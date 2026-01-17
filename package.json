@@ -1,0 +1,48 @@
+{
+  "name": "cali-sound",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next build",
+    "lint": "next lint",
+    "check-data": "node scripts/check-data.js",
+    "test-connection": "node scripts/test-connection.js",
+    "debug-fetch": "node scripts/debug-fetch.js",
+    "update-links": "node scripts/update-links.js",
+    "fetch-youtube": "node scripts/youtube-fetcher.js",
+    "fetch-youtube-city": "node scripts/youtube-fetcher.js",
+    "sync-cities": "node scripts/auto-sync-cities.js",
+    "sync-sets": "node scripts/auto-sync-sets.js",
+    "cleanup-sets": "node scripts/cleanup-sets.js",
+    "check-sets": "node scripts/check-sets.js",
+    "fetch-music-links": "node scripts/fetch-music-links.js",
+    "fix-duplicates": "node scripts/fix-duplicate-cities.js",
+    "list-cities": "node scripts/list-all-cities.js",
+    "force-fix-rio": "node scripts/force-fix-rio.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.0",
+    "framer-motion": "^11.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.0",
+    "dotenv": "^17.2.3",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.2.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.0"
+  }
+}
