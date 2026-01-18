@@ -8,6 +8,9 @@ import { CountdownTimer } from '@/components/city/CountdownTimer'
 import { CopyTools } from '@/components/city/CopyTools'
 import { SocialShare } from '@/components/shared/SocialShare'
 import { FavoriteButton } from '@/components/shared/FavoriteButton'
+import { PlaylistButton } from '@/components/shared/PlaylistButton'
+import { Comments } from '@/components/shared/Comments'
+import { ViewCount } from '@/components/shared/ViewCount'
 import { trackClick } from '@/lib/db'
 
 interface CityPageClientProps {
@@ -35,7 +38,7 @@ export function CityPageClient({ city, relatedCities }: CityPageClientProps) {
           <div className={`relative ${imageAspect} overflow-hidden`}>
             <Image
               src={currentImage}
-              alt={city.name}
+              alt={`CALI Sound - ${city.name} | Afro House Music | ${city.country} ${city.region}`}
               fill
               className="object-cover"
               priority
@@ -73,8 +76,15 @@ export function CityPageClient({ city, relatedCities }: CityPageClientProps) {
           </div>
         )}
 
-        {/* Favorite Button */}
-        <div className="absolute top-4 right-4 z-30">
+        {/* Favorite & Playlist Buttons */}
+        <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+          <PlaylistButton
+            id={city.id}
+            type="city"
+            name={city.name}
+            url={`/city/${city.slug}`}
+            image={currentImage || undefined}
+          />
           <FavoriteButton cityId={city.id} size="md" />
         </div>
 
@@ -96,7 +106,7 @@ export function CityPageClient({ city, relatedCities }: CityPageClientProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* City Meta Info - Moved from banner */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
               <p className="text-lg text-gray-600 dark:text-gray-400 font-medium">
                 {city.country} • {city.region}
               </p>
@@ -107,6 +117,9 @@ export function CityPageClient({ city, relatedCities }: CityPageClientProps) {
               }`}>
                 {city.status === 'OUT_NOW' ? 'OUT NOW' : 'SOON'}
               </span>
+              {city.youtube_full && (
+                <ViewCount youtubeUrl={city.youtube_full} />
+              )}
             </div>
             
             {city.mood.length > 0 && (
@@ -114,7 +127,7 @@ export function CityPageClient({ city, relatedCities }: CityPageClientProps) {
                 {city.mood.map((m) => (
                   <span
                     key={m}
-                    className="px-3 py-1.5 bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium capitalize"
+                    className="px-3 py-1.5 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded-full text-sm font-medium capitalize"
                   >
                     {m}
                   </span>
@@ -186,17 +199,17 @@ export function CityPageClient({ city, relatedCities }: CityPageClientProps) {
           {/* Descriptions */}
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {city.description_en && (
-              <div className="bg-gray-50 dark:bg-gray-950 rounded-2xl p-8 border border-gray-100 dark:border-gray-900">
+              <div className="bg-white dark:bg-black rounded-2xl p-8 border border-gray-100 dark:border-gray-900">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">English</h2>
-                <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line break-words overflow-wrap-anywhere">
+                <p className="text-gray-900 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line break-words overflow-wrap-anywhere">
                   {city.description_en}
                 </p>
               </div>
             )}
             {city.description_local && (
-              <div className="bg-gray-50 dark:bg-gray-950 rounded-2xl p-8 border border-gray-100 dark:border-gray-900">
+              <div className="bg-white dark:bg-black rounded-2xl p-8 border border-gray-100 dark:border-gray-900">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Local Language</h2>
-                <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line break-words overflow-wrap-anywhere">
+                <p className="text-gray-900 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line break-words overflow-wrap-anywhere">
                   {city.description_local}
                 </p>
               </div>
@@ -205,6 +218,11 @@ export function CityPageClient({ city, relatedCities }: CityPageClientProps) {
 
           {/* Copy Tools */}
           <CopyTools city={city} />
+
+          {/* Comments */}
+          <div className="mt-16">
+            <Comments entityType="city" entityId={city.id} />
+          </div>
 
           {/* Related Cities */}
           {relatedCities.length > 0 && (
@@ -215,7 +233,7 @@ export function CityPageClient({ city, relatedCities }: CityPageClientProps) {
                   <motion.div
                     key={relatedCity.id}
                     whileHover={{ scale: 1.05 }}
-                    className="group relative bg-white dark:bg-gray-950 rounded-2xl shadow-soft overflow-hidden cursor-pointer hover:shadow-soft-xl transition-all duration-300 border border-gray-100 dark:border-gray-900"
+                    className="group relative bg-white dark:bg-black rounded-2xl shadow-soft overflow-hidden cursor-pointer hover:shadow-soft-xl transition-all duration-300 border border-gray-100 dark:border-gray-900"
                   >
                     <Link href={`/city/${relatedCity.slug}`} className="absolute inset-0 z-10" aria-label={`View ${relatedCity.name}`} />
                       {relatedCity.cover_square_url ? (

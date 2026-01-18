@@ -85,7 +85,7 @@ export function Hero({ globalLinks }: HeroProps) {
               <span className="block bg-gradient-to-r from-white via-primary-100 to-accent-100 dark:from-gray-200 dark:via-gray-100 dark:to-gray-200 bg-clip-text text-transparent animate-gradient">
                 CALI
               </span>
-              <span className="block text-white dark:text-white text-5xl md:text-7xl lg:text-8xl font-extrabold mt-2">
+              <span className="block text-white text-5xl md:text-7xl lg:text-8xl font-extrabold mt-2">
                 Global Afro House
               </span>
               <span className="block text-white/90 dark:text-gray-200 text-4xl md:text-6xl lg:text-7xl font-bold mt-2">
@@ -107,7 +107,7 @@ export function Hero({ globalLinks }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12"
           >
             {globalLinks?.youtube && (
               <MagneticButton strength={0.2}>

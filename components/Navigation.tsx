@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
+import { GlobalSearch } from '@/components/shared/GlobalSearch'
 
 export function Navigation() {
   const pathname = usePathname()
@@ -28,6 +29,7 @@ export function Navigation() {
     { href: '/sets', label: 'Sets' },
     { href: '/links', label: 'Links' },
     { href: '/contact', label: 'Contact' },
+    { href: '/faq', label: 'FAQ' },
   ]
 
   // Prevent hydration mismatch by using default classes until mounted
@@ -65,7 +67,7 @@ export function Navigation() {
                       className={`relative z-10 block px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-xl hover:-translate-y-0.5 ${
                         isActive
                           ? 'text-white'
-                          : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                          : 'text-gray-900 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white'
                       }`}
                     >
                       {item.label}
@@ -113,6 +115,9 @@ export function Navigation() {
                 </motion.div>
               </motion.button>
             )}
+
+            {/* Global Search - En sağda */}
+            <GlobalSearch />
 
             {/* Mobile Menu Button */}
             <motion.button
@@ -172,7 +177,7 @@ export function Navigation() {
                       className={`block px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
                         isActive
                           ? 'bg-gradient-to-r from-orange-500/90 to-amber-500/90 dark:from-orange-500/80 dark:to-amber-500/80 text-white shadow-lg'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-900/80'
+                          : 'text-gray-900 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-900/80'
                       }`}
                     >
                       {item.label}
@@ -192,7 +197,7 @@ export function Navigation() {
                     onClick={() => {
                       toggleTheme()
                     }}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-900/80 transition-all duration-300"
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gray-900 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-900/80 transition-all duration-300"
                     aria-label="Toggle theme"
                   >
                     <span>Theme</span>

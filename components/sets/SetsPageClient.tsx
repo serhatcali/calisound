@@ -30,7 +30,7 @@ export function SetsPageClient({ sets }: SetsPageClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black py-12">
+    <div className="min-h-screen bg-white dark:bg-black py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -38,7 +38,7 @@ export function SetsPageClient({ sets }: SetsPageClientProps) {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h1 className="text-5xl md:text-7xl font-black text-gray-900 dark:text-white mb-4 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-7xl font-black mb-4 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
             DJ Sets
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 font-medium">
@@ -74,7 +74,7 @@ export function SetsPageClient({ sets }: SetsPageClientProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search sets by title or description..."
-              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 outline-none transition-all shadow-soft"
+              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 outline-none transition-all shadow-soft"
             />
             {searchQuery && (
               <button
@@ -118,7 +118,7 @@ export function SetsPageClient({ sets }: SetsPageClientProps) {
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
                 <Link href={`/sets/${set.id}`}>
-                  <div className="group bg-white dark:bg-gray-950 rounded-2xl shadow-soft overflow-hidden hover:shadow-soft-xl transition-all duration-300 cursor-pointer border border-gray-100 dark:border-gray-900">
+                  <div className="group bg-white dark:bg-black rounded-2xl shadow-soft overflow-hidden hover:shadow-soft-xl transition-all duration-300 cursor-pointer border border-gray-100 dark:border-gray-900">
                     {/* Video Preview */}
                     {videoId && (
                       <div className="relative aspect-video overflow-hidden bg-gray-900">

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Set } from '@/types/database'
 import { motion } from 'framer-motion'
 import { SocialShare } from '@/components/shared/SocialShare'
+import { PlaylistButton } from '@/components/shared/PlaylistButton'
+import { ViewCount } from '@/components/shared/ViewCount'
 
 interface SetDetailClientProps {
   set: Set
@@ -44,21 +46,35 @@ export function SetDetailClient({ set }: SetDetailClientProps) {
   const chaptersValid = validateChapters(set.chapters)
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black py-12">
+    <div className="min-h-screen bg-white dark:bg-black py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white dark:bg-gray-950 rounded-3xl shadow-soft-xl p-8 md:p-12 border border-gray-100 dark:border-gray-900 overflow-hidden"
+          className="bg-white dark:bg-black rounded-3xl shadow-soft-xl p-8 md:p-12 border border-gray-100 dark:border-gray-900 overflow-hidden"
         >
-          <h1 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white mb-4 break-words">
-            {set.title}
-          </h1>
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <h1 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white break-words flex-1">
+              {set.title}
+            </h1>
+            <PlaylistButton
+              id={set.id}
+              type="set"
+              name={set.title}
+              url={`/sets/${set.id}`}
+              image={(set as any)?.thumbnail_url || undefined}
+            />
+          </div>
 
-          {set.duration && (
-            <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 font-medium break-words">Duration: {set.duration}</p>
-          )}
+          <div className="flex items-center gap-4 mb-8 flex-wrap">
+            {set.duration && (
+              <p className="text-gray-600 dark:text-gray-400 text-lg font-medium break-words">Duration: {set.duration}</p>
+            )}
+            {set.youtube_embed && (
+              <ViewCount youtubeUrl={set.youtube_embed} />
+            )}
+          </div>
 
           {/* Social Share */}
           <div className="mb-8">
@@ -85,17 +101,17 @@ export function SetDetailClient({ set }: SetDetailClientProps) {
           {set.description && (
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Description</h2>
-              <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line break-words overflow-wrap-anywhere">
+              <p className="text-gray-900 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line break-words overflow-wrap-anywhere">
                 {set.description}
               </p>
             </div>
           )}
 
           {set.chapters && (
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 overflow-hidden">
               <div className="flex items-center justify-between mb-4 gap-4">
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Chapters</h2>
+                  <h2 className="text-2xl font-bold text-white">Chapters</h2>
                   {!chaptersValid && (
                     <p className="text-sm text-red-600 dark:text-red-400 mt-1">
                       Some chapters may not be in the correct format (00:00)

@@ -98,7 +98,7 @@ export function LinksPageClient({ links }: LinksPageClientProps) {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h1 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
             CALI Sound
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 font-medium">

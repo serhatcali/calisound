@@ -1,0 +1,19 @@
+Realistic 3D human male character, T-pose, short hair, casual t-shirt and pants, clean face, game-ready rigged model, realistic proportions, GLB format with textures
+
+---
+
+Alternative Detailed Prompt:
+
+Create a realistic 3D human character model:
+- Gender: Male
+- Age: 25-30 years
+- Body: Average build, athletic
+- Pose: T-pose (arms extended horizontally)
+- Hair: Short hair (2-3cm), natural color
+- Face: Clean, no beard, realistic proportions
+- Clothing: Simple t-shirt and pants
+- Style: Realistic, not anime or stylized
+- Technical: Game-ready, low poly, rigged skeleton
+- Format: GLB with textures
+- Height: Normal human proportions (1.75-1.80m)
+- Feet position: Standing on ground plane (y=0)

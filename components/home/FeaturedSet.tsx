@@ -16,7 +16,7 @@ export function FeaturedSet({ set }: FeaturedSetProps) {
   const videoId = set.youtube_embed ? extractVideoId(set.youtube_embed) : null
 
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-black">
+    <section className="py-24 bg-white dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -25,7 +25,7 @@ export function FeaturedSet({ set }: FeaturedSetProps) {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl md:text-7xl font-black text-gray-900 dark:text-white mb-6 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
+          <h2 className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
             Featured DJ Set
           </h2>
           <p className="text-2xl text-gray-600 dark:text-gray-300 font-medium">
@@ -46,7 +46,7 @@ export function FeaturedSet({ set }: FeaturedSetProps) {
           className="relative rounded-3xl p-8 md:p-12 overflow-hidden"
         >
           {/* Glassmorphism Background */}
-          <div className="absolute inset-0 bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-white/30 dark:border-white/10 rounded-3xl" />
+          <div className="absolute inset-0 bg-gray-50/80 dark:bg-gray-900/40 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-3xl" />
           
           <div className="relative z-10">
             <h3 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-8">
@@ -66,15 +66,15 @@ export function FeaturedSet({ set }: FeaturedSetProps) {
             )}
 
             {set.description && (
-              <p className="text-gray-700 dark:text-gray-300 text-lg mb-6">
+              <p className="text-gray-900 dark:text-gray-300 text-lg mb-6">
                 {set.description}
               </p>
             )}
 
             {set.chapters && (
-              <div className="bg-white/50 dark:bg-black/50 backdrop-blur-xl rounded-2xl p-6 border border-white/30 dark:border-white/10">
+              <div className="bg-gray-100/80 dark:bg-gray-900/50 backdrop-blur-xl rounded-2xl p-6 border border-gray-200 dark:border-white/10">
                 <h4 className="font-bold text-xl text-gray-900 dark:text-white mb-4">Chapters</h4>
-                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300 font-mono">
+                <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300 font-mono">
                   {set.chapters.split('\n').map((chapter, index) => (
                     <div key={index}>{chapter}</div>
                   ))}

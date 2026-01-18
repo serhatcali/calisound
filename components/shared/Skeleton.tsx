@@ -30,7 +30,7 @@ export function CityCardSkeleton() {
 
 export function SetCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-gray-950 rounded-2xl shadow-soft overflow-hidden border border-gray-100 dark:border-gray-900">
+    <div className="bg-white dark:bg-black rounded-2xl shadow-soft overflow-hidden border border-gray-100 dark:border-gray-900">
       <Skeleton className="aspect-video w-full" />
       <div className="p-6 space-y-3">
         <Skeleton className="h-6 w-3/4" />

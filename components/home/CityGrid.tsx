@@ -21,7 +21,7 @@ export function CityGrid({ cities }: CityGridProps) {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl md:text-7xl font-black text-gray-900 dark:text-white mb-6 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
+          <h2 className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
             Explore Cities
           </h2>
           <p className="text-2xl text-gray-600 dark:text-gray-300 font-medium">
@@ -47,7 +47,7 @@ export function CityGrid({ cities }: CityGridProps) {
               }}
             >
               {/* Glassmorphism Card */}
-              <div className="absolute inset-0 bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl" />
+              <div className="absolute inset-0 bg-white/10 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl" />
               
               {/* Shimmer Overlay */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 shimmer rounded-3xl" />
@@ -56,7 +56,7 @@ export function CityGrid({ cities }: CityGridProps) {
                 <div className="relative aspect-square overflow-hidden rounded-3xl">
                   <Image
                     src={city.cover_square_url}
-                    alt={city.name}
+                    alt={`${city.name} - CALI Sound Afro House | ${city.country} ${city.region}`}
                     fill
                     className="object-cover group-hover:scale-125 transition-transform duration-700"
                   />

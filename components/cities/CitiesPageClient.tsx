@@ -72,7 +72,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
   }, [selectedMood, selectedRegion, selectedStatus])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black py-12">
+    <div className="min-h-screen bg-white dark:bg-black py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -80,7 +80,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h1 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
             All Cities
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 font-medium">
@@ -116,7 +116,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search cities by name, country, region, or mood..."
-              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 outline-none transition-all shadow-soft"
+              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 outline-none transition-all shadow-soft"
             />
             {searchQuery && (
               <button
@@ -154,7 +154,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
               className={`px-6 py-3 rounded-xl font-semibold transition-all ${
                 showFavoritesOnly
                   ? 'bg-gradient-to-r from-red-500/80 to-pink-500/80 dark:from-red-500/70 dark:to-pink-500/70 text-white'
-                  : 'bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'
+                  : 'bg-white dark:bg-black text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'
               } shadow-soft`}
             >
               {showFavoritesOnly ? 'Show All Cities' : `Show Favorites (${favorites.length})`}
@@ -218,7 +218,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Mood Filter */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-300 mb-3">
                 Mood
               </label>
               <div className="flex flex-wrap gap-2">
@@ -227,7 +227,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                     selectedMood === 'all'
                       ? 'bg-gradient-to-r from-orange-500/80 to-amber-500/80 dark:from-orange-500/70 dark:to-amber-500/70 text-white'
-                      : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-900'
+                      : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900'
                   }`}
                 >
                   All
@@ -239,7 +239,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors capitalize ${
                       selectedMood === mood
                         ? 'bg-gradient-to-r from-orange-500/80 to-amber-500/80 dark:from-orange-500/70 dark:to-amber-500/70 text-white'
-                        : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-900'
+                        : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900'
                     }`}
                   >
                     {mood}
@@ -250,7 +250,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
 
             {/* Region Filter */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-300 mb-3">
                 Region
               </label>
               <div className="flex flex-wrap gap-2">
@@ -259,7 +259,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                     selectedRegion === 'all'
                       ? 'bg-gradient-to-r from-orange-500/80 to-amber-500/80 dark:from-orange-500/70 dark:to-amber-500/70 text-white'
-                      : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-900'
+                      : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900'
                   }`}
                 >
                   All
@@ -271,7 +271,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                       selectedRegion === region
                         ? 'bg-gradient-to-r from-orange-500/80 to-amber-500/80 dark:from-orange-500/70 dark:to-amber-500/70 text-white'
-                        : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-900'
+                        : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900'
                     }`}
                   >
                     {region}
@@ -282,7 +282,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-300 mb-3">
                 Status
               </label>
               <div className="flex flex-wrap gap-2">
@@ -291,7 +291,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                     selectedStatus === 'all'
                       ? 'bg-gradient-to-r from-orange-500/80 to-amber-500/80 dark:from-orange-500/70 dark:to-amber-500/70 text-white'
-                      : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-900'
+                      : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900'
                   }`}
                 >
                   All
@@ -303,7 +303,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                       selectedStatus === status
                         ? 'bg-gradient-to-r from-orange-500/80 to-amber-500/80 dark:from-orange-500/70 dark:to-amber-500/70 text-white'
-                        : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-900'
+                        : 'bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900'
                     }`}
                   >
                     {status === 'OUT_NOW' ? 'OUT NOW' : status}
@@ -348,11 +348,11 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                     <div className="relative aspect-square overflow-hidden">
                       <Image
                         src={city.cover_square_url}
-                        alt={city.name}
+                        alt={`${city.name} - CALI Sound Afro House | ${city.country} ${city.region}`}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                     </div>
                   ) : (
                     <div className="aspect-square bg-gradient-to-br from-gray-800 via-gray-900 to-black dark:from-gray-900 dark:via-black dark:to-gray-950 relative overflow-hidden group">
@@ -392,7 +392,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-2xl">{city.country_flag}</span>
-                      <h3 className="text-xl font-bold text-white">
+                      <h3 className="text-xl font-bold text-white drop-shadow-lg">
                         {city.name}
                       </h3>
                     </div>
@@ -404,7 +404,7 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                       }`}>
                         {city.status === 'OUT_NOW' ? 'OUT NOW' : 'SOON'}
                       </span>
-                      <span className="text-white/80 text-sm">{city.region}</span>
+                      <span className="text-white/90 text-sm drop-shadow-md">{city.region}</span>
                     </div>
                   </div>
                 </div>

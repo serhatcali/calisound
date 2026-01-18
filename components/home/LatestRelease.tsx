@@ -32,7 +32,7 @@ export function LatestRelease({ city }: LatestReleaseProps) {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl md:text-7xl font-black text-gray-900 dark:text-white mb-6 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
+          <h2 className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
             Latest Release
           </h2>
           <p className="text-2xl text-gray-600 dark:text-gray-300 font-medium">
@@ -49,7 +49,7 @@ export function LatestRelease({ city }: LatestReleaseProps) {
           className="relative rounded-3xl overflow-hidden group border-glow"
         >
           {/* Glassmorphism Background */}
-          <div className="absolute inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-2xl border border-white/30 dark:border-white/10 rounded-3xl" />
+          <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/60 backdrop-blur-2xl border border-white/30 dark:border-white/10 rounded-3xl" />
           {/* Shimmer Effect */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 shimmer rounded-3xl" />
           
@@ -73,7 +73,7 @@ export function LatestRelease({ city }: LatestReleaseProps) {
               <div className="relative h-64 md:h-96 overflow-hidden rounded-3xl">
                 <Image
                   src={city.banner_16x9_url}
-                  alt={city.name}
+                  alt={`CALI Sound - ${city.name} | Afro House Music | ${city.country}`}
                   fill
                   className="object-cover group-hover:scale-110 transition-transform duration-700"
                 />

@@ -33,10 +33,9 @@ module.exports = {
           800: '#6b21a8',
           900: '#581c87',
         },
-        dark: {
-          bg: '#000000',
-          surface: '#0a0a0a',
-          card: '#111111',
+        // Light mode background color
+        light: {
+          bg: '#474747',
         },
       },
       borderRadius: {
@@ -47,22 +46,12 @@ module.exports = {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
-        'float': 'float 6s ease-in-out infinite',
-        'glow-pulse': 'glowPulse 3s ease-in-out infinite',
-        'shimmer': 'shimmer 3s infinite',
+        'gradient': 'gradientShift 5s ease infinite',
       },
       keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-20px)' },
-        },
-        glowPulse: {
-          '0%, 100%': { opacity: '0.5', transform: 'scale(1)' },
-          '50%': { opacity: '1', transform: 'scale(1.05)' },
-        },
-        shimmer: {
-          '0%': { backgroundPosition: '-1000px 0' },
-          '100%': { backgroundPosition: '1000px 0' },
+        gradientShift: {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
         },
       },
     },
