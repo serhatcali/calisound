@@ -79,9 +79,11 @@ export async function POST(request: NextRequest) {
         requires2FA: result.requires2FA || false,
       })
       
-      // Cookies should be set by loginAdmin via cookies() API
-      // But we need to ensure they're included in the response
-      // The cookies() API in Next.js App Router automatically includes cookies in the response
+      // If session data is returned, set cookies in response
+      if (result.sessionData && !result.requires2FA) {
+        const { setSessionCookies } = await import('@/lib/session-manager')
+        setSessionCookies(response, result.sessionData.sessionToken, result.sessionData.csrfToken)
+      }
       
       return response
     } else {

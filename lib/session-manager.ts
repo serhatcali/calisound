@@ -4,6 +4,7 @@
  */
 
 import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 
 // SESSION_SECRET must be set in production!
@@ -161,6 +162,44 @@ export async function createSession(
   }
   
   return { sessionToken: encryptedData, csrfToken }
+}
+
+/**
+ * Set session cookies in NextResponse
+ * This is needed because cookies() API in server actions doesn't always work in API routes
+ */
+export function setSessionCookies(
+  response: NextResponse,
+  sessionToken: string,
+  csrfToken: string
+): void {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const isVercel = !!process.env.VERCEL
+  const isSecure = isProduction && isVercel
+  
+  // Set session cookie
+  response.cookies.set(SESSION_COOKIE_NAME, sessionToken, {
+    httpOnly: true,
+    secure: isSecure,
+    sameSite: 'lax',
+    maxAge: SESSION_DURATION,
+    path: '/',
+  })
+  
+  // Set CSRF cookie
+  response.cookies.set(CSRF_COOKIE_NAME, csrfToken, {
+    httpOnly: false,
+    secure: isSecure,
+    sameSite: 'lax',
+    maxAge: SESSION_DURATION,
+    path: '/',
+  })
+  
+  console.log('[Session] Cookies set in response:', {
+    sessionCookie: SESSION_COOKIE_NAME,
+    csrfCookie: CSRF_COOKIE_NAME,
+    secure: isSecure,
+  })
 }
 
 /**

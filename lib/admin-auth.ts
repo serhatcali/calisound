@@ -44,7 +44,7 @@ export async function loginAdmin(
   password: string,
   ipAddress: string,
   userAgent: string
-): Promise<{ success: boolean; requires2FA?: boolean; error?: string }> {
+): Promise<{ success: boolean; requires2FA?: boolean; error?: string; sessionData?: { sessionToken: string; csrfToken: string } }> {
   // Constant-time password comparison to prevent timing attacks
   const expectedPassword = ADMIN_PASSWORD
   const passwordMatch = crypto.timingSafeEqual(
@@ -78,21 +78,26 @@ export async function loginAdmin(
     cookieStore.set('admin-auth-temp', tempCookieValue, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict', // Changed from 'lax' to 'strict' for better CSRF protection
+      sameSite: 'lax',
       maxAge: 60 * 10, // 10 minutes for 2FA verification
       path: '/',
     })
 
     return { success: true, requires2FA: true }
   } else {
-    // No 2FA, create full secure session
+    // No 2FA, create session data (but don't set cookies here - do it in API route)
     try {
       const sessionResult = await createSession(ADMIN_USER_ID, ipAddress, userAgent)
       console.log('[Login] Session created:', { 
         hasSessionToken: !!sessionResult.sessionToken,
         hasCsrfToken: !!sessionResult.csrfToken 
       })
-      return { success: true, requires2FA: false }
+      // Return session data so API route can set cookies
+      return { 
+        success: true, 
+        requires2FA: false,
+        sessionData: sessionResult
+      }
     } catch (error: any) {
       console.error('[Login] Failed to create session:', error)
       return { success: false, error: 'Failed to create session' }
