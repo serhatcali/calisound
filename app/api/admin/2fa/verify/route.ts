@@ -18,19 +18,19 @@ export async function POST(request: NextRequest) {
     const { is2FAEnabled } = await import('@/lib/2fa')
     const twoFAEnabled = await is2FAEnabled()
     
-    // If 2FA is enabled, allow verification if:
-    // 1. Temp auth exists (during login)
-    // 2. Session exists (re-verification after session expires but 2FA verified cookie is missing)
-    // 3. Or if 2FA is enabled, we should allow verification attempts (user might be re-verifying)
-    if (!tempAuth?.value && !sessionCookie?.value && twoFAEnabled) {
-      // If 2FA is enabled but no session/temp auth, still allow verification
-      // The token verification itself will fail if invalid, but we allow the attempt
-      console.log('[2FA Verify] No temp auth or session, but 2FA is enabled - allowing verification attempt')
-    } else if (!tempAuth?.value && !sessionCookie?.value && !twoFAEnabled) {
-      return NextResponse.json(
-        { error: 'No pending 2FA verification. Please login again.' },
-        { status: 401 }
-      )
+    // If 2FA is enabled, always allow verification attempts
+    // The token verification itself will fail if invalid, but we allow the attempt
+    if (!tempAuth?.value && !sessionCookie?.value) {
+      if (twoFAEnabled) {
+        // 2FA is enabled - allow verification attempt (user might be re-verifying)
+        console.log('[2FA Verify] No temp auth or session, but 2FA is enabled - allowing verification attempt')
+      } else {
+        // 2FA is not enabled and no auth - require login
+        return NextResponse.json(
+          { error: 'No pending 2FA verification. Please login again.' },
+          { status: 401 }
+        )
+      }
     }
 
     // Aggressive rate limiting for 2FA verification
@@ -89,7 +89,6 @@ export async function POST(request: NextRequest) {
 
     if (isValid) {
       // Set 2FA verified cookie
-      const cookieStore = await cookies()
       const response = NextResponse.json({ success: true })
       
       // Set cookie in response (works in API routes)
@@ -104,6 +103,21 @@ export async function POST(request: NextRequest) {
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       })
+      
+      // If no session exists but 2FA is verified, create a session
+      // This allows re-verification after session expires
+      if (!sessionCookie?.value && !tempAuth?.value) {
+        const { createSession, getClientIP } = await import('@/lib/session-manager')
+        const ipAddress = getClientIP(request)
+        const userAgent = request.headers.get('user-agent') || 'unknown'
+        const sessionResult = await createSession('admin', ipAddress, userAgent)
+        
+        // Set session cookies in response
+        const { setSessionCookies } = await import('@/lib/session-manager')
+        setSessionCookies(response, sessionResult.sessionToken, sessionResult.csrfToken)
+        
+        console.log('[2FA Verify] Created new session after 2FA verification')
+      }
 
       return response
     } else {
