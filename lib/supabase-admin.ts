@@ -4,20 +4,17 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 let supabaseAdminInstance: SupabaseClient | null = null
 
 function getSupabaseAdminClient(): SupabaseClient {
-  // Check if we're in build phase (not runtime)
-  // Vercel runtime'da VERCEL_ENV set edilir (production, preview, development)
-  // Build sırasında VERCEL_ENV set edilmez
-  // En güvenilir yöntem: VERCEL_ENV yoksa build phase'dir
-  const isRuntime = !!process.env.VERCEL_ENV
-  const isBuildPhase = !isRuntime
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // During build phase: ALWAYS use mock client to prevent network calls
+  // Check if we're in build phase
+  const isBuildPhase = !!process.env.NEXT_PHASE || 
+                       (!!process.env.VERCEL && !process.env.VERCEL_ENV)
+
+  // During build phase: use mock client if env vars are missing or invalid
   // This prevents placeholder.supabase.co errors during build
-  // At runtime, we ALWAYS require real credentials
-  if (isBuildPhase) {
+  // At runtime: use real client if env vars are valid
+  if (isBuildPhase && (!supabaseUrl || !supabaseServiceKey || supabaseUrl.includes('placeholder'))) {
     // Return a mock client that returns empty results - never calls createClient
     // This prevents any network calls to placeholder URLs
     const createMockQueryBuilder = () => {
