@@ -8,14 +8,13 @@ function getSupabaseClient(): SupabaseClient {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   // Check if we're in build phase
-  // Build phase: NEXT_PHASE is set OR (VERCEL is set but VERCEL_ENV is not)
-  // Runtime: VERCEL_ENV is set OR we're not in a build environment
-  const isBuildPhase = !!process.env.NEXT_PHASE || 
-                       (!!process.env.VERCEL && !process.env.VERCEL_ENV)
+  // Build phase: NEXT_PHASE is explicitly set
+  // Runtime: Everything else (including when VERCEL_ENV is set or not set)
+  const isBuildPhase = !!process.env.NEXT_PHASE
 
-  // During build phase: use mock client if env vars are missing or invalid
+  // During build phase ONLY: use mock client if env vars are missing or invalid
   // This prevents placeholder.supabase.co errors during build
-  // At runtime: use real client if env vars are valid
+  // At runtime: ALWAYS use real client if env vars are valid
   if (isBuildPhase && (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder'))) {
     // Return a mock client that returns empty results - never calls createClient
     // This prevents any network calls to placeholder URLs

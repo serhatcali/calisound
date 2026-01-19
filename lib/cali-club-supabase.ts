@@ -2,14 +2,15 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 // Check if we're in build phase
-const isBuildPhase = !!process.env.NEXT_PHASE || 
-                     (!!process.env.VERCEL && !process.env.VERCEL_ENV)
+// Build phase: NEXT_PHASE is explicitly set
+// Runtime: Everything else
+const isBuildPhase = !!process.env.NEXT_PHASE
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-// During build phase: use mock client if env vars are missing or invalid
-// At runtime: use real client if env vars are valid
+// During build phase ONLY: use mock client if env vars are missing or invalid
+// At runtime: ALWAYS use real client if env vars are valid
 let caliClubSupabase: SupabaseClient
 
 if (isBuildPhase && (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder'))) {

@@ -8,12 +8,13 @@ function getSupabaseAdminClient(): SupabaseClient {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   // Check if we're in build phase
-  const isBuildPhase = !!process.env.NEXT_PHASE || 
-                       (!!process.env.VERCEL && !process.env.VERCEL_ENV)
+  // Build phase: NEXT_PHASE is explicitly set
+  // Runtime: Everything else
+  const isBuildPhase = !!process.env.NEXT_PHASE
 
-  // During build phase: use mock client if env vars are missing or invalid
+  // During build phase ONLY: use mock client if env vars are missing or invalid
   // This prevents placeholder.supabase.co errors during build
-  // At runtime: use real client if env vars are valid
+  // At runtime: ALWAYS use real client if env vars are valid
   if (isBuildPhase && (!supabaseUrl || !supabaseServiceKey || supabaseUrl.includes('placeholder'))) {
     // Return a mock client that returns empty results - never calls createClient
     // This prevents any network calls to placeholder URLs
