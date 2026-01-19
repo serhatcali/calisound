@@ -86,8 +86,17 @@ export async function loginAdmin(
     return { success: true, requires2FA: true }
   } else {
     // No 2FA, create full secure session
-    await createSession(ADMIN_USER_ID, ipAddress, userAgent)
-    return { success: true, requires2FA: false }
+    try {
+      const sessionResult = await createSession(ADMIN_USER_ID, ipAddress, userAgent)
+      console.log('[Login] Session created:', { 
+        hasSessionToken: !!sessionResult.sessionToken,
+        hasCsrfToken: !!sessionResult.csrfToken 
+      })
+      return { success: true, requires2FA: false }
+    } catch (error: any) {
+      console.error('[Login] Failed to create session:', error)
+      return { success: false, error: 'Failed to create session' }
+    }
   }
 }
 

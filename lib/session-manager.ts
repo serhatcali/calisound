@@ -114,22 +114,40 @@ export async function createSession(
   
   // Store session in cookie (encrypted)
   const cookieStore = await cookies()
+  
+  // Check if we're in production with HTTPS
+  const isProduction = process.env.NODE_ENV === 'production'
+  const isSecure = isProduction && process.env.VERCEL_ENV !== undefined
+  
   cookieStore.set(SESSION_COOKIE_NAME, encryptedData, {
     httpOnly: true, // Prevent XSS
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    secure: isSecure, // HTTPS only in production
     sameSite: 'strict', // CSRF protection
     maxAge: SESSION_DURATION,
     path: '/',
     // Don't set domain - let browser handle it
   })
   
+  console.log('[Session] Setting session cookie:', {
+    name: SESSION_COOKIE_NAME,
+    hasValue: !!encryptedData,
+    secure: isSecure,
+    maxAge: SESSION_DURATION,
+  })
+  
   // Store CSRF token in separate cookie
   cookieStore.set(CSRF_COOKIE_NAME, csrfToken, {
     httpOnly: false, // Must be readable by JavaScript for CSRF checks
-    secure: process.env.NODE_ENV === 'production',
+    secure: isSecure,
     sameSite: 'strict',
     maxAge: SESSION_DURATION,
     path: '/',
+  })
+  
+  console.log('[Session] Setting CSRF cookie:', {
+    name: CSRF_COOKIE_NAME,
+    hasValue: !!csrfToken,
+    secure: isSecure,
   })
   
   return { sessionToken: encryptedData, csrfToken }
