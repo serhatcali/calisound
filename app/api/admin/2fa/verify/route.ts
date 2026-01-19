@@ -9,6 +9,17 @@ import { getClientIP, rateLimit, validateString } from '@/lib/security'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if user has pending 2FA (temp auth cookie)
+    const cookieStore = await cookies()
+    const tempAuth = cookieStore.get('admin-auth-temp')
+    
+    if (!tempAuth?.value) {
+      return NextResponse.json(
+        { error: 'No pending 2FA verification. Please login again.' },
+        { status: 401 }
+      )
+    }
+
     // Aggressive rate limiting for 2FA verification
     const clientIP = getClientIP(request)
     const rateLimitResult = rateLimit(`2fa-verify:${clientIP}`, {
