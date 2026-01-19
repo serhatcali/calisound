@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase'
 import { withAdminAuthAndCSRF } from '@/lib/api-security'
 import { validateObject, sanitizeInput, isValidURL } from '@/lib/security'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 async function handlePUT(request: NextRequest) {
   try {
     const body = await request.json()

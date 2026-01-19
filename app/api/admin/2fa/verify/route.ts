@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verify2FAToken } from '@/lib/2fa'
 import { cookies } from 'next/headers'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 import { getClientIP, rateLimit, validateString } from '@/lib/security'
 
 export async function POST(request: NextRequest) {

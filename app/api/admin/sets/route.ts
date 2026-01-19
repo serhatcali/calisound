@@ -4,6 +4,9 @@ import { supabase } from '@/lib/supabase'
 import { validateSetData } from '@/lib/admin-validation'
 import { withAdminAuthAndCSRF } from '@/lib/api-security'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json()

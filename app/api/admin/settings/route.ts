@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateSettingsData } from '@/lib/admin-validation'
 import { withAdminAuth, withAdminAuthAndCSRF } from '@/lib/api-security'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 async function handleGET() {
   try {
     // Only return public settings, never expose sensitive data

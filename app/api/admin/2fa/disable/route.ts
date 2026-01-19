@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
 import { disable2FA } from '@/lib/2fa'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     if (!(await isAdminAuthenticated(request))) {

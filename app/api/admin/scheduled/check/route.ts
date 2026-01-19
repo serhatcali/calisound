@@ -3,6 +3,9 @@ import { isAdminAuthenticated } from '@/lib/admin-auth'
 import { supabase } from '@/lib/supabase'
 import { logActivity } from '@/lib/activity-logs'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     if (!(await isAdminAuthenticated(request))) {

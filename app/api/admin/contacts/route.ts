@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { supabase } from '@/lib/supabase'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     await requireAdmin()

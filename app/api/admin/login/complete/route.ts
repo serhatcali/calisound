@@ -3,6 +3,9 @@ import { cookies } from 'next/headers'
 import { isAdminPending2FA } from '@/lib/admin-auth'
 import { createSession, getClientIP } from '@/lib/session-manager'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const pending2FA = await isAdminPending2FA()

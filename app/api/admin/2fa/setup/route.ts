@@ -3,6 +3,9 @@ import { isAdminAuthenticated } from '@/lib/admin-auth'
 import { generate2FASecret, enable2FA } from '@/lib/2fa'
 import { validateString } from '@/lib/security'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     if (!(await isAdminAuthenticated(request))) {

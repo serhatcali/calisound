@@ -4,6 +4,9 @@ import { validateCityData } from '@/lib/admin-validation'
 import { withAdminAuthAndCSRF } from '@/lib/api-security'
 import { validateString } from '@/lib/security'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 async function handlePUT(
   request: NextRequest,
   { params }: { params: { id: string } }
