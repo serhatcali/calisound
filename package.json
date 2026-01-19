@@ -61,8 +61,6 @@
   },
   "overrides": {
     "rimraf": "^4.0.0",
-    "glob": "^9.0.0",
-    "inflight": "npm:lru-cache@^10.0.0",
-    "fs-promise": "npm:fs-extra@^11.0.0"
+    "glob": "^9.0.0"
   }
 }
