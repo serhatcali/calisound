@@ -6,11 +6,21 @@ import { Footer } from '@/components/Footer'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { CookieConsent } from '@/components/shared/CookieConsent'
 import { StructuredData } from '@/components/shared/StructuredData'
-import { PlaylistPanel } from '@/components/shared/PlaylistPanel'
-import { NewsletterPopup } from '@/components/shared/NewsletterPopup'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import { PerformanceMonitor } from '@/components/shared/PerformanceMonitor'
 import { headers } from 'next/headers'
+import dynamic from 'next/dynamic'
+
+// Lazy load non-critical components for better performance
+const PlaylistPanel = dynamic(() => import('@/components/shared/PlaylistPanel').then(mod => ({ default: mod.PlaylistPanel })), {
+  ssr: false,
+  loading: () => null,
+})
+
+const NewsletterPopup = dynamic(() => import('@/components/shared/NewsletterPopup').then(mod => ({ default: mod.NewsletterPopup })), {
+  ssr: false,
+  loading: () => null,
+})
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
 
@@ -76,7 +86,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://calisound.com',
+    canonical: baseUrl,
   },
   category: 'Music',
   icons: {
@@ -205,12 +215,17 @@ export default async function RootLayout({
             `,
           }}
         />
-        <link rel="preconnect" href="https://www.youtube.com" />
-        <link rel="preconnect" href="https://i.ytimg.com" />
-        <link rel="preconnect" href="https://open.spotify.com" />
+        {/* Performance: Preconnect to external domains */}
+        <link rel="preconnect" href="https://www.youtube.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://i.ytimg.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://open.spotify.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.youtube.com" />
         <link rel="dns-prefetch" href="https://i.ytimg.com" />
         <link rel="dns-prefetch" href="https://open.spotify.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        {/* Performance: Preload critical resources */}
+        <link rel="preload" href="/icon.svg" as="image" type="image/svg+xml" />
       </head>
       <body className="bg-white dark:bg-black">
         {!isAdminRoute && (

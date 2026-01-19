@@ -15,6 +15,18 @@ export function middleware(request: NextRequest) {
     response.headers.set(key, value)
   })
   
+  // Performance headers
+  if (!pathname.startsWith('/api/')) {
+    // Cache static assets
+    if (pathname.match(/\.(jpg|jpeg|png|gif|ico|svg|webp|avif|woff|woff2|ttf|eot)$/)) {
+      response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+    }
+    // Cache HTML with shorter TTL
+    else if (pathname === '/' || pathname.match(/^\/[^/]+$/)) {
+      response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400')
+    }
+  }
+  
   // Rate limiting for API routes
   if (pathname.startsWith('/api/')) {
     const clientIP = getClientIP(request)
