@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isAdminAuthenticated, is2FAEnabled } from '@/lib/admin-auth'
+import { isAdminAuthenticated } from '@/lib/admin-auth'
+import { is2FAEnabled } from '@/lib/2fa'
 
 export const dynamic = 'force-dynamic'
 
