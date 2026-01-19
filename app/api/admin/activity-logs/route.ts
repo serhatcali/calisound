@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
+import { validateNumber, validateObject, sanitizeInput } from '@/lib/security'
 
 export async function GET(request: NextRequest) {
   try {
     if (!(await isAdminAuthenticated(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-import { validateNumber } from '@/lib/security'
 
     const searchParams = request.nextUrl.searchParams
     const limitParam = searchParams.get('limit')
@@ -52,8 +51,6 @@ import { validateNumber } from '@/lib/security'
     )
   }
 }
-
-import { validateObject, sanitizeInput } from '@/lib/security'
 
 export async function POST(request: NextRequest) {
   try {

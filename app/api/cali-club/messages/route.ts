@@ -69,8 +69,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-import { getClientIP, rateLimit, validateString, sanitizeInput, validateObject } from '@/lib/security'
-
 // POST - Create a new message
 export async function POST(request: NextRequest) {
   try {
