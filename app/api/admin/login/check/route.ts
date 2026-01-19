@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     // Check session cookie directly
+    const { cookies } = await import('next/headers')
     const cookieStore = await cookies()
     const sessionCookie = cookieStore.get('admin_session')
     const csrfCookie = cookieStore.get('admin_csrf')
