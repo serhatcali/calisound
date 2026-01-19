@@ -38,8 +38,9 @@ export default function AdminLoginPage() {
         if (data.requires2FA) {
           setRequires2FA(true)
         } else {
-          router.push('/admin')
-          router.refresh()
+          // Wait a bit for cookies to be set, then redirect
+          await new Promise(resolve => setTimeout(resolve, 100))
+          window.location.href = '/admin'
         }
       } else {
         setError(data.error || 'Invalid password')
@@ -68,14 +69,20 @@ export default function AdminLoginPage() {
 
       if (data.success) {
         // Set full auth cookie
-        await fetch('/api/admin/login/complete', { method: 'POST' })
-        router.push('/admin')
-        router.refresh()
+        const completeResponse = await fetch('/api/admin/login/complete', { method: 'POST' })
+        if (completeResponse.ok) {
+          // Wait for cookies to be set
+          await new Promise(resolve => setTimeout(resolve, 100))
+          window.location.href = '/admin'
+        } else {
+          setError('Failed to complete login')
+        }
       } else {
         setError(data.error || 'Invalid verification code')
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.')
+    } catch (err: any) {
+      console.error('2FA verification error:', err)
+      setError(err?.message || 'An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
