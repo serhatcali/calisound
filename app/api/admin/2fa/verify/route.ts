@@ -9,14 +9,14 @@ import { getClientIP, rateLimit, validateString } from '@/lib/security'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if 2FA is enabled FIRST - if enabled, always allow verification
+    const { is2FAEnabled } = await import('@/lib/2fa')
+    const twoFAEnabled = await is2FAEnabled()
+    
     // Check if user has pending 2FA (temp auth cookie) OR valid session
     const cookieStore = await cookies()
     const tempAuth = cookieStore.get('admin-auth-temp')
     const sessionCookie = cookieStore.get('admin_session')
-    
-    // Check if 2FA is enabled FIRST
-    const { is2FAEnabled } = await import('@/lib/2fa')
-    const twoFAEnabled = await is2FAEnabled()
     
     console.log('[2FA Verify] Auth check:', {
       hasTempAuth: !!tempAuth?.value,
@@ -24,20 +24,19 @@ export async function POST(request: NextRequest) {
       twoFAEnabled,
     })
     
-    // If 2FA is enabled, always allow verification attempts
-    // The token verification itself will fail if invalid, but we allow the attempt
-    if (!tempAuth?.value && !sessionCookie?.value) {
-      if (twoFAEnabled) {
-        // 2FA is enabled - allow verification attempt (user might be re-verifying)
-        console.log('[2FA Verify] No temp auth or session, but 2FA is enabled - allowing verification attempt')
-      } else {
-        // 2FA is not enabled and no auth - require login
-        console.log('[2FA Verify] No auth and 2FA disabled - rejecting')
-        return NextResponse.json(
-          { error: 'No pending 2FA verification. Please login again.' },
-          { status: 401 }
-        )
-      }
+    // If 2FA is enabled, always allow verification attempts (even without session/temp auth)
+    // This allows re-verification after session expires
+    if (!twoFAEnabled && !tempAuth?.value && !sessionCookie?.value) {
+      console.log('[2FA Verify] No auth and 2FA disabled - rejecting')
+      return NextResponse.json(
+        { error: 'No pending 2FA verification. Please login again.' },
+        { status: 401 }
+      )
+    }
+    
+    // If 2FA is enabled, proceed with verification (no auth check needed)
+    if (twoFAEnabled) {
+      console.log('[2FA Verify] 2FA enabled - allowing verification attempt')
     }
 
     // Aggressive rate limiting for 2FA verification
