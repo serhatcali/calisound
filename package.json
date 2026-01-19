@@ -62,13 +62,6 @@
   "overrides": {
     "rimraf": "^4.0.0",
     "glob": "^9.0.0",
-    "three-mesh-bvh": "^0.8.0",
-    "@otplib/preset-default": "^13.0.0",
-    "@otplib/plugin-crypto": "^13.0.0",
-    "@otplib/plugin-thirty-two": "^13.0.0",
-    "@humanwhocodes/config-array": "npm:@eslint/config-array@^0.18.0",
-    "@humanwhocodes/object-schema": "npm:@eslint/object-schema@^2.1.0",
-    "fs-promise": "npm:fs-extra@^11.0.0",
-    "inflight": "npm:lru-cache@^10.0.0"
+    "three-mesh-bvh": "^0.8.0"
   }
 }
