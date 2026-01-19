@@ -7,7 +7,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 // Set authenticator options
 authenticator.options = {
   step: 30, // 30 seconds
-  window: [1, 1], // Allow 1 step before/after (more lenient)
+  window: [2, 2], // Allow 2 steps before/after (more lenient for time sync issues)
 }
 
 export async function generate2FASecret(email: string = 'admin@calisound.com') {
@@ -59,11 +59,21 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
       return false
     }
 
-    console.log('Verifying token:', cleanToken, 'with secret:', secretToUse.substring(0, 10) + '...')
+    // Only log in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Verifying token:', cleanToken, 'with secret:', secretToUse.substring(0, 10) + '...')
+    }
     
-    const isValid = authenticator.verify({ token: cleanToken, secret: secretToUse })
+    // Verify with more lenient window
+    const isValid = authenticator.verify({ 
+      token: cleanToken, 
+      secret: secretToUse,
+      window: [2, 2] // Override global window for this verification
+    })
     
-    console.log('Token verification result:', isValid)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Token verification result:', isValid)
+    }
     
     return isValid
   } catch (error) {

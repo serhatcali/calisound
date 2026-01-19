@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     if (!isValid) {
       return NextResponse.json({ 
-        error: 'Invalid verification code. Please make sure you entered the correct 6-digit code from your authenticator app.' 
+        error: 'Invalid verification code. Please check:\n1. The code is from the correct authenticator app\n2. Your device time is synchronized\n3. You entered all 6 digits correctly\n4. The code hasn\'t expired (codes refresh every 30 seconds)\n5. Try waiting for a new code to generate' 
       }, { status: 400 })
     }
 

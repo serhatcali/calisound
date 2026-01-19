@@ -56,15 +56,16 @@ export async function POST(request: NextRequest) {
       cookieStore.set('admin-2fa-verified', 'true', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict', // Changed from 'lax' to 'strict' for better security
+        sameSite: 'strict',
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       })
 
       return NextResponse.json({ success: true })
     } else {
+      // More helpful error message
       return NextResponse.json({ 
-        error: 'Invalid code. Please make sure you entered the correct 6-digit code from your authenticator app.' 
+        error: 'Invalid code. Please check:\n1. The code is from the correct authenticator app\n2. Your device time is synchronized\n3. You entered all 6 digits correctly\n4. The code hasn\'t expired (codes refresh every 30 seconds)' 
       }, { status: 401 })
     }
   } catch (error: any) {
