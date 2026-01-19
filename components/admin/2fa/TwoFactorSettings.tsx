@@ -48,6 +48,32 @@ export function TwoFactorSettings() {
     }
   }
 
+  const handleReset = async () => {
+    if (!confirm('Are you sure you want to reset 2FA? This will completely remove your 2FA setup and you will need to set it up again from scratch.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/admin/2fa/reset', { method: 'POST' })
+      const data = await response.json()
+
+      if (data.success) {
+        setEnabled(false)
+        setShowSetup(false)
+        alert('2FA has been reset. You can now set it up again.')
+        // Optionally show setup form
+        setTimeout(() => {
+          setShowSetup(true)
+        }, 1000)
+      } else {
+        alert(`Error: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Error resetting 2FA:', error)
+      alert('Error resetting 2FA')
+    }
+  }
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -93,14 +119,24 @@ export function TwoFactorSettings() {
         </div>
 
         {enabled ? (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleDisable}
-            className="px-6 py-3 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-colors"
-          >
-            Disable 2FA
-          </motion.button>
+          <div className="flex gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleDisable}
+              className="px-6 py-3 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-colors"
+            >
+              Disable 2FA
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleReset}
+              className="px-6 py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition-colors"
+            >
+              Reset 2FA
+            </motion.button>
+          </div>
         ) : (
           <motion.button
             whileHover={{ scale: 1.05 }}
