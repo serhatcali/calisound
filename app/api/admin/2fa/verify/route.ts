@@ -14,8 +14,19 @@ export async function POST(request: NextRequest) {
     const tempAuth = cookieStore.get('admin-auth-temp')
     const sessionCookie = cookieStore.get('admin_session')
     
-    // Allow if either temp auth exists (during login) OR session exists (re-verification)
-    if (!tempAuth?.value && !sessionCookie?.value) {
+    // Check if 2FA is enabled
+    const { is2FAEnabled } = await import('@/lib/2fa')
+    const twoFAEnabled = await is2FAEnabled()
+    
+    // If 2FA is enabled, allow verification if:
+    // 1. Temp auth exists (during login)
+    // 2. Session exists (re-verification after session expires but 2FA verified cookie is missing)
+    // 3. Or if 2FA is enabled, we should allow verification attempts (user might be re-verifying)
+    if (!tempAuth?.value && !sessionCookie?.value && twoFAEnabled) {
+      // If 2FA is enabled but no session/temp auth, still allow verification
+      // The token verification itself will fail if invalid, but we allow the attempt
+      console.log('[2FA Verify] No temp auth or session, but 2FA is enabled - allowing verification attempt')
+    } else if (!tempAuth?.value && !sessionCookie?.value && !twoFAEnabled) {
       return NextResponse.json(
         { error: 'No pending 2FA verification. Please login again.' },
         { status: 401 }
