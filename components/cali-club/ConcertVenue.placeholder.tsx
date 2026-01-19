@@ -12,7 +12,7 @@ export function ConcertVenue() {
           Paketler yükleniyor...
         </p>
         <p className="text-gray-500 text-sm">
-          Terminal'de şunu çalıştırın:
+          Terminal&apos;de şunu çalıştırın:
         </p>
         <code className="block mt-2 px-4 py-2 bg-gray-800 text-orange-500 rounded">
           npm install

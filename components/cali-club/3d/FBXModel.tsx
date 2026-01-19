@@ -57,6 +57,65 @@ function FBXModelContent({ url, onModelLoad, onAnimationsLoad, isPlaying }: FBXM
     }
   }, [fbx, onModelLoad])
   
+  // Use calculated scale or fallback to a small value
+  // The calculated scale should be around 0.01-0.014 for Mixamo models (180 units -> 2.5 units)
+  const FBX_SCALE = calculatedScale > 0 ? calculatedScale : 0.01
+  
+  // Apply scale to the model - use object scale, not geometry scale (simpler and more reliable)
+  // IMPORTANT: scaledModel must be defined BEFORE any useEffect that uses it
+  const scaledModel = React.useMemo(() => {
+    if (!fbx) return null
+    
+    const cloned = fbx.clone()
+    
+    // Apply scale to the object itself (not geometry - this is simpler and more reliable)
+    cloned.scale.set(FBX_SCALE, FBX_SCALE, FBX_SCALE)
+    
+    // Calculate bounding box to position model correctly (feet on ground)
+    const box = new Box3().setFromObject(cloned)
+    const minY = box.min.y
+    // Move model up so its bottom (minY) is at y=0
+    cloned.position.y = -minY
+    
+    console.log(`[FBXModel] ✅ Scale ${FBX_SCALE.toFixed(4)} applied to model`)
+    console.log(`[FBXModel] ✅ Model positioned: minY=${minY.toFixed(2)}, offset=${(-minY).toFixed(2)}`)
+    console.log(`[FBXModel] ✅ Model bounding box:`, box.min, box.max)
+    console.log(`[FBXModel] ✅ Model children count:`, cloned.children.length)
+    return cloned
+  }, [fbx, FBX_SCALE])
+  
+  // Initialize animation mixer with cloned model (CRITICAL: must use scaledModel, not groupRef)
+  useEffect(() => {
+    if (!scaledModel || !fbx?.animations || fbx.animations.length === 0) {
+      return
+    }
+    
+    // Create mixer with cloned model (this is the key fix!)
+    mixerRef.current = new AnimationMixer(scaledModel)
+    console.log(`[FBXModel] ✅ Animation mixer initialized with ${fbx.animations.length} animations`)
+    
+    // Create animation actions manually on the cloned model
+    const actions: { [key: string]: any } = {}
+    fbx.animations.forEach((clip: any) => {
+      const action = mixerRef.current!.clipAction(clip)
+      actions[clip.name] = action
+      console.log(`[FBXModel] Created action for: ${clip.name}`)
+    })
+    
+    actionsRef.current = actions
+    
+    // Notify parent about animations
+    if (onAnimationsLoad) {
+      onAnimationsLoad({ actions, mixer: mixerRef.current }, actions)
+    }
+    
+    return () => {
+      if (mixerRef.current) {
+        mixerRef.current.stopAllAction()
+      }
+    }
+  }, [scaledModel, fbx, onAnimationsLoad])
+  
   // Play animation - always play at least idle, or dance when music is playing
   // IMPORTANT: Never use TPose - always use idle or other natural poses
   useEffect(() => {
@@ -125,72 +184,6 @@ function FBXModelContent({ url, onModelLoad, onAnimationsLoad, isPlaying }: FBXM
     }
   }, [scaledModel, isPlaying])
   
-  // Update animation mixer
-  useFrame((state, delta) => {
-    if (mixerRef.current) {
-      mixerRef.current.update(delta)
-    }
-  })
-  
-  // Use calculated scale or fallback to a small value
-  // The calculated scale should be around 0.01-0.014 for Mixamo models (180 units -> 2.5 units)
-  const FBX_SCALE = calculatedScale > 0 ? calculatedScale : 0.01
-  
-  // Apply scale to the model - use object scale, not geometry scale (simpler and more reliable)
-  // Use useMemo to avoid recreating the model on every render
-  const scaledModel = React.useMemo(() => {
-    if (!fbx) return null
-    
-    const cloned = fbx.clone()
-    
-    // Apply scale to the object itself (not geometry - this is simpler and more reliable)
-    cloned.scale.set(FBX_SCALE, FBX_SCALE, FBX_SCALE)
-    
-    // Calculate bounding box to position model correctly (feet on ground)
-    const box = new Box3().setFromObject(cloned)
-    const minY = box.min.y
-    // Move model up so its bottom (minY) is at y=0
-    cloned.position.y = -minY
-    
-    console.log(`[FBXModel] ✅ Scale ${FBX_SCALE.toFixed(4)} applied to model`)
-    console.log(`[FBXModel] ✅ Model positioned: minY=${minY.toFixed(2)}, offset=${(-minY).toFixed(2)}`)
-    console.log(`[FBXModel] ✅ Model bounding box:`, box.min, box.max)
-    console.log(`[FBXModel] ✅ Model children count:`, cloned.children.length)
-    return cloned
-  }, [fbx, FBX_SCALE])
-  
-  // Initialize animation mixer with cloned model (CRITICAL: must use scaledModel, not groupRef)
-  useEffect(() => {
-    if (!scaledModel || !fbx?.animations || fbx.animations.length === 0) {
-      return
-    }
-    
-    // Create mixer with cloned model (this is the key fix!)
-    mixerRef.current = new AnimationMixer(scaledModel)
-    console.log(`[FBXModel] ✅ Animation mixer initialized with ${fbx.animations.length} animations`)
-    
-    // Create animation actions manually on the cloned model
-    const actions: { [key: string]: any } = {}
-    fbx.animations.forEach((clip: any) => {
-      const action = mixerRef.current!.clipAction(clip)
-      actions[clip.name] = action
-      console.log(`[FBXModel] Created action for: ${clip.name}`)
-    })
-    
-    actionsRef.current = actions
-    
-    // Notify parent about animations
-    if (onAnimationsLoad) {
-      onAnimationsLoad({ actions, mixer: mixerRef.current }, actions)
-    }
-    
-    return () => {
-      if (mixerRef.current) {
-        mixerRef.current.stopAllAction()
-      }
-    }
-  }, [scaledModel, fbx, onAnimationsLoad])
-  
   // Also ensure group scale is applied
   useEffect(() => {
     if (groupRef.current && calculatedScale > 0) {
@@ -207,6 +200,13 @@ function FBXModelContent({ url, onModelLoad, onAnimationsLoad, isPlaying }: FBXM
       console.log(`[FBXModel] ✅ Model scale:`, scaledModel.scale)
     }
   }, [scaledModel, FBX_SCALE])
+  
+  // Update animation mixer
+  useFrame((state, delta) => {
+    if (mixerRef.current) {
+      mixerRef.current.update(delta)
+    }
+  })
   
   // Show placeholder if model not loaded
   if (!fbx) {
