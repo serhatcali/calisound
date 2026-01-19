@@ -93,7 +93,8 @@ function decryptSessionData(encrypted: string): SessionData | null {
 }
 
 /**
- * Create secure session
+ * Create secure session data (without setting cookies)
+ * Cookies should be set in API route using setSessionCookies()
  */
 export async function createSession(
   userId: string,
@@ -113,54 +114,14 @@ export async function createSession(
   
   const encryptedData = encryptSessionData(sessionData)
   
-  // Store session in cookie (encrypted)
-  const cookieStore = await cookies()
+  console.log('[Session] Created session data:', {
+    userId,
+    hasSessionToken: !!encryptedData,
+    hasCsrfToken: !!csrfToken,
+    tokenLength: encryptedData.length,
+  })
   
-  // Check if we're in production with HTTPS
-  // For Vercel, check if we're on a production deployment
-  const isProduction = process.env.NODE_ENV === 'production'
-  const isVercel = !!process.env.VERCEL
-  const isSecure = isProduction && isVercel
-  
-  try {
-    cookieStore.set(SESSION_COOKIE_NAME, encryptedData, {
-      httpOnly: true, // Prevent XSS
-      secure: isSecure, // HTTPS only in production on Vercel
-      sameSite: 'lax', // Changed from 'strict' to 'lax' for better compatibility
-      maxAge: SESSION_DURATION,
-      path: '/',
-      // Don't set domain - let browser handle it
-    })
-    
-    console.log('[Session] Setting session cookie:', {
-      name: SESSION_COOKIE_NAME,
-      hasValue: !!encryptedData,
-      valueLength: encryptedData.length,
-      secure: isSecure,
-      maxAge: SESSION_DURATION,
-      isProduction,
-      isVercel,
-    })
-    
-    // Store CSRF token in separate cookie
-    cookieStore.set(CSRF_COOKIE_NAME, csrfToken, {
-      httpOnly: false, // Must be readable by JavaScript for CSRF checks
-      secure: isSecure,
-      sameSite: 'lax', // Changed from 'strict' to 'lax'
-      maxAge: SESSION_DURATION,
-      path: '/',
-    })
-    
-    console.log('[Session] Setting CSRF cookie:', {
-      name: CSRF_COOKIE_NAME,
-      hasValue: !!csrfToken,
-      secure: isSecure,
-    })
-  } catch (error: any) {
-    console.error('[Session] Error setting cookies:', error)
-    throw error
-  }
-  
+  // Don't set cookies here - they should be set in API route using setSessionCookies()
   return { sessionToken: encryptedData, csrfToken }
 }
 

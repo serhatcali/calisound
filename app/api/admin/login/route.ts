@@ -82,7 +82,16 @@ export async function POST(request: NextRequest) {
       // If session data is returned, set cookies in response
       if (result.sessionData && !result.requires2FA) {
         const { setSessionCookies } = await import('@/lib/session-manager')
+        console.log('[Login API] Setting cookies in response:', {
+          hasSessionToken: !!result.sessionData.sessionToken,
+          hasCsrfToken: !!result.sessionData.csrfToken,
+        })
         setSessionCookies(response, result.sessionData.sessionToken, result.sessionData.csrfToken)
+      } else {
+        console.log('[Login API] No session data to set:', {
+          hasSessionData: !!result.sessionData,
+          requires2FA: result.requires2FA,
+        })
       }
       
       return response
