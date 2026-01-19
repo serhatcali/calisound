@@ -43,7 +43,10 @@ export async function getCityBySlug(slug: string): Promise<City | null> {
     .single()
   
   if (error) {
-    console.error('Error fetching city:', error)
+    // Only log errors during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('Error fetching city:', error)
+    }
     return null
   }
   
@@ -75,7 +78,10 @@ export async function getCitiesByFilter(
   const { data, error } = await query.order('release_datetime', { ascending: false, nullsFirst: false })
   
   if (error) {
-    console.error('Error fetching filtered cities:', error)
+    // Only log errors during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('Error fetching filtered cities:', error)
+    }
     return []
   }
   
@@ -131,7 +137,10 @@ export async function getRelatedCities(city: City, limit: number = 4): Promise<C
     .limit(limit)
   
   if (error) {
-    console.error('Error fetching related cities:', error)
+    // Only log errors during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('Error fetching related cities:', error)
+    }
     return []
   }
   
@@ -178,7 +187,10 @@ export async function getSetById(id: string): Promise<Set | null> {
     .single()
   
   if (error) {
-    console.error('Error fetching set:', error)
+    // Only log errors during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('Error fetching set:', error)
+    }
     return null
   }
   
@@ -229,6 +241,9 @@ export async function trackClick(linkType: string, linkUrl: string) {
     })
   
   if (error) {
-    console.error('Error tracking click:', error)
+    // Only log errors during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('Error tracking click:', error)
+    }
   }
 }
