@@ -17,9 +17,17 @@ export function middleware(request: NextRequest) {
   
   // Performance headers
   if (!pathname.startsWith('/api/')) {
-    // Cache static assets
-    if (pathname.match(/\.(jpg|jpeg|png|gif|ico|svg|webp|avif|woff|woff2|ttf|eot)$/)) {
+    // Cache static assets with Expires header
+    if (pathname.match(/\.(jpg|jpeg|png|gif|ico|svg|webp|avif|woff|woff2|ttf|eot)$/) || 
+        pathname.startsWith('/_next/static/') || 
+        pathname.startsWith('/_next/image/') ||
+        pathname === '/og-default.jpg' ||
+        pathname === '/icon.svg') {
       response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+      // Set Expires header (1 year from now)
+      const expiresDate = new Date()
+      expiresDate.setFullYear(expiresDate.getFullYear() + 1)
+      response.headers.set('Expires', expiresDate.toUTCString())
     }
     // Cache HTML with shorter TTL
     else if (pathname === '/' || pathname.match(/^\/[^/]+$/)) {

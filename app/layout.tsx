@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     default: 'CALI Sound - Global Afro House City Series | Afrobeat DJ Music',
     template: '%s | CALI Sound',
   },
-  description: 'Experience the world through Afro House music. CALI Sound brings you city-inspired melodic club music from around the globe. Listen to the best Afro House, Afrobeat, and DJ sets.',
+  description: 'Experience the world through Afro House music. CALI Sound brings you city-inspired melodic club music from around the globe.',
   keywords: [
     'calisound',
     'afrohouse',
@@ -60,10 +60,11 @@ export const metadata: Metadata = {
     description: 'Experience the world through Afro House music. CALI Sound brings you city-inspired melodic club music from around the globe.',
     images: [
       {
-        url: '/og-default.jpg',
+        url: `${baseUrl}/og-default.jpg`,
         width: 1200,
         height: 630,
         alt: 'CALI Sound - Global Afro House City Series',
+        type: 'image/jpeg',
       },
     ],
   },
