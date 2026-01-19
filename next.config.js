@@ -29,10 +29,6 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
-  // Performance optimizations
-  experimental: {
-    optimizeCss: true,
-  },
   // Headers for caching and performance
   async headers() {
     return [
