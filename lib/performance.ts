@@ -7,7 +7,10 @@ export function measurePageLoad() {
   window.addEventListener('load', () => {
     if ('performance' in window) {
       const perfData = window.performance.timing
-      const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart
+      // Ensure valid timing data
+      const pageLoadTime = perfData.loadEventEnd > 0 && perfData.navigationStart > 0
+        ? perfData.loadEventEnd - perfData.navigationStart
+        : 0
       const domContentLoaded = perfData.domContentLoadedEventEnd - perfData.navigationStart
 
       console.log('Performance Metrics:', {
