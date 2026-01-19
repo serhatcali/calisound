@@ -152,8 +152,16 @@ export async function isAdminPending2FA(): Promise<boolean> {
  * Require admin authentication (redirect if not authenticated)
  */
 export async function requireAdmin() {
-  const authenticated = await isAdminAuthenticated()
-  if (!authenticated) {
+  try {
+    const authenticated = await isAdminAuthenticated()
+    console.log('[requireAdmin] Authentication check:', { authenticated })
+    if (!authenticated) {
+      console.log('[requireAdmin] Not authenticated, redirecting to login')
+      redirect('/admin/login')
+    }
+    console.log('[requireAdmin] Authenticated, allowing access')
+  } catch (error: any) {
+    console.error('[requireAdmin] Error checking authentication:', error)
     redirect('/admin/login')
   }
 }
