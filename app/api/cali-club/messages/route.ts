@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getClientIP, rateLimit, validateString, sanitizeInput, validateObject, validateNumber } from '@/lib/security'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 // GET - Fetch recent messages
 export async function GET(request: NextRequest) {
   try {

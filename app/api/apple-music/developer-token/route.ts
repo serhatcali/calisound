@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken'
 import fs from 'fs'
 import path from 'path'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 // Generate Apple Music Developer Token (JWT)
 export async function GET() {
   try {

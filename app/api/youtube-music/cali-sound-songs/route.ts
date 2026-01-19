@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 // CALI Sound YouTube Playlist ID
 const CALI_SOUND_PLAYLIST_ID = 'OLAK5uy_l0tfLR4zhcKpOxQsqdUzUdmWNphJGO1Uk'
 

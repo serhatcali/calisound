@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 // POST - Cleanup character (for sendBeacon compatibility)
 // This endpoint is called when user leaves/closes browser
 export async function POST(request: NextRequest) {

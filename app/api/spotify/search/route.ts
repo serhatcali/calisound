@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 // Search Spotify catalog
 import { getClientIP, rateLimit, validateString, sanitizeInput, validateNumber } from '@/lib/security'
 
