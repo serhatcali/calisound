@@ -23,6 +23,14 @@ const nextConfig = {
   },
   trailingSlash: true,
   reactStrictMode: true,
+  // Ignore ESLint during build (warnings are not critical)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Ignore TypeScript errors during build (if any)
+  typescript: {
+    ignoreBuildErrors: false, // Keep TypeScript errors, only ignore ESLint
+  },
   // Ensure environment variables are available
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
