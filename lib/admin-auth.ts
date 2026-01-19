@@ -122,20 +122,41 @@ export async function logoutAdmin() {
 export async function isAdminAuthenticated(
   request?: Request
 ): Promise<boolean> {
-  const cookieStore = await cookies()
-  const twoFAVerified = cookieStore.get('admin-2fa-verified')
+  try {
+    const cookieStore = await cookies()
+    const twoFAVerified = cookieStore.get('admin-2fa-verified')
+    const sessionCookie = cookieStore.get('admin_session')
+    
+    console.log('[isAdminAuthenticated] Cookie check:', {
+      hasSessionCookie: !!sessionCookie,
+      has2FAVerified: !!twoFAVerified,
+    })
 
-  // Check if 2FA is enabled
-  const twoFAEnabled = await is2FAEnabled()
+    // Check if 2FA is enabled
+    const twoFAEnabled = await is2FAEnabled()
 
-  if (twoFAEnabled) {
-    // Both secure session and 2FA verification required
+    // Verify session (works without request parameter in server components)
     const sessionCheck = await verifySession(request)
-    return sessionCheck.valid && twoFAVerified?.value === 'true'
-  } else {
-    // Just secure session required
-    const sessionCheck = await verifySession(request)
-    return sessionCheck.valid
+    
+    console.log('[isAdminAuthenticated] Session check:', {
+      valid: sessionCheck.valid,
+      error: sessionCheck.error,
+      twoFAEnabled,
+    })
+
+    if (twoFAEnabled) {
+      // Both secure session and 2FA verification required
+      const result = sessionCheck.valid && twoFAVerified?.value === 'true'
+      console.log('[isAdminAuthenticated] 2FA enabled, result:', result)
+      return result
+    } else {
+      // Just secure session required
+      console.log('[isAdminAuthenticated] 2FA disabled, result:', sessionCheck.valid)
+      return sessionCheck.valid
+    }
+  } catch (error: any) {
+    console.error('[isAdminAuthenticated] Error:', error)
+    return false
   }
 }
 
