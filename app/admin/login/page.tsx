@@ -10,56 +10,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [requires2FA, setRequires2FA] = useState(false)
-  const [checkingAuth, setCheckingAuth] = useState(true)
   const router = useRouter()
-
-  // Check if already authenticated on mount
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout
-    
-    const checkAuth = async () => {
-      try {
-        // Add timeout to prevent infinite loading
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutId = setTimeout(() => reject(new Error('Timeout')), 3000)
-        })
-        
-        const fetchPromise = fetch('/api/admin/login/check', {
-          credentials: 'include',
-          cache: 'no-store',
-        })
-        
-        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response
-        
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-          setCheckingAuth(false)
-          return
-        }
-        
-        const data = await response.json()
-        if (data.authenticated) {
-          // Already logged in, redirect to admin
-          window.location.href = '/admin'
-          return
-        }
-      } catch (err) {
-        console.error('Auth check error:', err)
-        // On error, just show login form
-      } finally {
-        clearTimeout(timeoutId)
-        setCheckingAuth(false)
-      }
-    }
-    
-    checkAuth()
-    
-    // Cleanup
-    return () => {
-      clearTimeout(timeoutId)
-    }
-  }, [])
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -135,14 +86,6 @@ export default function AdminLoginPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  if (checkingAuth) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-4">
-        <div className="text-white">Checking authentication...</div>
-      </div>
-    )
   }
 
   return (
