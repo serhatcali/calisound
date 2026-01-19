@@ -69,10 +69,12 @@ function getSupabaseClient(): SupabaseClient {
       }
     })
 
-    if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL && !process.env.NEXT_PHASE) {
-      console.log('✅ Supabase client initialized')
+    // Log in production runtime to debug
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.log('✅ Supabase client initialized (RUNTIME)')
       console.log('  URL:', supabaseUrl)
-      console.log('  Key:', `${supabaseAnonKey.substring(0, 20)}...`)
+      console.log('  Key:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'MISSING')
+      console.log('  isBuildPhase:', !!process.env.NEXT_PHASE)
     }
   }
 

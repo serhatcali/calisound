@@ -21,9 +21,12 @@ export async function getAllCities(): Promise<City[]> {
       return []
     }
     
-    // Only log success during runtime, not during build
+    // Log in production runtime to debug
     if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
-      console.log('✅ Cities fetched:', data?.length || 0, '(Total in DB:', count || 0, ')')
+      console.log('✅ Cities fetched (RUNTIME):', data?.length || 0, '(Total in DB:', count || 0, ')')
+      if (error) {
+        console.error('❌ Supabase error:', error)
+      }
     }
     return data || []
   } catch (err) {
