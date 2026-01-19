@@ -116,39 +116,49 @@ export async function createSession(
   const cookieStore = await cookies()
   
   // Check if we're in production with HTTPS
+  // For Vercel, check if we're on a production deployment
   const isProduction = process.env.NODE_ENV === 'production'
-  const isSecure = isProduction && process.env.VERCEL_ENV !== undefined
+  const isVercel = !!process.env.VERCEL
+  const isSecure = isProduction && isVercel
   
-  cookieStore.set(SESSION_COOKIE_NAME, encryptedData, {
-    httpOnly: true, // Prevent XSS
-    secure: isSecure, // HTTPS only in production
-    sameSite: 'strict', // CSRF protection
-    maxAge: SESSION_DURATION,
-    path: '/',
-    // Don't set domain - let browser handle it
-  })
-  
-  console.log('[Session] Setting session cookie:', {
-    name: SESSION_COOKIE_NAME,
-    hasValue: !!encryptedData,
-    secure: isSecure,
-    maxAge: SESSION_DURATION,
-  })
-  
-  // Store CSRF token in separate cookie
-  cookieStore.set(CSRF_COOKIE_NAME, csrfToken, {
-    httpOnly: false, // Must be readable by JavaScript for CSRF checks
-    secure: isSecure,
-    sameSite: 'strict',
-    maxAge: SESSION_DURATION,
-    path: '/',
-  })
-  
-  console.log('[Session] Setting CSRF cookie:', {
-    name: CSRF_COOKIE_NAME,
-    hasValue: !!csrfToken,
-    secure: isSecure,
-  })
+  try {
+    cookieStore.set(SESSION_COOKIE_NAME, encryptedData, {
+      httpOnly: true, // Prevent XSS
+      secure: isSecure, // HTTPS only in production on Vercel
+      sameSite: 'lax', // Changed from 'strict' to 'lax' for better compatibility
+      maxAge: SESSION_DURATION,
+      path: '/',
+      // Don't set domain - let browser handle it
+    })
+    
+    console.log('[Session] Setting session cookie:', {
+      name: SESSION_COOKIE_NAME,
+      hasValue: !!encryptedData,
+      valueLength: encryptedData.length,
+      secure: isSecure,
+      maxAge: SESSION_DURATION,
+      isProduction,
+      isVercel,
+    })
+    
+    // Store CSRF token in separate cookie
+    cookieStore.set(CSRF_COOKIE_NAME, csrfToken, {
+      httpOnly: false, // Must be readable by JavaScript for CSRF checks
+      secure: isSecure,
+      sameSite: 'lax', // Changed from 'strict' to 'lax'
+      maxAge: SESSION_DURATION,
+      path: '/',
+    })
+    
+    console.log('[Session] Setting CSRF cookie:', {
+      name: CSRF_COOKIE_NAME,
+      hasValue: !!csrfToken,
+      secure: isSecure,
+    })
+  } catch (error: any) {
+    console.error('[Session] Error setting cookies:', error)
+    throw error
+  }
   
   return { sessionToken: encryptedData, csrfToken }
 }
