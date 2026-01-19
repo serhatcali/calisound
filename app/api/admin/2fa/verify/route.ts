@@ -77,14 +77,23 @@ export async function POST(request: NextRequest) {
 
     const { token } = tokenValidation.value!
 
+    console.log('[2FA Verify] Verifying token:', token.substring(0, 2) + '****')
+
     // Verify token
     const isValid = await verify2FAToken(token)
+    
+    console.log('[2FA Verify] Token verification result:', isValid)
 
     // In development, provide more debugging info
-    if (!isValid && process.env.NODE_ENV !== 'production') {
+    if (!isValid) {
       // Check if secret exists
       const { get2FASecret } = await import('@/lib/2fa')
       const secret = await get2FASecret()
+      
+      console.log('[2FA Verify] Secret check:', {
+        hasSecret: !!secret,
+        secretLength: secret?.length,
+      })
       
       if (!secret) {
         return NextResponse.json({ 
