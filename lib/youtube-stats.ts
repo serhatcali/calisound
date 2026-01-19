@@ -72,7 +72,10 @@ export async function getYouTubeStats(videoId: string): Promise<YouTubeStats | n
       duration,
     }
   } catch (error) {
-    console.error('Error fetching YouTube stats:', error)
+    // Only log during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('Error fetching YouTube stats:', error)
+    }
     return null
   }
 }

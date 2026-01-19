@@ -14,7 +14,8 @@ import crypto from 'crypto'
 
 // ADMIN_PASSWORD must be set in production!
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (() => {
-  if (process.env.NODE_ENV === 'production') {
+  // Only show warning during runtime, not during build
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
     console.error('⚠️ CRITICAL: ADMIN_PASSWORD not set in production! Using default password is UNSAFE!')
   }
   return 'admin123' // Default for development only

@@ -34,7 +34,10 @@ export const metadata: Metadata = {
 export default async function CitiesPage() {
   const cities = await getAllCities()
   
-  console.log('📊 Cities page - cities count:', cities?.length || 0)
+  // Only log during runtime, not during build
+  if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+    console.log('📊 Cities page - cities count:', cities?.length || 0)
+  }
 
   // ItemList Schema for all cities (premium SEO)
   const cityListItems = cities.map(city => ({

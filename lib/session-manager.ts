@@ -9,7 +9,8 @@ import crypto from 'crypto'
 // SESSION_SECRET must be set in production!
 // If not set, generate a warning and use a random value (sessions will be invalidated on restart)
 const SESSION_SECRET = process.env.SESSION_SECRET || (() => {
-  if (process.env.NODE_ENV === 'production') {
+  // Only show warning during runtime, not during build
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
     console.error('⚠️ CRITICAL: SESSION_SECRET not set in production! Sessions will be invalidated on restart.')
   }
   return crypto.randomBytes(32).toString('hex')

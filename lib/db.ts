@@ -11,17 +11,26 @@ export async function getAllCities(): Promise<City[]> {
       .order('release_datetime', { ascending: false, nullsFirst: false })
     
     if (error) {
-      console.error('❌ Error fetching cities:', error)
-      console.error('Error code:', error.code)
-      console.error('Error message:', error.message)
-      console.error('Error details:', JSON.stringify(error, null, 2))
+      // Only log errors during runtime, not during build
+      if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+        console.error('❌ Error fetching cities:', error)
+        console.error('Error code:', error.code)
+        console.error('Error message:', error.message)
+        console.error('Error details:', JSON.stringify(error, null, 2))
+      }
       return []
     }
     
-    console.log('✅ Cities fetched:', data?.length || 0, '(Total in DB:', count || 0, ')')
+    // Only log success during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.log('✅ Cities fetched:', data?.length || 0, '(Total in DB:', count || 0, ')')
+    }
     return data || []
   } catch (err) {
-    console.error('❌ Exception fetching cities:', err)
+    // Only log errors during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('❌ Exception fetching cities:', err)
+    }
     return []
   }
 }
@@ -85,15 +94,24 @@ export async function getLatestRelease(): Promise<City | null> {
       .maybeSingle()
     
     if (error) {
-      console.error('❌ Error fetching latest release:', error)
-      console.error('Error code:', error.code)
+      // Only log errors during runtime, not during build
+      if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+        console.error('❌ Error fetching latest release:', error)
+        console.error('Error code:', error.code)
+      }
       return null
     }
     
-    console.log('✅ Latest release fetched:', data?.name || 'None')
+    // Only log success during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.log('✅ Latest release fetched:', data?.name || 'None')
+    }
     return data
   } catch (err) {
-    console.error('❌ Exception fetching latest release:', err)
+    // Only log errors during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('❌ Exception fetching latest release:', err)
+    }
     return null
   }
 }
@@ -128,17 +146,26 @@ export async function getAllSets(): Promise<Set[]> {
       .order('created_at', { ascending: false })
     
     if (error) {
-      console.error('❌ Error fetching sets:', error)
-      console.error('Error code:', error.code)
-      console.error('Error message:', error.message)
-      console.error('Error details:', JSON.stringify(error, null, 2))
+      // Only log errors during runtime, not during build
+      if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+        console.error('❌ Error fetching sets:', error)
+        console.error('Error code:', error.code)
+        console.error('Error message:', error.message)
+        console.error('Error details:', JSON.stringify(error, null, 2))
+      }
       return []
     }
     
-    console.log('✅ Sets fetched:', data?.length || 0, '(Total in DB:', count || 0, ')')
+    // Only log success during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.log('✅ Sets fetched:', data?.length || 0, '(Total in DB:', count || 0, ')')
+    }
     return data || []
   } catch (err) {
-    console.error('❌ Exception fetching sets:', err)
+    // Only log errors during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('❌ Exception fetching sets:', err)
+    }
     return []
   }
 }
@@ -167,16 +194,25 @@ export async function getGlobalLinks(): Promise<GlobalLinks | null> {
       .maybeSingle()
     
     if (error) {
-      console.error('❌ Error fetching global links:', error)
-      console.error('Error code:', error.code)
-      console.error('Error message:', error.message)
+      // Only log errors during runtime, not during build
+      if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+        console.error('❌ Error fetching global links:', error)
+        console.error('Error code:', error.code)
+        console.error('Error message:', error.message)
+      }
       return null
     }
     
-    console.log('✅ Global links fetched:', data ? 'Yes' : 'No')
+    // Only log success during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.log('✅ Global links fetched:', data ? 'Yes' : 'No')
+    }
     return data
   } catch (err) {
-    console.error('❌ Exception fetching global links:', err)
+    // Only log errors during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('❌ Exception fetching global links:', err)
+    }
     return null
   }
 }

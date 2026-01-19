@@ -18,7 +18,7 @@ function getSupabaseAdminClient(): SupabaseClient {
     // Return a mock client that returns empty results - never calls createClient
     // This prevents any network calls to placeholder URLs
     const createMockQueryBuilder = () => {
-      const builder = {
+      const builder: any = {
         eq: () => builder,
         neq: () => builder,
         not: () => builder,
@@ -26,11 +26,16 @@ function getSupabaseAdminClient(): SupabaseClient {
         limit: () => builder,
         maybeSingle: async () => ({ data: null, error: null }),
         single: async () => ({ data: null, error: null }),
-        select: async (columns?: string, options?: any) => {
-          if (options?.count === 'exact') {
-            return { data: [], error: null, count: 0 }
-          }
-          return { data: [], error: null }
+        select: (columns?: string, options?: any) => {
+          // Return a promise that resolves to empty data
+          const result = options?.count === 'exact' 
+            ? { data: [], error: null, count: 0 }
+            : { data: [], error: null }
+          // Make select() chainable by returning builder, but also make it awaitable
+          const selectPromise = Promise.resolve(result)
+          // Add builder methods to promise for chaining
+          Object.assign(selectPromise, builder)
+          return selectPromise
         },
         insert: async () => ({ data: null, error: null }),
         update: async () => ({ data: null, error: null }),

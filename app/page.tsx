@@ -58,12 +58,15 @@ export default async function HomePage() {
     sets = setsData.status === 'fulfilled' ? (setsData.value || []) : []
     globalLinks = globalLinksData.status === 'fulfilled' ? globalLinksData.value : null
 
-    console.log('📊 Data loaded:', {
-      cities: cities?.length || 0,
-      sets: sets?.length || 0,
-      hasGlobalLinks: !!globalLinks,
-      latestRelease: latestRelease?.name || 'none'
-    })
+    // Only log during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.log('📊 Data loaded:', {
+        cities: cities?.length || 0,
+        sets: sets?.length || 0,
+        hasGlobalLinks: !!globalLinks,
+        latestRelease: latestRelease?.name || 'none'
+      })
+    }
   } catch (error) {
     console.error('⚠️ Data fetch error:', error)
     // Continue with empty data

@@ -36,7 +36,10 @@ export const metadata: Metadata = {
 export default async function SetsPage() {
   const sets = await getAllSets()
   
-  console.log('📊 Sets page - sets count:', sets?.length || 0)
+  // Only log during runtime, not during build
+  if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+    console.log('📊 Sets page - sets count:', sets?.length || 0)
+  }
 
   // ItemList Schema for all sets (premium SEO)
   const setListItems = sets.map(set => ({
