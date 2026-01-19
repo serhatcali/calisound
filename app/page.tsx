@@ -68,7 +68,10 @@ export default async function HomePage() {
       })
     }
   } catch (error) {
-    console.error('⚠️ Data fetch error:', error)
+    // Only log during runtime, not during build
+    if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
+      console.error('⚠️ Data fetch error:', error)
+    }
     // Continue with empty data
   }
 
