@@ -4,13 +4,19 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 import { NewsletterForm } from './NewsletterForm'
+import { useSiteContent } from '@/hooks/use-site-content'
 
 const STORAGE_KEY = 'newsletter-popup-dismissed'
 
 export function NewsletterPopup() {
+  const { content: newsletterContent } = useSiteContent(['newsletter_title', 'newsletter_description', 'newsletter_button', 'newsletter_success'])
   const [isOpen, setIsOpen] = useState(false)
   const [dontShowAgain, setDontShowAgain] = useState(false)
   const pathname = usePathname()
+  
+  // Fallback values
+  const title = newsletterContent.newsletter_title || 'Stay Updated'
+  const description = newsletterContent.newsletter_description || 'Get notified when new cities are released'
 
   useEffect(() => {
     // Don't show on admin pages (including login)
@@ -82,10 +88,10 @@ export function NewsletterPopup() {
                 <div className="text-center mb-6">
                   <div className="text-5xl mb-4">🎵</div>
                   <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">
-                    Stay Updated
+                    {title}
                   </h2>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Get notified when new cities are released
+                    {description}
                   </p>
                 </div>
 

@@ -10,8 +10,10 @@ import {
   setCookiePreferences,
   type CookiePreferences,
 } from '@/lib/cookies'
+import { useSiteContent } from '@/hooks/use-site-content'
 
 export function CookieConsent() {
+  const { content: cookieContent } = useSiteContent(['cookie_title', 'cookie_description', 'cookie_accept', 'cookie_decline'])
   const [showBanner, setShowBanner] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [preferences, setPreferences] = useState<CookiePreferences>({
@@ -19,6 +21,12 @@ export function CookieConsent() {
     analytics: false,
     marketing: false,
   })
+  
+  // Fallback values
+  const title = cookieContent.cookie_title || 'Cookie Preferences'
+  const description = cookieContent.cookie_description || 'We use cookies to enhance your browsing experience, analyze site traffic, and personalize content.'
+  const acceptText = cookieContent.cookie_accept || 'Accept All'
+  const declineText = cookieContent.cookie_decline || 'Reject All'
 
   useEffect(() => {
     const hasConsented = getCookieConsent()
@@ -82,11 +90,10 @@ export function CookieConsent() {
               {!showSettings ? (
                 <>
                   <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                    Cookie Preferences
+                    {title}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm md:text-base">
-                    We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. 
-                    By clicking &quot;Accept All&quot;, you consent to our use of cookies.{' '}
+                    {description}{' '}
                     <Link href="/cookie-policy" className="text-orange-500 hover:text-orange-600 underline">
                       Learn more
                     </Link>
@@ -99,7 +106,7 @@ export function CookieConsent() {
                       onClick={handleAcceptAll}
                       className="px-6 py-3 bg-gradient-to-r from-orange-500/80 to-amber-500/80 dark:from-orange-500/70 dark:to-amber-500/70 text-white rounded-xl font-semibold hover:from-orange-400/90 hover:to-amber-400/90 transition-all shadow-soft"
                     >
-                      Accept All
+                      {acceptText}
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
@@ -115,7 +122,7 @@ export function CookieConsent() {
                       onClick={handleRejectAll}
                       className="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     >
-                      Reject All
+                      {declineText}
                     </motion.button>
                   </div>
                 </>

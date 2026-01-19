@@ -6,12 +6,15 @@ import { GlobalLinks } from '@/types/database'
 import { trackClick } from '@/lib/db'
 import { Particles } from '@/components/effects/Particles'
 import { MagneticButton } from '@/components/effects/MagneticButton'
+import { useSiteContent } from '@/hooks/use-site-content'
 
 interface HeroProps {
   globalLinks: GlobalLinks | null
 }
 
 export function Hero({ globalLinks }: HeroProps) {
+  const { content: heroContent } = useSiteContent(['hero_title', 'hero_subtitle', 'hero_description', 'hero_cta'])
+  
   const sectionRef = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -21,6 +24,12 @@ export function Hero({ globalLinks }: HeroProps) {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
   const y = useTransform(scrollYProgress, [0, 0.5], [0, 100])
+  
+  // Fallback values
+  const heroTitle = heroContent.hero_title || 'CALI Sound - Global Afro House City Series'
+  const heroSubtitle = heroContent.hero_subtitle || 'Experience the world through Afro House music'
+  const heroDescription = heroContent.hero_description || 'CALI Sound brings you city-inspired melodic club music from around the globe.'
+  const heroCta = heroContent.hero_cta || 'Explore Cities'
 
   const handleClick = (type: string, url: string | null) => {
     if (url) {
@@ -86,10 +95,7 @@ export function Hero({ globalLinks }: HeroProps) {
                 CALI
               </span>
               <span className="block text-white text-5xl md:text-7xl lg:text-8xl font-extrabold mt-2">
-                Global Afro House
-              </span>
-              <span className="block text-white/90 dark:text-gray-200 text-4xl md:text-6xl lg:text-7xl font-bold mt-2">
-                City Series
+                {heroTitle.split(' - ')[1] || heroTitle}
               </span>
             </h1>
           </motion.div>
@@ -100,7 +106,7 @@ export function Hero({ globalLinks }: HeroProps) {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-2xl md:text-3xl text-white/90 dark:text-gray-100 mb-12 max-w-4xl mx-auto font-medium leading-relaxed"
           >
-            Experience the world through Afro House music. Each city tells a story through melodic club sounds.
+            {heroDescription}
           </motion.p>
 
           <motion.div

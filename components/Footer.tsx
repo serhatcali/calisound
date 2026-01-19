@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { getGlobalLinks } from '@/lib/db'
 import { NewsletterForm } from '@/components/shared/NewsletterForm'
+import { getSiteContents } from '@/lib/get-site-content'
 
 export async function Footer() {
   const links = await getGlobalLinks()
+  const footerContent = await getSiteContents(['footer_description', 'footer_copyright'])
 
   return (
     <footer className="relative bg-white dark:bg-black border-t border-gray-200 dark:border-gray-900 overflow-hidden">
@@ -32,7 +34,7 @@ export async function Footer() {
                 </span>
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                Global Afro House City Series. Experience the world through melodic club music.
+                {footerContent.footer_description || 'Global Afro House City Series. Experience the world through melodic club music.'}
               </p>
             </div>
           </div>
@@ -138,7 +140,7 @@ export async function Footer() {
         <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
           <div className="text-center">
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              &copy; {new Date().getFullYear()} CALI Sound. All rights reserved.
+              {footerContent.footer_copyright || `© ${new Date().getFullYear()} CALI Sound. All rights reserved.`}
             </p>
           </div>
         </div>
