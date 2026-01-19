@@ -106,7 +106,7 @@ export function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
           onClick={() => setStep('verify')}
           className="w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all"
         >
-          I've Scanned the QR Code
+          I&apos;ve Scanned the QR Code
         </button>
       </div>
     )

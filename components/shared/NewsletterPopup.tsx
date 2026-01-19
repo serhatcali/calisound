@@ -107,7 +107,7 @@ export function NewsletterPopup() {
                     htmlFor="dont-show-again"
                     className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer"
                   >
-                    Don't show this again
+                    Don&apos;t show this again
                   </label>
                 </div>
               </div>

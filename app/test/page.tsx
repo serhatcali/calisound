@@ -5,7 +5,7 @@ export default function TestPage() {
         Test Page - If you see this, basic rendering works!
       </h1>
       <p className="text-gray-600 dark:text-gray-400 mt-4">
-        If this page works but homepage doesn't, there's an issue with data fetching or components.
+        If this page works but homepage doesn&apos;t, there&apos;s an issue with data fetching or components.
       </p>
     </div>
   )

@@ -22,9 +22,37 @@ function GLTFModelContent({ url, onModelLoad, onAnimationsLoad, isPlaying, custo
   const groupRef = useRef<Group>(null)
   const mixerRef = useRef<AnimationMixer | null>(null)
   const currentActionRef = useRef<any>(null)
+  const actionsRef = useRef<{ [key: string]: any }>({})
   
   // Load GLTF model
   const gltf = useGLTF(url, true)
+  
+  // Scale model to appropriate size (GLB models might be too small)
+  // Default scale: 2.5x to make characters more visible and match FBX size
+  const MODEL_SCALE = 2.5
+  
+  // Clone and prepare the model with scale and positioning
+  // IMPORTANT: All hooks must be called before any early returns
+  const scaledModel = React.useMemo(() => {
+    if (!gltf?.scene) return null
+    
+    const cloned = gltf.scene.clone()
+    
+    // Apply scale to the model itself (like FBXModel does)
+    cloned.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE)
+    
+    // Calculate bounding box to position model correctly (feet on ground)
+    const box = new Box3().setFromObject(cloned)
+    const minY = box.min.y
+    
+    // Position model so its feet are at y=0
+    cloned.position.y = -minY
+    
+    console.log(`[GLTFModel] ✅ Scale ${MODEL_SCALE} applied to model`)
+    console.log(`[GLTFModel] ✅ Model positioned: minY=${minY.toFixed(2)}, offset=${(-minY).toFixed(2)}`)
+    
+    return cloned
+  }, [gltf?.scene, MODEL_SCALE])
   
   console.log(`[GLTFModel] Model loaded with ${gltf?.animations?.length || 0} animations`)
   if (gltf?.animations && gltf.animations.length > 0) {
@@ -50,57 +78,6 @@ function GLTFModelContent({ url, onModelLoad, onAnimationsLoad, isPlaying, custo
       })
     }
   }, [gltf, customizations])
-  
-  // Update animation mixer
-  useFrame((state, delta) => {
-    if (mixerRef.current) {
-      mixerRef.current.update(delta)
-    }
-  })
-  
-  if (!gltf?.scene) {
-    console.warn(`[GLTFModel] ⚠️ Model not loaded: ${url}`)
-    return (
-      <group ref={groupRef}>
-        <mesh>
-          <boxGeometry args={[0.5, 1.5, 0.5]} />
-          <meshStandardMaterial color="#ff6b35" />
-        </mesh>
-      </group>
-    )
-  }
-  
-  console.log(`[GLTFModel] ✅ Model loaded successfully: ${url}`)
-  
-  // Scale model to appropriate size (GLB models might be too small)
-  // Default scale: 2.5x to make characters more visible and match FBX size
-  const MODEL_SCALE = 2.5
-  
-  // Clone and prepare the model with scale and positioning
-  // IMPORTANT: Clone AFTER animations are set up, so animations work on the cloned model
-  const scaledModel = React.useMemo(() => {
-    if (!gltf?.scene) return null
-    
-    const cloned = gltf.scene.clone()
-    
-    // Apply scale to the model itself (like FBXModel does)
-    cloned.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE)
-    
-    // Calculate bounding box to position model correctly (feet on ground)
-    const box = new Box3().setFromObject(cloned)
-    const minY = box.min.y
-    
-    // Position model so its feet are at y=0
-    cloned.position.y = -minY
-    
-    console.log(`[GLTFModel] ✅ Scale ${MODEL_SCALE} applied to model`)
-    console.log(`[GLTFModel] ✅ Model positioned: minY=${minY.toFixed(2)}, offset=${(-minY).toFixed(2)}`)
-    
-    return cloned
-  }, [gltf?.scene])
-  
-  // Store actions for later use
-  const actionsRef = useRef<{ [key: string]: any }>({})
   
   // Initialize animation mixer with cloned model
   useEffect(() => {
@@ -202,6 +179,28 @@ function GLTFModelContent({ url, onModelLoad, onAnimationsLoad, isPlaying, custo
       }
     }
   }, [scaledModel, isPlaying])
+  
+  // Update animation mixer
+  useFrame((state, delta) => {
+    if (mixerRef.current) {
+      mixerRef.current.update(delta)
+    }
+  })
+  
+  // Early returns AFTER all hooks
+  if (!gltf?.scene) {
+    console.warn(`[GLTFModel] ⚠️ Model not loaded: ${url}`)
+    return (
+      <group ref={groupRef}>
+        <mesh>
+          <boxGeometry args={[0.5, 1.5, 0.5]} />
+          <meshStandardMaterial color="#ff6b35" />
+        </mesh>
+      </group>
+    )
+  }
+  
+  console.log(`[GLTFModel] ✅ Model loaded successfully: ${url}`)
   
   if (!scaledModel) {
     console.warn(`[GLTFModel] ⚠️ Scaled model not created`)

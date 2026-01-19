@@ -86,7 +86,7 @@ export function CookieConsent() {
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm md:text-base">
                     We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. 
-                    By clicking "Accept All", you consent to our use of cookies.{' '}
+                    By clicking &quot;Accept All&quot;, you consent to our use of cookies.{' '}
                     <Link href="/cookie-policy" className="text-orange-500 hover:text-orange-600 underline">
                       Learn more
                     </Link>

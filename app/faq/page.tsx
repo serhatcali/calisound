@@ -109,7 +109,7 @@ export default function FAQPage() {
                 <a href="/contact" className="text-orange-500 hover:text-orange-600 underline">
                   Contact us
                 </a>{' '}
-                and we'll be happy to help!
+                and we&apos;ll be happy to help!
               </p>
             </div>
           </div>

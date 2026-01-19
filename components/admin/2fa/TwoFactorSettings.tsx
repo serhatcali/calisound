@@ -117,8 +117,8 @@ export function TwoFactorSettings() {
         <h4 className="font-bold text-blue-900 dark:text-blue-100 mb-2">About 2FA</h4>
         <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
           <li>• Two-factor authentication adds an extra layer of security to your account</li>
-          <li>• You'll need an authenticator app (Google Authenticator, Authy, etc.)</li>
-          <li>• After enabling, you'll need to enter a 6-digit code when logging in</li>
+          <li>• You&apos;ll need an authenticator app (Google Authenticator, Authy, etc.)</li>
+          <li>• After enabling, you&apos;ll need to enter a 6-digit code when logging in</li>
           <li>• Keep your backup codes safe in case you lose access to your authenticator app</li>
         </ul>
       </div>

@@ -70,7 +70,7 @@ export default function ContactPage() {
                 Thank you!
               </h2>
               <p className="text-gray-600 dark:text-gray-300">
-                We'll get back to you soon.
+                We&apos;ll get back to you soon.
               </p>
             </div>
           ) : (
@@ -152,7 +152,7 @@ export default function ContactPage() {
           className="mt-8 text-center text-gray-600 dark:text-gray-400 text-sm"
         >
           <p>
-            For press inquiries, please mention "Press" in your subject line.
+            For press inquiries, please mention &quot;Press&quot; in your subject line.
           </p>
         </motion.div>
       </div>

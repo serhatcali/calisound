@@ -95,7 +95,7 @@ export function LinksAdminForm({ links: initialLinks }: LinksAdminFormProps) {
             <strong>Note:</strong> These links will be automatically updated across the entire site, including:
           </p>
           <ul className="list-disc list-inside text-sm text-blue-600 dark:text-blue-400 mt-2 space-y-1">
-            <li>Homepage "Listen Everywhere" section</li>
+            <li>Homepage &quot;Listen Everywhere&quot; section</li>
             <li>Footer social links</li>
             <li>All city pages (if not overridden)</li>
             <li>Navigation and other global components</li>

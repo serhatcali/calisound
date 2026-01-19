@@ -26,7 +26,7 @@ export default function CaliClubPage() {
             Coming Soon
           </h2>
           <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
-            We're building an amazing virtual concert experience where you can create your character, 
+            We&apos;re building an amazing virtual concert experience where you can create your character, 
             listen to music, and connect with others in real-time.
           </p>
           <p className="text-base md:text-lg text-gray-400">

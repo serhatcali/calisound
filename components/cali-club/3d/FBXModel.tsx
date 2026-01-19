@@ -199,6 +199,15 @@ function FBXModelContent({ url, onModelLoad, onAnimationsLoad, isPlaying }: FBXM
     }
   }, [calculatedScale])
   
+  // Log when model is rendered (must be before early returns)
+  useEffect(() => {
+    if (scaledModel) {
+      console.log(`[FBXModel] ✅ Rendering model with scale ${FBX_SCALE.toFixed(4)}`)
+      console.log(`[FBXModel] ✅ Model position:`, scaledModel.position)
+      console.log(`[FBXModel] ✅ Model scale:`, scaledModel.scale)
+    }
+  }, [scaledModel, FBX_SCALE])
+  
   // Show placeholder if model not loaded
   if (!fbx) {
     console.warn(`[FBXModel] ⚠️ Model not loaded: ${url}`)
@@ -223,13 +232,6 @@ function FBXModelContent({ url, onModelLoad, onAnimationsLoad, isPlaying }: FBXM
       </group>
     )
   }
-  
-  // Log when model is rendered
-  useEffect(() => {
-    console.log(`[FBXModel] ✅ Rendering model with scale ${FBX_SCALE.toFixed(4)}`)
-    console.log(`[FBXModel] ✅ Model position:`, scaledModel.position)
-    console.log(`[FBXModel] ✅ Model scale:`, scaledModel.scale)
-  }, [scaledModel, FBX_SCALE])
   
   return (
     <group ref={groupRef}>

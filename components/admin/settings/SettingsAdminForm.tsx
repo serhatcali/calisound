@@ -95,7 +95,7 @@ export function SettingsAdminForm() {
               placeholder="Verification code or meta tag content"
             />
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Add this to your site's meta tags for Search Console verification
+              Add this to your site&apos;s meta tags for Search Console verification
             </p>
           </div>
         </div>
