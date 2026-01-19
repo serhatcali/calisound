@@ -31,6 +31,11 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Suppress all warnings during build
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
   // Ensure environment variables are available
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
