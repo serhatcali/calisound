@@ -134,9 +134,26 @@ export function setSessionCookies(
   sessionToken: string,
   csrfToken: string
 ): void {
+  if (!sessionToken || !csrfToken) {
+    console.error('[Session] Missing session or CSRF token:', {
+      hasSessionToken: !!sessionToken,
+      hasCsrfToken: !!csrfToken,
+    })
+    return
+  }
+  
   const isProduction = process.env.NODE_ENV === 'production'
   const isVercel = !!process.env.VERCEL
   const isSecure = isProduction && isVercel
+  
+  console.log('[Session] Setting cookies with config:', {
+    isProduction,
+    isVercel,
+    isSecure,
+    sessionCookieName: SESSION_COOKIE_NAME,
+    csrfCookieName: CSRF_COOKIE_NAME,
+    maxAge: SESSION_DURATION,
+  })
   
   // Set session cookie
   response.cookies.set(SESSION_COOKIE_NAME, sessionToken, {
@@ -156,10 +173,15 @@ export function setSessionCookies(
     path: '/',
   })
   
+  // Verify cookies were set
+  const sessionCookie = response.cookies.get(SESSION_COOKIE_NAME)
+  const csrfCookie = response.cookies.get(CSRF_COOKIE_NAME)
+  
   console.log('[Session] Cookies set in response:', {
-    sessionCookie: SESSION_COOKIE_NAME,
-    csrfCookie: CSRF_COOKIE_NAME,
-    secure: isSecure,
+    sessionCookieSet: !!sessionCookie,
+    csrfCookieSet: !!csrfCookie,
+    sessionCookieValue: sessionCookie?.value?.substring(0, 20) + '...',
+    csrfCookieValue: csrfCookie?.value,
   })
 }
 

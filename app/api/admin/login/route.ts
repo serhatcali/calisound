@@ -79,18 +79,32 @@ export async function POST(request: NextRequest) {
         requires2FA: result.requires2FA || false,
       })
       
+      console.log('[Login API] Login result:', {
+        success: result.success,
+        requires2FA: result.requires2FA,
+        hasSessionData: !!result.sessionData,
+        sessionDataKeys: result.sessionData ? Object.keys(result.sessionData) : [],
+      })
+      
       // If session data is returned, set cookies in response
       if (result.sessionData && !result.requires2FA) {
         const { setSessionCookies } = await import('@/lib/session-manager')
         console.log('[Login API] Setting cookies in response:', {
           hasSessionToken: !!result.sessionData.sessionToken,
           hasCsrfToken: !!result.sessionData.csrfToken,
+          sessionTokenLength: result.sessionData.sessionToken?.length,
+          csrfTokenLength: result.sessionData.csrfToken?.length,
         })
         setSessionCookies(response, result.sessionData.sessionToken, result.sessionData.csrfToken)
+        
+        // Verify cookies were set
+        const setCookieHeaders = response.headers.getSetCookie()
+        console.log('[Login API] Set-Cookie headers:', setCookieHeaders)
       } else {
         console.log('[Login API] No session data to set:', {
           hasSessionData: !!result.sessionData,
           requires2FA: result.requires2FA,
+          resultKeys: Object.keys(result),
         })
       }
       
