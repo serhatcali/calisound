@@ -5,16 +5,11 @@ let supabaseInstance: SupabaseClient | null = null
 
 function getSupabaseClient(): SupabaseClient {
   // Check if we're in build phase (not runtime)
-  // Vercel build sırasında NEXT_PHASE set edilir, ama bazen set edilmeyebilir
-  // Runtime'da VERCEL_ENV set edilir, build sırasında set edilmez
+  // Vercel runtime'da VERCEL_ENV set edilir (production, preview, development)
+  // Build sırasında VERCEL_ENV set edilmez
   // En güvenilir yöntem: VERCEL_ENV yoksa build phase'dir
-  const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || 
-                       process.env.NEXT_PHASE === 'phase-export' ||
-                       process.env.NEXT_PHASE === 'phase-development-build' ||
-                       // Vercel build sırasında VERCEL_ENV set edilmez
-                       (process.env.VERCEL === '1' && !process.env.VERCEL_ENV) ||
-                       // CI/CD ortamlarında da build phase olabilir
-                       (process.env.CI === 'true' && !process.env.VERCEL_ENV)
+  const isRuntime = !!process.env.VERCEL_ENV
+  const isBuildPhase = !isRuntime
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
