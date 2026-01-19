@@ -61,17 +61,17 @@ export default function TestSentryPage() {
   const testSentryLogger = async () => {
     try {
       setTested(true)
-      // Use Sentry logger API
+      // Use Sentry captureMessage API instead of logger (logger is not exported)
       if (typeof window !== 'undefined') {
         const Sentry = await import('@sentry/nextjs')
-        Sentry.logger.info('User triggered test log', { log_source: 'sentry_test' })
-        Sentry.logger.warn('User triggered test warning', { log_source: 'sentry_test' })
-        Sentry.logger.error('User triggered test error log', { log_source: 'sentry_test' })
-        setMessage('✅ Sentry logger mesajları gönderildi! (info, warn, error) Sentry dashboard\'u kontrol edin.')
+        Sentry.captureMessage('User triggered test log', 'info')
+        Sentry.captureMessage('User triggered test warning', 'warning')
+        Sentry.captureMessage('User triggered test error log', 'error')
+        setMessage('✅ Sentry mesajları gönderildi! (info, warn, error) Sentry dashboard\'u kontrol edin.')
       }
     } catch (error) {
-      console.error('Sentry logger test error:', error)
-      setMessage('❌ Sentry logger yüklenemedi. Console\'u kontrol edin.')
+      console.error('Sentry test error:', error)
+      setMessage('❌ Sentry yüklenemedi. Console\'u kontrol edin.')
     }
   }
 
