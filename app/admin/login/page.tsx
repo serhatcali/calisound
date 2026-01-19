@@ -15,14 +15,25 @@ export default function AdminLoginPage() {
 
   // Check if already authenticated on mount
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/admin/login/check', {
-          credentials: 'include', // Important: include cookies
+        // Add timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error('Timeout')), 3000)
         })
         
+        const fetchPromise = fetch('/api/admin/login/check', {
+          credentials: 'include',
+          cache: 'no-store',
+        })
+        
+        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response
+        
+        clearTimeout(timeoutId)
+        
         if (!response.ok) {
-          // If check fails, just show login form
           setCheckingAuth(false)
           return
         }
@@ -30,17 +41,25 @@ export default function AdminLoginPage() {
         const data = await response.json()
         if (data.authenticated) {
           // Already logged in, redirect to admin
-          router.push('/admin')
+          window.location.href = '/admin'
           return
         }
       } catch (err) {
         console.error('Auth check error:', err)
+        // On error, just show login form
       } finally {
+        clearTimeout(timeoutId)
         setCheckingAuth(false)
       }
     }
+    
     checkAuth()
-  }, [router])
+    
+    // Cleanup
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [])
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
