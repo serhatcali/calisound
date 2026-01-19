@@ -47,6 +47,9 @@ module.exports = withSentryConfig(module.exports, {
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
 
+  // Hide source maps in production (security)
+  hideSourceMaps: true,
+
   // For all available options, see:
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
