@@ -47,8 +47,21 @@ export async function POST(request: NextRequest) {
 
     const { token } = tokenValidation.value!
 
-    // Don't log sensitive token data
+    // Verify token
     const isValid = await verify2FAToken(token)
+
+    // In development, provide more debugging info
+    if (!isValid && process.env.NODE_ENV !== 'production') {
+      // Check if secret exists
+      const { get2FASecret } = await import('@/lib/2fa')
+      const secret = await get2FASecret()
+      
+      if (!secret) {
+        return NextResponse.json({ 
+          error: '2FA is not set up. Please set up 2FA first in the admin settings.' 
+        }, { status: 400 })
+      }
+    }
 
     if (isValid) {
       // Set 2FA verified cookie

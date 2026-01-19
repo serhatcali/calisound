@@ -27,7 +27,9 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
     const cleanToken = token.replace(/\s/g, '').trim()
     
     if (cleanToken.length !== 6 || !/^\d+$/.test(cleanToken)) {
-      console.error('Invalid token format:', cleanToken)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Invalid token format:', cleanToken, 'Length:', cleanToken.length)
+      }
       return false
     }
 
@@ -42,12 +44,16 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
         .single()
 
       if (error) {
-        console.error('Error fetching secret:', error)
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Error fetching secret:', error)
+        }
         return false
       }
 
       if (!data?.value) {
-        console.error('No secret found in database')
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('No secret found in database')
+        }
         return false
       }
 
@@ -55,29 +61,55 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
     }
 
     if (!secretToUse) {
-      console.error('No secret available')
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('No secret available')
+      }
       return false
     }
 
     // Only log in development
     if (process.env.NODE_ENV !== 'production') {
-      console.log('Verifying token:', cleanToken, 'with secret:', secretToUse.substring(0, 10) + '...')
+      console.log('Verifying token:', cleanToken)
+      console.log('Secret length:', secretToUse.length)
+      console.log('Secret format check:', /^[A-Z2-7]+$/.test(secretToUse))
     }
     
-    // Verify with more lenient window
-    const isValid = authenticator.verify({ 
+    // Try multiple windows for better compatibility
+    // First try with window [2, 2]
+    let isValid = authenticator.verify({ 
       token: cleanToken, 
       secret: secretToUse,
-      window: [2, 2] // Override global window for this verification
+      window: [2, 2]
     })
+    
+    // If that fails, try with even wider window [3, 3]
+    if (!isValid) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('First verification failed, trying wider window [3, 3]')
+      }
+      isValid = authenticator.verify({ 
+        token: cleanToken, 
+        secret: secretToUse,
+        window: [3, 3]
+      })
+    }
     
     if (process.env.NODE_ENV !== 'production') {
       console.log('Token verification result:', isValid)
+      if (!isValid) {
+        // Try to get current valid tokens for debugging
+        const currentTime = Math.floor(Date.now() / 1000)
+        const currentStep = Math.floor(currentTime / 30)
+        console.log('Current time step:', currentStep)
+        console.log('Current time:', new Date().toISOString())
+      }
     }
     
     return isValid
   } catch (error) {
-    console.error('Error verifying 2FA token:', error)
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Error verifying 2FA token:', error)
+    }
     return false
   }
 }
