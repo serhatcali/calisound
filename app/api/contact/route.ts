@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import {
-
-// Force dynamic rendering to prevent build-time execution
-export const dynamic = 'force-dynamic'
   validateObject,
   sanitizeInput,
   isValidEmail,
   getClientIP,
   rateLimit,
 } from '@/lib/security'
+
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllCities, getAllSets } from '@/lib/db'
+import { getClientIP, rateLimit, validateString, sanitizeInput } from '@/lib/security'
 
 // Force dynamic rendering to prevent build-time execution
 export const dynamic = 'force-dynamic'
-
-import { getClientIP, rateLimit, validateString, sanitizeInput } from '@/lib/security'
 
 export async function POST(request: NextRequest) {
   try {
