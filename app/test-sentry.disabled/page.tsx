@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import * as Sentry from '@sentry/nextjs'
 
 export default function TestSentryPage() {
   const [tested, setTested] = useState(false)
@@ -12,18 +13,9 @@ export default function TestSentryPage() {
       // Create a test error
       const error = new Error('Test Error - Sentry Test için oluşturuldu')
       
-      // Send to Sentry if available (dynamic import)
-      if (typeof window !== 'undefined') {
-        import('@sentry/nextjs')
-          .then((Sentry) => {
-            Sentry.captureException(error)
-            setMessage('✅ Test hatası Sentry\'ye gönderildi! Sentry dashboard\'u kontrol edin.')
-          })
-          .catch((err) => {
-            console.error('Sentry not available:', err)
-            setMessage('⚠️ Sentry yüklenemedi. Console\'u kontrol edin veya npm install çalıştırın.')
-          })
-      }
+      // Send to Sentry
+      Sentry.captureException(error)
+      setMessage('✅ Test hatası Sentry\'ye gönderildi! Sentry dashboard\'u kontrol edin.')
     } catch (error) {
       console.error('Test error:', error)
       setMessage('❌ Hata oluştu! Console\'u kontrol edin.')
@@ -33,18 +25,9 @@ export default function TestSentryPage() {
   const testManualError = () => {
     try {
       setTested(true)
-      // Send to Sentry if available
-      if (typeof window !== 'undefined') {
-        import('@sentry/nextjs')
-          .then((Sentry) => {
-            Sentry.captureMessage('Manuel test mesajı - Sentry test için', 'info')
-            setMessage('✅ Test mesajı Sentry\'ye gönderildi!')
-          })
-          .catch((err) => {
-            console.error('Sentry not available:', err)
-            setMessage('⚠️ Sentry yüklenemedi. Console\'u kontrol edin veya npm install çalıştırın.')
-          })
-      }
+      // Send to Sentry
+      Sentry.captureMessage('Manuel test mesajı - Sentry test için', 'info')
+      setMessage('✅ Test mesajı Sentry\'ye gönderildi!')
     } catch (error) {
       console.error('Test error:', error)
       setMessage('❌ Hata oluştu! Console\'u kontrol edin.')
@@ -58,17 +41,14 @@ export default function TestSentryPage() {
     setMessage('✅ Console error oluşturuldu. Sentry dashboard\'u kontrol edin.')
   }
 
-  const testSentryLogger = async () => {
+  const testSentryLogger = () => {
     try {
       setTested(true)
-      // Use Sentry captureMessage API instead of logger (logger is not exported)
-      if (typeof window !== 'undefined') {
-        const Sentry = await import('@sentry/nextjs')
-        Sentry.captureMessage('User triggered test log', 'info')
-        Sentry.captureMessage('User triggered test warning', 'warning')
-        Sentry.captureMessage('User triggered test error log', 'error')
-        setMessage('✅ Sentry mesajları gönderildi! (info, warn, error) Sentry dashboard\'u kontrol edin.')
-      }
+      // Use Sentry captureMessage API
+      Sentry.captureMessage('User triggered test log', 'info')
+      Sentry.captureMessage('User triggered test warning', 'warning')
+      Sentry.captureMessage('User triggered test error log', 'error')
+      setMessage('✅ Sentry mesajları gönderildi! (info, warn, error) Sentry dashboard\'u kontrol edin.')
     } catch (error) {
       console.error('Sentry test error:', error)
       setMessage('❌ Sentry yüklenemedi. Console\'u kontrol edin.')

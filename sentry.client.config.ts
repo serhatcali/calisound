@@ -7,6 +7,10 @@ Sentry.init({
   tracesSampleRate: 1.0,
   debug: false,
   enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+  // Ignore test-sentry page from auto-instrumentation
+  ignoreErrors: [
+    'Cannot split a chunk that has already been edited',
+  ],
   integrations: [
     // Console logging integration (only if available in this Sentry version)
     // Note: consoleLoggingIntegration is available in Sentry 8.0+, we have 7.91.0
