@@ -18,6 +18,7 @@ const menuItems = [
   { href: '/admin/import', label: 'Import', icon: '📥' },
   { href: '/admin/scheduled', label: 'Scheduled', icon: '⏰' },
   { href: '/admin/analytics', label: 'Analytics', icon: '📈' },
+  { href: '/admin/content', label: 'Site Content', icon: '✏️' },
   { href: '/admin/settings', label: 'Settings', icon: '⚙️' },
 ]
 
