@@ -9,11 +9,13 @@ import { getClientIP, rateLimit, validateString } from '@/lib/security'
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if user has pending 2FA (temp auth cookie)
+    // Check if user has pending 2FA (temp auth cookie) OR valid session
     const cookieStore = await cookies()
     const tempAuth = cookieStore.get('admin-auth-temp')
+    const sessionCookie = cookieStore.get('admin_session')
     
-    if (!tempAuth?.value) {
+    // Allow if either temp auth exists (during login) OR session exists (re-verification)
+    if (!tempAuth?.value && !sessionCookie?.value) {
       return NextResponse.json(
         { error: 'No pending 2FA verification. Please login again.' },
         { status: 401 }
@@ -77,15 +79,22 @@ export async function POST(request: NextRequest) {
     if (isValid) {
       // Set 2FA verified cookie
       const cookieStore = await cookies()
-      cookieStore.set('admin-2fa-verified', 'true', {
+      const response = NextResponse.json({ success: true })
+      
+      // Set cookie in response (works in API routes)
+      const isProduction = process.env.NODE_ENV === 'production'
+      const isVercel = !!process.env.VERCEL
+      const isSecure = isProduction && isVercel
+      
+      response.cookies.set('admin-2fa-verified', 'true', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: isSecure,
+        sameSite: 'lax',
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       })
 
-      return NextResponse.json({ success: true })
+      return response
     } else {
       // More helpful error message
       return NextResponse.json({ 
