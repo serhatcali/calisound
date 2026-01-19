@@ -1,12 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
 // Use service role key for admin operations (bypasses RLS)
 // If service role key is not available, use anon key (RLS policies should allow access)
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key-for-build'
 
 // Only log errors in development, not during build
-if (!supabaseUrl || !supabaseServiceKey) {
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL || (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
   if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     console.error('❌ Supabase admin credentials not found!')
     console.error('Please set SUPABASE_SERVICE_ROLE_KEY in .env.local for admin operations')
@@ -23,13 +23,17 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 // Admin client - uses service role key if available, otherwise anon key
-// Use empty strings as fallback to prevent build errors
-export const supabaseAdmin = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseServiceKey || 'placeholder-key',
-  {
-    auth: {
-      persistSession: false
-    }
+// Use placeholder values during build to prevent errors
+// These will be replaced with actual values at runtime
+let supabaseAdminInstance: SupabaseClient | null = null
+
+export const supabaseAdmin: SupabaseClient = (() => {
+  if (!supabaseAdminInstance) {
+    supabaseAdminInstance = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        persistSession: false
+      }
+    })
   }
-)
+  return supabaseAdminInstance
+})()

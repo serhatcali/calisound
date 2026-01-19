@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
 import { validateNumber, validateObject, sanitizeInput } from '@/lib/security'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     if (!(await isAdminAuthenticated(request))) {
