@@ -5,19 +5,21 @@ let supabaseInstance: SupabaseClient | null = null
 
 function getSupabaseClient(): SupabaseClient {
   // Check if we're in build phase (not runtime)
-  // NEXT_PHASE is only set during build, never at runtime
-  // Also check if we're in a build context (no VERCEL_ENV or CI environment)
+  // Vercel build sırasında NEXT_PHASE set edilir
+  // Ayrıca CI/CD ortamlarında da build phase olabilir
   const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || 
                        process.env.NEXT_PHASE === 'phase-export' ||
-                       (process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV && !process.env.VERCEL)
+                       process.env.NEXT_PHASE === 'phase-development-build' ||
+                       // Vercel build sırasında CI=true olabilir
+                       (process.env.CI === 'true' && process.env.VERCEL === '1')
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // During build phase ONLY: don't create client if env vars are missing
-  // This prevents placeholder from being cached and used at runtime
+  // During build phase: ALWAYS use mock client to prevent network calls
+  // This prevents placeholder.supabase.co errors during build
   // At runtime, we ALWAYS require real credentials
-  if (isBuildPhase && (!supabaseUrl || !supabaseAnonKey)) {
+  if (isBuildPhase) {
     // Return a mock client that returns empty results - never calls createClient
     // This prevents any network calls to placeholder URLs
     const createMockQueryBuilder = () => {
