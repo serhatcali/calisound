@@ -59,7 +59,17 @@ export async function requireCSRFToken(
   request: NextRequest
 ): Promise<{ valid: boolean; response?: NextResponse }> {
   try {
-    const body = await request.json().catch(() => ({}))
+    // Only try to parse JSON for methods that have a body
+    const method = request.method
+    let body = {}
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+      try {
+        body = await request.json()
+      } catch {
+        // Body might be empty or not JSON
+        body = {}
+      }
+    }
     const csrfToken = body.csrfToken || request.headers.get('x-csrf-token')
 
     if (!csrfToken) {
@@ -114,26 +124,35 @@ export function withAdminAuth(
 
 /**
  * Wrapper for admin API routes with authentication + CSRF protection
+ * For GET requests, use isAdminAuthenticated directly
  */
 export function withAdminAuthAndCSRF(
   handler: (request: NextRequest) => Promise<NextResponse>
 ) {
   return async (request: NextRequest) => {
-    // Check authentication
-    const authCheck = await requireAdminAuth(request)
-    if (!authCheck.authorized) {
-      return authCheck.response!
-    }
-
-    // Check CSRF token (only for POST, PUT, DELETE, PATCH)
-    const method = request.method
-    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
-      const csrfCheck = await requireCSRFToken(request)
-      if (!csrfCheck.valid) {
-        return csrfCheck.response!
+    try {
+      // Check authentication
+      const authCheck = await requireAdminAuth(request)
+      if (!authCheck.authorized) {
+        return authCheck.response!
       }
-    }
 
-    return handler(request)
+      // Check CSRF token (only for POST, PUT, DELETE, PATCH)
+      const method = request.method
+      if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+        const csrfCheck = await requireCSRFToken(request)
+        if (!csrfCheck.valid) {
+          return csrfCheck.response!
+        }
+      }
+
+      return handler(request)
+    } catch (error: any) {
+      console.error('withAdminAuthAndCSRF error:', error)
+      return NextResponse.json(
+        { error: 'Authentication error' },
+        { status: 500 }
+      )
+    }
   }
 }

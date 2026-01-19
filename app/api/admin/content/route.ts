@@ -30,10 +30,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check authentication
-    const authResult = await withAdminAuthAndCSRF(request, 'GET')
-    if (!authResult.authenticated) {
-      return authResult.response
+    // Check authentication (GET requests don't need CSRF)
+    const { isAdminAuthenticated } = await import('@/lib/admin-auth')
+    if (!(await isAdminAuthenticated(request))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { data, error } = await supabaseAdmin
