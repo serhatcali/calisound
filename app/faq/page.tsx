@@ -2,6 +2,8 @@ import { Metadata } from 'next'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
+
 export const metadata: Metadata = {
   title: 'FAQ - CALI Sound | Frequently Asked Questions',
   description: 'Frequently asked questions about CALI Sound, Afro House music, DJ sets, and the Global City Series. Find answers to common questions.',
@@ -19,10 +21,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'FAQ - CALI Sound',
     description: 'Frequently asked questions about CALI Sound and the Global Afro House City Series.',
-    url: 'https://calisound.com/faq',
+    url: `${baseUrl}/faq`,
   },
   alternates: {
-    canonical: 'https://calisound.com/faq',
+    canonical: `${baseUrl}/faq`,
   },
 }
 

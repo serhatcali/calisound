@@ -7,6 +7,8 @@ import { getAllCities } from '@/lib/db'
 // Force dynamic rendering to prevent build-time Supabase calls
 export const dynamic = 'force-dynamic'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
+
 export const metadata: Metadata = {
   title: 'Cities - CALI Sound | Global Afro House Music',
   description: 'Explore all cities in the CALI Sound Global Afro House City Series. Discover Afro House, Afrobeat, and DJ music from cities around the world. Filter by mood, region, and status.',
@@ -24,10 +26,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Cities - CALI Sound | Global Afro House Music',
     description: 'Explore all cities in the CALI Sound Global Afro House City Series. Discover Afro House and Afrobeat music from cities worldwide.',
-    url: 'https://calisound.com/cities',
+    url: `${baseUrl}/cities`,
   },
   alternates: {
-    canonical: 'https://calisound.com/cities',
+    canonical: `${baseUrl}/cities`,
   },
 }
 
@@ -42,7 +44,7 @@ export default async function CitiesPage() {
   // ItemList Schema for all cities (premium SEO)
   const cityListItems = cities.map(city => ({
     name: city.name,
-    url: `https://calisound.com/city/${city.slug}`,
+    url: `${baseUrl}/city/${city.slug}`,
     description: city.description_en || `Experience ${city.name} through Afro House music.`,
     image: city.cover_square_url || city.banner_16x9_url,
   }))

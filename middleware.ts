@@ -88,7 +88,7 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith('/api/')) {
     const origin = request.headers.get('origin')
     const allowedOrigins = [
-      process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.com',
+      process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music',
       'http://localhost:3000',
       'http://localhost:3001',
     ]

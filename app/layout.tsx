@@ -12,8 +12,10 @@ import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import { PerformanceMonitor } from '@/components/shared/PerformanceMonitor'
 import { headers } from 'next/headers'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.com'),
+  metadataBase: new URL(baseUrl),
   title: {
     default: 'CALI Sound - Global Afro House City Series | Afrobeat DJ Music',
     template: '%s | CALI Sound',
@@ -42,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://calisound.com',
+    url: baseUrl,
     siteName: 'CALI Sound',
     title: 'CALI Sound - Global Afro House City Series | Afrobeat DJ Music',
     description: 'Experience the world through Afro House music. CALI Sound brings you city-inspired melodic club music from around the globe.',
@@ -101,12 +103,12 @@ export default async function RootLayout({
     '@type': 'WebSite',
     name: 'CALI Sound',
     description: 'Global Afro House City Series. Experience the world through Afro House music.',
-    url: 'https://calisound.com',
+    url: baseUrl,
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://calisound.com/cities?search={search_term_string}',
+        urlTemplate: `${baseUrl}/cities?search={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -116,8 +118,8 @@ export default async function RootLayout({
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'CALI Sound',
-    url: 'https://calisound.com',
-    logo: 'https://calisound.com/og-default.jpg',
+    url: baseUrl,
+    logo: `${baseUrl}/og-default.jpg`,
     sameAs: [
       'https://www.youtube.com/@calisound',
       'https://open.spotify.com/artist/calisound',

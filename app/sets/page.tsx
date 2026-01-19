@@ -8,6 +8,8 @@ import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
 // Force dynamic rendering to prevent build-time Supabase calls
 export const dynamic = 'force-dynamic'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
+
 export const metadata: Metadata = {
   title: 'DJ Sets - CALI Sound | Afro House Mixes & Sets',
   description: 'Explore CALI Sound DJ sets and mixes. Listen to the best Afro House, Afrobeat, and electronic music DJ sets. Full-length mixes and sets available.',
@@ -26,10 +28,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'DJ Sets - CALI Sound | Afro House Mixes & Sets',
     description: 'Explore CALI Sound DJ sets and mixes. Listen to the best Afro House and Afrobeat DJ sets.',
-    url: 'https://calisound.com/sets',
+    url: `${baseUrl}/sets`,
   },
   alternates: {
-    canonical: 'https://calisound.com/sets',
+    canonical: `${baseUrl}/sets`,
   },
 }
 
@@ -44,7 +46,7 @@ export default async function SetsPage() {
   // ItemList Schema for all sets (premium SEO)
   const setListItems = sets.map(set => ({
     name: set.title,
-    url: `https://calisound.com/sets/${set.id}`,
+    url: `${baseUrl}/sets/${set.id}`,
     description: set.description || `Listen to ${set.title} by CALI Sound.`,
   }))
 

@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       title: path.includes('/city/') ? 'City Page' : 'Page',
       description: 'CALI Sound - Global Afro House City Series',
       url: urlValidation.value,
-      image: 'https://calisound.com/og-default.jpg',
+      image: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'}/og-default.jpg`,
     }
 
     return NextResponse.json({ success: true, seoData })

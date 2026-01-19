@@ -5,7 +5,7 @@ import { getAllCities, getAllSets } from '@/lib/db'
 export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.com'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
   
   const [cities, sets] = await Promise.all([
     getAllCities(),

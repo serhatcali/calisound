@@ -13,6 +13,8 @@ interface SetDetailPageProps {
 // Force dynamic rendering to prevent build-time Supabase calls
 export const dynamic = 'force-dynamic'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
+
 // Disable static params generation - use dynamic rendering instead
 // export async function generateStaticParams() {
 //   const sets = await getAllSets()
@@ -52,7 +54,7 @@ export async function generateMetadata({ params }: SetDetailPageProps): Promise<
     openGraph: {
       title: `${set.title} - CALI Sound`,
       description: setDescription,
-      url: `https://calisound.com/sets/${set.id}`,
+      url: `${baseUrl}/sets/${set.id}`,
       type: 'music.playlist',
     },
     twitter: {

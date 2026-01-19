@@ -1,5 +1,7 @@
 import { Metadata } from 'next'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
+
 export const metadata: Metadata = {
   title: 'Contact - CALI Sound',
   description: 'Get in touch with CALI Sound. Contact us for collaborations, press inquiries, bookings, and more. We\'d love to hear from you.',
@@ -17,10 +19,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Contact - CALI Sound',
     description: 'Get in touch with CALI Sound. Contact us for collaborations, press inquiries, and bookings.',
-    url: 'https://calisound.com/contact',
+    url: `${baseUrl}/contact`,
   },
   alternates: {
-    canonical: 'https://calisound.com/contact',
+    canonical: `${baseUrl}/contact`,
   },
 }
 

@@ -13,6 +13,8 @@ interface CityPageProps {
 // Force dynamic rendering to prevent build-time Supabase calls
 export const dynamic = 'force-dynamic'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
+
 // Disable static params generation - use dynamic rendering instead
 // export async function generateStaticParams() {
 //   const cities = await getAllCities()
@@ -54,7 +56,7 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
       title: `${city.name} - CALI Sound | Afro House Music`,
       description: cityDescription,
       images: city.banner_16x9_url ? [city.banner_16x9_url] : city.cover_square_url ? [city.cover_square_url] : [],
-      url: `https://calisound.com/city/${city.slug}`,
+      url: `${baseUrl}/city/${city.slug}`,
       type: 'music.song',
     },
     twitter: {

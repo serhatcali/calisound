@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
+
 export const metadata: Metadata = {
   title: 'Cookie Policy - CALI Sound',
   description: 'Learn about how CALI Sound uses cookies and how to manage your preferences. Our cookie policy explains what cookies we use and how you can control them.',
@@ -13,10 +15,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Cookie Policy - CALI Sound',
     description: 'Learn about how CALI Sound uses cookies and how to manage your preferences.',
-    url: 'https://calisound.com/cookie-policy',
+    url: `${baseUrl}/cookie-policy`,
   },
   alternates: {
-    canonical: 'https://calisound.com/cookie-policy',
+    canonical: `${baseUrl}/cookie-policy`,
   },
   robots: {
     index: true,

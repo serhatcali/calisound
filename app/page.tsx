@@ -11,6 +11,8 @@ import { getAllCities, getLatestRelease, getAllSets, getGlobalLinks } from '@/li
 // Force dynamic rendering to prevent build-time Supabase calls
 export const dynamic = 'force-dynamic'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
+
 export const metadata: Metadata = {
   title: 'CALI Sound - Global Afro House City Series | Afrobeat DJ Music',
   description: 'Experience the world through Afro House music. CALI Sound brings you city-inspired melodic club music from around the globe. Listen to the best Afro House, Afrobeat, and DJ sets featuring cities worldwide.',
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
     title: 'CALI Sound - Global Afro House City Series | Afrobeat DJ Music',
     description: 'Experience the world through Afro House music. CALI Sound brings you city-inspired melodic club music from around the globe.',
     images: ['/og-default.jpg'],
-    url: 'https://calisound.com',
+    url: baseUrl,
   },
   alternates: {
     canonical: 'https://calisound.com',
@@ -84,7 +86,7 @@ export default async function HomePage() {
     '@type': 'MusicGroup',
     name: 'CALI Sound',
     description: 'Global Afro House City Series. Experience the world through Afro House music.',
-    url: 'https://calisound.com',
+    url: baseUrl,
     genre: ['Afro House', 'Afrobeat', 'Electronic Music', 'Melodic House'],
     sameAs: globalLinks ? [
       globalLinks.youtube,
@@ -97,7 +99,7 @@ export default async function HomePage() {
   // ItemList Schema for cities (premium SEO)
   const cityListItems = cities.slice(0, 20).map(city => ({
     name: city.name,
-    url: `https://calisound.com/city/${city.slug}`,
+    url: `${baseUrl}/city/${city.slug}`,
     description: city.description_en || `Experience ${city.name} through Afro House music.`,
     image: city.cover_square_url || city.banner_16x9_url,
   }))
