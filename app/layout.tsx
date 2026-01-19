@@ -216,17 +216,13 @@ export default async function RootLayout({
             `,
           }}
         />
-        {/* Performance: Preconnect to external domains */}
-        <link rel="preconnect" href="https://www.youtube.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://i.ytimg.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://open.spotify.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        {/* Performance: Preconnect to external domains (only if needed) */}
         <link rel="dns-prefetch" href="https://www.youtube.com" />
         <link rel="dns-prefetch" href="https://i.ytimg.com" />
         <link rel="dns-prefetch" href="https://open.spotify.com" />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        {/* Performance: Preload critical resources */}
-        <link rel="preload" href="/icon.svg" as="image" type="image/svg+xml" />
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        )}
       </head>
       <body className="bg-white dark:bg-black">
         {!isAdminRoute && (

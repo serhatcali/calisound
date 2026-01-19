@@ -32,7 +32,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse and validate input
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid request format. Please provide a valid JSON body.' },
+        { status: 400 }
+      )
+    }
+
+    if (!body || typeof body !== 'object' || !body.password) {
+      return NextResponse.json(
+        { success: false, error: 'Password is required' },
+        { status: 400 }
+      )
+    }
+
     const passwordValidation = validateString(body.password, {
       required: true,
       minLength: 1,
@@ -41,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     if (!passwordValidation.valid) {
       return NextResponse.json(
-        { success: false, error: 'Invalid request' },
+        { success: false, error: passwordValidation.errors?.[0] || 'Invalid password format' },
         { status: 400 }
       )
     }
@@ -70,10 +86,17 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Admin login error:', error)
+    // More specific error handling
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid request format' },
+        { status: 400 }
+      )
+    }
     return NextResponse.json(
-      { success: false, error: 'Invalid request' },
+      { success: false, error: error?.message || 'Invalid request' },
       { status: 400 }
     )
   }

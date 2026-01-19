@@ -24,6 +24,14 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ password }),
       })
 
+      if (!response.ok) {
+        // Handle HTTP errors
+        const errorData = await response.json().catch(() => ({ error: 'Network error' }))
+        setError(errorData.error || `Error ${response.status}: ${response.statusText}`)
+        setLoading(false)
+        return
+      }
+
       const data = await response.json()
 
       if (data.success) {
@@ -36,8 +44,9 @@ export default function AdminLoginPage() {
       } else {
         setError(data.error || 'Invalid password')
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.')
+    } catch (err: any) {
+      console.error('Login error:', err)
+      setError(err?.message || 'An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
