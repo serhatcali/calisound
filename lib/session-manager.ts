@@ -233,16 +233,13 @@ export async function verifySession(
       }
     }
     
-    // Update last activity
+    // Update last activity (but don't update cookie in server components)
+    // Cookie updates should be done via API routes
     sessionData.lastActivity = now
-    const updatedEncrypted = encryptSessionData(sessionData)
-    cookieStore.set(SESSION_COOKIE_NAME, updatedEncrypted, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: SESSION_DURATION,
-      path: '/',
-    })
+    
+    // Note: In server components, cookies().set() doesn't work
+    // Session activity update should be done via API route or middleware
+    // For now, just return valid without updating cookie
     
     return { valid: true, sessionData }
   } catch (error) {
