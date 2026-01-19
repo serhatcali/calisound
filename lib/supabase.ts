@@ -8,24 +8,22 @@ function getSupabaseClient(): SupabaseClient {
     return supabaseInstance
   }
 
+  // Check if we're in build phase
+  const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || 
+                       process.env.NEXT_PHASE === 'phase-export' ||
+                       !process.env.NEXT_RUNTIME
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // During build phase, use placeholder values
-  if (process.env.NEXT_PHASE === 'phase-production-build' || !supabaseUrl || !supabaseAnonKey) {
-    if (!supabaseUrl || !supabaseAnonKey) {
-      // Use placeholder values only during build
-      supabaseInstance = createClient(
-        'https://placeholder.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
-        { auth: { persistSession: false } }
-      )
-      return supabaseInstance
-    }
-  }
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set')
+  // During build phase or if credentials missing, use placeholder values
+  if (isBuildPhase || !supabaseUrl || !supabaseAnonKey) {
+    supabaseInstance = createClient(
+      'https://placeholder.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
+      { auth: { persistSession: false } }
+    )
+    return supabaseInstance
   }
 
   supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
