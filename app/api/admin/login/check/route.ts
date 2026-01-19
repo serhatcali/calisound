@@ -11,18 +11,27 @@ export async function GET(request: NextRequest) {
     const twoFAEnabled = await is2FAEnabled()
     
     return NextResponse.json({
-      authenticated,
-      twoFAEnabled,
+      authenticated: authenticated || false,
+      twoFAEnabled: twoFAEnabled || false,
       message: authenticated 
         ? 'You are logged in' 
         : twoFAEnabled 
           ? '2FA is enabled - you need to verify' 
           : 'Not logged in'
+    }, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
     })
   } catch (error: any) {
-    return NextResponse.json(
-      { error: 'Failed to check status', details: error.message },
-      { status: 500 }
-    )
+    console.error('Login check error:', error)
+    // Return false on error instead of 500
+    return NextResponse.json({
+      authenticated: false,
+      twoFAEnabled: false,
+      message: 'Not logged in',
+      error: error.message
+    }, { status: 200 }) // Return 200 so client can handle it
   }
 }

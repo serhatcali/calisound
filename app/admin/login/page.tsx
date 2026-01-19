@@ -17,11 +17,21 @@ export default function AdminLoginPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/admin/login/check')
+        const response = await fetch('/api/admin/login/check', {
+          credentials: 'include', // Important: include cookies
+        })
+        
+        if (!response.ok) {
+          // If check fails, just show login form
+          setCheckingAuth(false)
+          return
+        }
+        
         const data = await response.json()
         if (data.authenticated) {
           // Already logged in, redirect to admin
-          window.location.href = '/admin'
+          router.push('/admin')
+          return
         }
       } catch (err) {
         console.error('Auth check error:', err)
@@ -30,7 +40,7 @@ export default function AdminLoginPage() {
       }
     }
     checkAuth()
-  }, [])
+  }, [router])
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
