@@ -6,8 +6,10 @@ let supabaseAdminInstance: SupabaseClient | null = null
 function getSupabaseAdminClient(): SupabaseClient {
   // Check if we're in build phase (not runtime)
   // NEXT_PHASE is only set during build, never at runtime
+  // Also check if we're in a build context (no VERCEL_ENV or CI environment)
   const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || 
-                       process.env.NEXT_PHASE === 'phase-export'
+                       process.env.NEXT_PHASE === 'phase-export' ||
+                       (process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV && !process.env.VERCEL)
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
