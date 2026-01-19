@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
+import { getSiteContents } from '@/lib/get-site-content'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.music'
 
@@ -55,7 +56,13 @@ const faqs = [
   },
 ]
 
-export default function FAQPage() {
+export default async function FAQPage() {
+  const faqContent = await getSiteContents(['faq_title', 'faq_description'])
+  
+  // Fallback values
+  const title = faqContent.faq_title || 'Frequently Asked Questions'
+  const description = faqContent.faq_description || 'Find answers to common questions about CALI Sound, our music, and the Global Afro House City Series.'
+  
   // FAQ Structured Data for SEO
   const faqStructuredData = {
     '@context': 'https://schema.org',
@@ -82,10 +89,10 @@ export default function FAQPage() {
           
           <div className="bg-white dark:bg-black rounded-3xl shadow-soft-xl p-8 md:p-12 border border-gray-100 dark:border-gray-900">
             <h1 className="text-4xl md:text-5xl font-black mb-6 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
-              Frequently Asked Questions
+              {title}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-12 text-lg">
-              Find answers to common questions about CALI Sound, our music, and the Global Afro House City Series.
+              {description}
             </p>
 
             <div className="space-y-6">

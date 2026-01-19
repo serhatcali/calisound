@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useSiteContent } from '@/hooks/use-site-content'
 
 export default function Error({
   error,
@@ -10,6 +11,12 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const { content: errorContent } = useSiteContent(['error_500_title', 'error_500_message'])
+  
+  // Fallback values
+  const title = errorContent.error_500_title || 'Something went wrong!'
+  const defaultMessage = errorContent.error_500_message || 'An unexpected error occurred. Please try again.'
+  
   useEffect(() => {
     // Log error to Sentry if available
     if (typeof window !== 'undefined' && (window as any).Sentry) {
@@ -37,10 +44,10 @@ export default function Error({
           </svg>
         </div>
         <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-4">
-          Something went wrong!
+          {title}
         </h1>
         <p className="text-gray-600 dark:text-gray-300 mb-6">
-          {error.message || 'An unexpected error occurred. Please try again.'}
+          {error.message || defaultMessage}
         </p>
         <div className="flex gap-4 justify-center">
           <button

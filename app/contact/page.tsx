@@ -2,11 +2,23 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useSiteContent } from '@/hooks/use-site-content'
 
 // Note: Metadata should be in a layout.tsx or page.tsx without 'use client'
 // For client components, we handle SEO via layout.tsx
 
 export default function ContactPage() {
+  const { content: contactContent } = useSiteContent([
+    'contact_title',
+    'contact_description',
+    'contact_form_name',
+    'contact_form_email',
+    'contact_form_subject',
+    'contact_form_message',
+    'contact_form_submit',
+    'contact_success',
+  ])
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,6 +26,16 @@ export default function ContactPage() {
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  
+  // Fallback values
+  const title = contactContent.contact_title || 'Contact'
+  const description = contactContent.contact_description || 'Get in touch with CALI Sound'
+  const nameLabel = contactContent.contact_form_name || 'Name'
+  const emailLabel = contactContent.contact_form_email || 'Email'
+  const subjectLabel = contactContent.contact_form_subject || 'Subject'
+  const messageLabel = contactContent.contact_form_message || 'Message'
+  const submitText = contactContent.contact_form_submit || 'Send Message'
+  const successMessage = contactContent.contact_success || 'Thank you! We\'ll get back to you soon.'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,10 +72,10 @@ export default function ContactPage() {
           className="text-center mb-12"
         >
           <h1 className="text-5xl md:text-7xl font-black mb-4 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
-            Contact
+            {title}
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 font-medium">
-            Get in touch with CALI Sound
+            {description}
           </p>
         </motion.div>
 
@@ -67,17 +89,17 @@ export default function ContactPage() {
             <div className="text-center py-12">
               <div className="text-6xl mb-4">✅</div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Thank you!
+                {successMessage.split('!')[0]}!
               </h2>
               <p className="text-gray-600 dark:text-gray-300">
-                We&apos;ll get back to you soon.
+                {successMessage.split('!')[1]?.trim() || 'We\'ll get back to you soon.'}
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-gray-900 dark:text-gray-300 mb-2">
-                  Name
+                  {nameLabel}
                 </label>
                 <input
                   type="text"
@@ -92,7 +114,7 @@ export default function ContactPage() {
 
               <div>
                 <label htmlFor="email" className="block text-sm font-semibold text-gray-900 dark:text-gray-300 mb-2">
-                  Email
+                  {emailLabel}
                 </label>
                 <input
                   type="email"
@@ -107,7 +129,7 @@ export default function ContactPage() {
 
               <div>
                 <label htmlFor="subject" className="block text-sm font-semibold text-gray-900 dark:text-gray-300 mb-2">
-                  Subject
+                  {subjectLabel}
                 </label>
                 <input
                   type="text"
@@ -122,7 +144,7 @@ export default function ContactPage() {
 
               <div>
                 <label htmlFor="message" className="block text-sm font-semibold text-gray-900 dark:text-gray-300 mb-2">
-                  Message
+                  {messageLabel}
                 </label>
                 <textarea
                   id="message"
@@ -139,7 +161,7 @@ export default function ContactPage() {
                 type="submit"
                 className="w-full px-8 py-4 bg-gradient-to-r from-orange-500/80 to-amber-500/80 dark:from-orange-500/70 dark:to-amber-500/70 text-white rounded-xl font-semibold text-lg hover:from-orange-400/90 hover:to-amber-400/90 transition-all shadow-soft hover:shadow-soft-xl"
               >
-                Send Message
+                {submitText}
               </button>
             </form>
           )}
