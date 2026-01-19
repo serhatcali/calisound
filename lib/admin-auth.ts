@@ -127,10 +127,13 @@ export async function isAdminAuthenticated(
     const twoFAVerified = cookieStore.get('admin-2fa-verified')
     const sessionCookie = cookieStore.get('admin_session')
     
-    console.log('[isAdminAuthenticated] Cookie check:', {
-      hasSessionCookie: !!sessionCookie,
-      has2FAVerified: !!twoFAVerified,
-    })
+    // Only log in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[isAdminAuthenticated] Cookie check:', {
+        hasSessionCookie: !!sessionCookie,
+        has2FAVerified: !!twoFAVerified,
+      })
+    }
 
     // Check if 2FA is enabled
     const twoFAEnabled = await is2FAEnabled()
@@ -138,20 +141,27 @@ export async function isAdminAuthenticated(
     // Verify session (works without request parameter in server components)
     const sessionCheck = await verifySession(request)
     
-    console.log('[isAdminAuthenticated] Session check:', {
-      valid: sessionCheck.valid,
-      error: sessionCheck.error,
-      twoFAEnabled,
-    })
+    // Only log in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[isAdminAuthenticated] Session check:', {
+        valid: sessionCheck.valid,
+        error: sessionCheck.error,
+        twoFAEnabled,
+      })
+    }
 
     if (twoFAEnabled) {
       // Both secure session and 2FA verification required
       const result = sessionCheck.valid && twoFAVerified?.value === 'true'
-      console.log('[isAdminAuthenticated] 2FA enabled, result:', result)
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[isAdminAuthenticated] 2FA enabled, result:', result)
+      }
       return result
     } else {
       // Just secure session required
-      console.log('[isAdminAuthenticated] 2FA disabled, result:', sessionCheck.valid)
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[isAdminAuthenticated] 2FA disabled, result:', sessionCheck.valid)
+      }
       return sessionCheck.valid
     }
   } catch (error: any) {
