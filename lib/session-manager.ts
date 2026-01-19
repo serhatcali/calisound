@@ -222,6 +222,7 @@ export async function verifySession(
     
     // Verify IP address if request is available (optional but recommended)
     if (request) {
+      const { getClientIP } = await import('@/lib/security')
       const clientIP = getClientIP(request)
       // Allow IP changes (user might be on mobile network)
       // But log it for security monitoring
