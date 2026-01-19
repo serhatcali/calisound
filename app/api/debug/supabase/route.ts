@@ -5,10 +5,12 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    // Test Supabase connection
+    // Test Supabase connection - same query as getAllCities()
     const { data, error, count } = await supabase
       .from('cities')
       .select('*', { count: 'exact' })
+      .not('youtube_full', 'is', null)
+      .order('release_datetime', { ascending: false, nullsFirst: false })
       .limit(5)
 
     return NextResponse.json({
