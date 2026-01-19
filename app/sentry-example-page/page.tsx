@@ -16,12 +16,13 @@ export default function Page() {
   const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
-    Sentry.logger.info("Sentry example page loaded");
-    async function checkConnectivity() {
-      const result = await Sentry.diagnoseSdkConnectivity();
-      setIsConnected(result !== "sentry-unreachable");
-    }
-    checkConnectivity();
+    // Sentry.logger.info("Sentry example page loaded");
+    // async function checkConnectivity() {
+    //   const result = await Sentry.diagnoseSdkConnectivity();
+    //   setIsConnected(result !== "sentry-unreachable");
+    // }
+    // checkConnectivity();
+    setIsConnected(true); // Default to connected
   }, []);
 
   return (
@@ -71,22 +72,27 @@ export default function Page() {
         <button
           type="button"
           onClick={async () => {
-            Sentry.logger.info("User clicked the button, throwing a sample error");
-            await Sentry.startSpan(
-              {
-                name: "Example Frontend/Backend Span",
-                op: "test",
-              },
-              async () => {
-                const res = await fetch("/api/sentry-example-api");
-                if (!res.ok) {
-                  setHasSentError(true);
-                }
-              },
-            );
-            throw new SentryExampleFrontendError(
-              "This error is raised on the frontend of the example page.",
-            );
+            // Sentry.logger.info("User clicked the button, throwing a sample error");
+            try {
+              await Sentry.startSpan(
+                {
+                  name: "Example Frontend/Backend Span",
+                  op: "test",
+                },
+                async () => {
+                  const res = await fetch("/api/sentry-example-api");
+                  if (!res.ok) {
+                    setHasSentError(true);
+                  }
+                },
+              );
+              throw new SentryExampleFrontendError(
+                "This error is raised on the frontend of the example page.",
+              );
+            } catch (error) {
+              Sentry.captureException(error);
+              setHasSentError(true);
+            }
           }}
           disabled={!isConnected}
         >
