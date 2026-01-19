@@ -10,13 +10,16 @@ interface SetDetailPageProps {
   params: Promise<{ id: string }>
 }
 
-// Required for static export
-export async function generateStaticParams() {
-  const sets = await getAllSets()
-  return sets.map((set) => ({
-    id: set.id.toString(),
-  }))
-}
+// Force dynamic rendering to prevent build-time Supabase calls
+export const dynamic = 'force-dynamic'
+
+// Disable static params generation - use dynamic rendering instead
+// export async function generateStaticParams() {
+//   const sets = await getAllSets()
+//   return sets.map((set) => ({
+//     id: set.id.toString(),
+//   }))
+// }
 
 export async function generateMetadata({ params }: SetDetailPageProps): Promise<Metadata> {
   const { id } = await params

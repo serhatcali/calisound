@@ -8,6 +8,9 @@ import { StructuredData } from '@/components/shared/StructuredData'
 import { ItemListSchema } from '@/components/shared/ItemListSchema'
 import { getAllCities, getLatestRelease, getAllSets, getGlobalLinks } from '@/lib/db'
 
+// Force dynamic rendering to prevent build-time Supabase calls
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'CALI Sound - Global Afro House City Series | Afrobeat DJ Music',
   description: 'Experience the world through Afro House music. CALI Sound brings you city-inspired melodic club music from around the globe. Listen to the best Afro House, Afrobeat, and DJ sets featuring cities worldwide.',

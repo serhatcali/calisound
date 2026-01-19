@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
+import { validateString, isValidURL } from '@/lib/security'
 
 // Force dynamic rendering to prevent build-time execution
 export const dynamic = 'force-dynamic'
-
-import { validateString, isValidURL } from '@/lib/security'
 
 export async function GET(request: NextRequest) {
   try {

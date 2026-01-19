@@ -4,6 +4,9 @@ import { ItemListSchema } from '@/components/shared/ItemListSchema'
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
 import { getAllCities } from '@/lib/db'
 
+// Force dynamic rendering to prevent build-time Supabase calls
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Cities - CALI Sound | Global Afro House Music',
   description: 'Explore all cities in the CALI Sound Global Afro House City Series. Discover Afro House, Afrobeat, and DJ music from cities around the world. Filter by mood, region, and status.',

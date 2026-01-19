@@ -5,6 +5,9 @@ import { SetsPageClient } from '@/components/sets/SetsPageClient'
 import { ItemListSchema } from '@/components/shared/ItemListSchema'
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
 
+// Force dynamic rendering to prevent build-time Supabase calls
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'DJ Sets - CALI Sound | Afro House Mixes & Sets',
   description: 'Explore CALI Sound DJ sets and mixes. Listen to the best Afro House, Afrobeat, and electronic music DJ sets. Full-length mixes and sets available.',

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit } from '@/middleware-rate-limit'
 
+// Force dynamic rendering to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 // Example API route with rate limiting
 export async function GET(request: NextRequest) {
   const rateLimitResult = checkRateLimit(request)

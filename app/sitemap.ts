@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next'
 import { getAllCities, getAllSets } from '@/lib/db'
 
+// Force dynamic rendering to prevent build-time Supabase calls
+export const dynamic = 'force-dynamic'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://calisound.com'
   

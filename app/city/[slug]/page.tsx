@@ -10,13 +10,16 @@ interface CityPageProps {
   params: Promise<{ slug: string }>
 }
 
-// Required for static export
-export async function generateStaticParams() {
-  const cities = await getAllCities()
-  return cities.map((city) => ({
-    slug: city.slug,
-  }))
-}
+// Force dynamic rendering to prevent build-time Supabase calls
+export const dynamic = 'force-dynamic'
+
+// Disable static params generation - use dynamic rendering instead
+// export async function generateStaticParams() {
+//   const cities = await getAllCities()
+//   return cities.map((city) => ({
+//     slug: city.slug,
+//   }))
+// }
 
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const { slug } = await params
