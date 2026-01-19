@@ -16,26 +16,37 @@ function getSupabaseClient(): SupabaseClient {
   // During build phase: don't create client if env vars are missing
   // This prevents placeholder from being cached and used at runtime
   if (isBuildPhase && (!supabaseUrl || !supabaseAnonKey)) {
-    // Return a mock client that returns empty results instead of throwing
+    // Return a mock client that returns empty results - never calls createClient
+    // This prevents any network calls to placeholder URLs
+    const createMockQueryBuilder = () => {
+      const builder = {
+        eq: () => builder,
+        neq: () => builder,
+        not: () => builder,
+        order: () => builder,
+        limit: () => builder,
+        maybeSingle: async () => ({ data: null, error: null }),
+        single: async () => ({ data: null, error: null }),
+        select: async (columns?: string, options?: any) => {
+          if (options?.count === 'exact') {
+            return { data: [], error: null, count: 0 }
+          }
+          return { data: [], error: null }
+        },
+        insert: async () => ({ data: null, error: null }),
+        update: async () => ({ data: null, error: null }),
+        delete: async () => ({ data: null, error: null }),
+      }
+      return builder
+    }
+    
     return new Proxy({} as SupabaseClient, {
       get(_target, prop) {
         if (prop === 'from') {
-          return () => ({
-            select: () => ({
-              eq: () => ({ data: [], error: null }),
-              neq: () => ({ data: [], error: null }),
-              not: () => ({ data: [], error: null }),
-              order: () => ({ data: [], error: null }),
-              limit: () => ({ data: [], error: null }),
-              maybeSingle: () => ({ data: null, error: null }),
-              single: () => ({ data: null, error: null }),
-            }),
-            insert: () => ({ data: null, error: null }),
-            update: () => ({ data: null, error: null }),
-            delete: () => ({ data: null, error: null }),
-          })
+          return () => createMockQueryBuilder()
         }
-        return () => ({ data: null, error: null })
+        // Return async functions that return empty results
+        return async () => ({ data: null, error: null })
       }
     })
   }
