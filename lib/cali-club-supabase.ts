@@ -2,14 +2,15 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 // Check if we're in build phase
+// NEXT_PHASE is only set during build, never at runtime
 const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || 
-                     process.env.NEXT_PHASE === 'phase-export' ||
-                     !process.env.VERCEL_ENV
+                     process.env.NEXT_PHASE === 'phase-export'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-// During build phase: return mock client if env vars are missing
+// During build phase ONLY: return mock client if env vars are missing
+// At runtime, we ALWAYS require real credentials
 let caliClubSupabase: SupabaseClient
 
 if (isBuildPhase && (!supabaseUrl || !supabaseAnonKey)) {

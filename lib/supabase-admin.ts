@@ -5,15 +5,16 @@ let supabaseAdminInstance: SupabaseClient | null = null
 
 function getSupabaseAdminClient(): SupabaseClient {
   // Check if we're in build phase (not runtime)
+  // NEXT_PHASE is only set during build, never at runtime
   const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || 
-                       process.env.NEXT_PHASE === 'phase-export' ||
-                       !process.env.VERCEL_ENV // During build, VERCEL_ENV is not set
+                       process.env.NEXT_PHASE === 'phase-export'
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // During build phase: don't create client if env vars are missing
+  // During build phase ONLY: don't create client if env vars are missing
   // This prevents placeholder from being cached and used at runtime
+  // At runtime, we ALWAYS require real credentials
   if (isBuildPhase && (!supabaseUrl || !supabaseServiceKey)) {
     // Return a mock client that returns empty results - never calls createClient
     // This prevents any network calls to placeholder URLs
