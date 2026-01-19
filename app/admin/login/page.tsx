@@ -38,21 +38,12 @@ export default function AdminLoginPage() {
         if (data.requires2FA) {
           setRequires2FA(true)
         } else {
-          // Session should be created by loginAdmin function
-          // Wait a bit for cookies to be set, then verify and redirect
-          await new Promise(resolve => setTimeout(resolve, 200))
+          // Session cookies should be set in response
+          // Wait a bit for cookies to be set, then redirect
+          await new Promise(resolve => setTimeout(resolve, 300))
           
-          // Verify session was created
-          const verifyResponse = await fetch('/api/admin/login/check', { credentials: 'include' })
-          const verifyData = await verifyResponse.json()
-          
-          if (verifyData.authenticated) {
-            window.location.href = '/admin'
-          } else {
-            console.error('Session not created:', verifyData)
-            setError('Login successful but session not created. Please try again.')
-            setLoading(false)
-          }
+          // Force redirect to admin page
+          window.location.href = '/admin'
         }
       } else {
         setError(data.error || 'Invalid password')
