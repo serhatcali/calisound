@@ -62,9 +62,9 @@ export async function GET(request: NextRequest) {
 
 // PUT - Update site content
 export async function PUT(request: NextRequest) {
-  return withAdminAuthAndCSRF(request, 'PUT', async () => {
+  return withAdminAuthAndCSRF(async (req: NextRequest) => {
     try {
-      const body = await request.json()
+      const body = await req.json()
 
       // Validate input
       const validation = validateObject(body, {
@@ -126,5 +126,5 @@ export async function PUT(request: NextRequest) {
         { status: 500 }
       )
     }
-  })
+  })(request)
 }
