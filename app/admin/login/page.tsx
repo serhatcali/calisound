@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 
 export default function AdminLoginPage() {
@@ -10,7 +9,6 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [requires2FA, setRequires2FA] = useState(false)
-  const router = useRouter()
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
