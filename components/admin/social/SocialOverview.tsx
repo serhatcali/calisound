@@ -48,6 +48,23 @@ export function SocialOverview({
         ))}
       </div>
 
+      {/* All Posts Link */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
+        <Link
+          href="/admin/social/posts"
+          className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-200 dark:border-orange-800 rounded-xl hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">📋</span>
+            <div>
+              <p className="font-semibold text-gray-900 dark:text-white">View All Posts</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">See all your saved posts</p>
+            </div>
+          </div>
+          <span className="text-orange-600 dark:text-orange-400">→</span>
+        </Link>
+      </div>
+
       {/* Quick Actions */}
       <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h2>

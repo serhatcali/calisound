@@ -28,6 +28,9 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
   const [baseText, setBaseText] = useState(initialPost?.base_text || '')
   const [selectedCity, setSelectedCity] = useState<string | undefined>(initialPost?.city_id)
   const [selectedCampaign, setSelectedCampaign] = useState<string | undefined>(initialPost?.campaign_id)
+  const [scheduledAt, setScheduledAt] = useState<string>(
+    initialPost?.scheduled_at ? new Date(initialPost.scheduled_at).toISOString().slice(0, 16) : ''
+  )
   const [saving, setSaving] = useState(false)
 
   // Platform-specific variant states
@@ -81,6 +84,8 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
         city_id: selectedCity,
         campaign_id: selectedCampaign,
         timezone: 'Europe/Istanbul',
+        scheduled_at: scheduledAt || undefined,
+        status: scheduledAt ? 'scheduled' : 'draft',
       }
 
       let postId = initialPost?.id
@@ -231,6 +236,22 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
               ))}
             </select>
           </div>
+        </div>
+
+        {/* Schedule */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Schedule Post (Optional)
+          </label>
+          <input
+            type="datetime-local"
+            value={scheduledAt}
+            onChange={(e) => setScheduledAt(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Leave empty to save as draft. Timezone: Europe/Istanbul (UTC+3)
+          </p>
         </div>
       </div>
 

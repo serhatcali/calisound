@@ -1,8 +1,25 @@
+import { getSocialPosts } from '@/lib/social-media-service'
+import { getSocialJobs } from '@/lib/social-media-service'
 import { SocialPublishing } from '@/components/admin/social/SocialPublishing'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SocialPublishingPage() {
+  let publishedPosts: any[] = []
+  let failedPosts: any[] = []
+  let publishingPosts: any[] = []
+  let jobs: any[] = []
+
+  try {
+    [publishedPosts, failedPosts, publishingPosts, jobs] = await Promise.all([
+      getSocialPosts({ status: 'published', limit: 100 }),
+      getSocialPosts({ status: 'failed', limit: 100 }),
+      getSocialPosts({ status: 'publishing', limit: 100 }),
+      getSocialJobs(),
+    ])
+  } catch (error: any) {
+    console.error('[Social Publishing Page] Error fetching data:', error)
+  }
 
   return (
     <div className="space-y-6">
@@ -15,7 +32,12 @@ export default async function SocialPublishingPage() {
         </p>
       </div>
 
-      <SocialPublishing />
+      <SocialPublishing
+        published={publishedPosts}
+        failed={failedPosts}
+        publishing={publishingPosts}
+        jobs={jobs}
+      />
     </div>
   )
 }
