@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { City, Region, CityStatus, Mood } from '@/types/database'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FavoriteButton } from '@/components/shared/FavoriteButton'
 import { getFavorites } from '@/lib/favorites'
+import { SkeletonLoader } from '@/components/shared/SkeletonLoader'
 
 interface CitiesPageClientProps {
   initialCities: City[]
@@ -329,8 +330,9 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
             <motion.div
               key={city.id}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.5) }}
             >
               <div className="group relative bg-white dark:bg-black rounded-2xl shadow-soft overflow-hidden cursor-pointer hover:shadow-soft-xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
                 {/* Favorite Button - Above everything */}
@@ -346,12 +348,18 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
                 />
                   {city.cover_square_url ? (
                     <div className="relative aspect-square overflow-hidden">
-                      <Image
-                        src={city.cover_square_url}
-                        alt={`${city.name} - CALI Sound Afro House | ${city.country} ${city.region}`}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
+                      <Suspense fallback={<SkeletonLoader variant="image" />}>
+                        <Image
+                          src={city.cover_square_url}
+                          alt={`${city.name} - CALI Sound Afro House | ${city.country} ${city.region}`}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          loading="lazy"
+                          placeholder="blur"
+                          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                        />
+                      </Suspense>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                     </div>
                   ) : (

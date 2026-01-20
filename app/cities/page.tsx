@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { Metadata } from 'next'
 import { CitiesPageClient } from '@/components/cities/CitiesPageClient'
 import { ItemListSchema } from '@/components/shared/ItemListSchema'
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
+import { SkeletonLoader } from '@/components/shared/SkeletonLoader'
 import { getAllCities } from '@/lib/db'
 
 // Force dynamic rendering to prevent build-time Supabase calls
@@ -63,7 +65,9 @@ export default async function CitiesPage() {
             { name: 'Cities', url: '/cities' },
           ]} />
         </div>
-        <CitiesPageClient initialCities={cities} />
+        <Suspense fallback={<SkeletonLoader variant="grid" count={12} className="py-12" />}>
+          <CitiesPageClient initialCities={cities} />
+        </Suspense>
       </div>
     </>
   )

@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Metadata } from 'next'
 import { Hero } from '@/components/home/Hero'
 import { LatestRelease } from '@/components/home/LatestRelease'
@@ -6,6 +7,7 @@ import { FeaturedSet } from '@/components/home/FeaturedSet'
 import { ListenEverywhere } from '@/components/home/ListenEverywhere'
 import { StructuredData } from '@/components/shared/StructuredData'
 import { ItemListSchema } from '@/components/shared/ItemListSchema'
+import { SkeletonLoader } from '@/components/shared/SkeletonLoader'
 import { getAllCities, getLatestRelease, getAllSets, getGlobalLinks } from '@/lib/db'
 
 // Force dynamic rendering to prevent build-time Supabase calls
@@ -115,11 +117,27 @@ export default async function HomePage() {
         />
       )}
       <div className="min-h-screen bg-white dark:bg-black">
-        <Hero globalLinks={globalLinks} />
-        {latestRelease && <LatestRelease city={latestRelease} />}
-        {cities.length > 0 && <CityGrid cities={cities.slice(0, 8)} />}
-        {featuredSet && <FeaturedSet set={featuredSet} />}
-        <ListenEverywhere globalLinks={globalLinks} />
+        <Suspense fallback={<div className="min-h-screen" />}>
+          <Hero globalLinks={globalLinks} />
+        </Suspense>
+        {latestRelease && (
+          <Suspense fallback={<SkeletonLoader variant="card" className="my-8" />}>
+            <LatestRelease city={latestRelease} />
+          </Suspense>
+        )}
+        {cities.length > 0 && (
+          <Suspense fallback={<SkeletonLoader variant="grid" count={8} className="py-20" />}>
+            <CityGrid cities={cities.slice(0, 8)} />
+          </Suspense>
+        )}
+        {featuredSet && (
+          <Suspense fallback={<SkeletonLoader variant="card" className="my-8" />}>
+            <FeaturedSet set={featuredSet} />
+          </Suspense>
+        )}
+        <Suspense fallback={null}>
+          <ListenEverywhere globalLinks={globalLinks} />
+        </Suspense>
       </div>
     </>
   )

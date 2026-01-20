@@ -1,10 +1,12 @@
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { City } from '@/types/database'
 import { motion } from 'framer-motion'
 import { AudioWaveform } from '@/components/effects/AudioWaveform'
+import { SkeletonLoader } from '@/components/shared/SkeletonLoader'
 
 interface CityGridProps {
   cities: City[]
@@ -35,7 +37,7 @@ export function CityGrid({ cities }: CityGridProps) {
               key={city.id}
               initial={{ opacity: 0, y: 30, rotateX: -15 }}
               whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
               className="group relative rounded-3xl overflow-hidden cursor-pointer border-glow"
@@ -54,12 +56,18 @@ export function CityGrid({ cities }: CityGridProps) {
               
               {city.cover_square_url ? (
                 <div className="relative aspect-square overflow-hidden rounded-3xl">
-                  <Image
-                    src={city.cover_square_url}
-                    alt={`${city.name} - CALI Sound Afro House | ${city.country} ${city.region}`}
-                    fill
-                    className="object-cover group-hover:scale-125 transition-transform duration-700"
-                  />
+                  <Suspense fallback={<SkeletonLoader variant="image" />}>
+                    <Image
+                      src={city.cover_square_url}
+                      alt={`${city.name} - CALI Sound Afro House | ${city.country} ${city.region}`}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover group-hover:scale-125 transition-transform duration-700"
+                      loading="lazy"
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                    />
+                  </Suspense>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                   
                   {/* Audio Waveform Overlay */}
