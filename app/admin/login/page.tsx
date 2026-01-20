@@ -1,7 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+
+// Log helper that saves to localStorage
+const logToStorage = (message: string, data?: any) => {
+  const timestamp = new Date().toISOString()
+  const logEntry = {
+    timestamp,
+    message,
+    data: data ? JSON.parse(JSON.stringify(data)) : null,
+  }
+  
+  try {
+    const existingLogs = JSON.parse(localStorage.getItem('admin-login-logs') || '[]')
+    existingLogs.push(logEntry)
+    // Keep only last 100 logs
+    if (existingLogs.length > 100) {
+      existingLogs.shift()
+    }
+    localStorage.setItem('admin-login-logs', JSON.stringify(existingLogs))
+  } catch (e) {
+    console.error('Failed to save log:', e)
+  }
+  
+  console.log(`[${timestamp}] ${message}`, data || '')
+}
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
@@ -9,6 +33,23 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [requires2FA, setRequires2FA] = useState(false)
+  const [logs, setLogs] = useState<any[]>([])
+
+  // Load logs from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedLogs = JSON.parse(localStorage.getItem('admin-login-logs') || '[]')
+      setLogs(savedLogs)
+    } catch (e) {
+      console.error('Failed to load logs:', e)
+    }
+  }, [])
+
+  // Clear logs function
+  const clearLogs = () => {
+    localStorage.removeItem('admin-login-logs')
+    setLogs([])
+  }
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,10 +100,10 @@ export default function AdminLoginPage() {
     setError('')
     setLoading(true)
 
-    console.log('[Login Page] Starting 2FA verification...')
+    logToStorage('[Login Page] Starting 2FA verification...')
 
     try {
-      console.log('[Login Page] Calling /api/admin/2fa/verify with token:', twoFACode.substring(0, 2) + '****')
+      logToStorage('[Login Page] Calling /api/admin/2fa/verify', { tokenPreview: twoFACode.substring(0, 2) + '****' })
       const response = await fetch('/api/admin/2fa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,12 +111,12 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ token: twoFACode }),
       })
 
-      console.log('[Login Page] 2FA verify response status:', response.status, response.statusText)
+      logToStorage('[Login Page] 2FA verify response', { status: response.status, statusText: response.statusText })
       const data = await response.json()
-      console.log('[Login Page] 2FA verify response data:', { success: data.success, error: data.error })
+      logToStorage('[Login Page] 2FA verify response data', { success: data.success, error: data.error })
 
       if (data.success) {
-        console.log('[Login Page] 2FA verified successfully, calling /api/admin/login/complete')
+        logToStorage('[Login Page] 2FA verified successfully, calling /api/admin/login/complete')
         // 2FA verify route already creates session if needed
         // But we still need to call complete endpoint to clean up temp cookies
         try {
@@ -84,43 +125,56 @@ export default function AdminLoginPage() {
             credentials: 'include' // Important: include cookies
           })
           
-          console.log('[Login Page] Complete response status:', completeResponse.status, completeResponse.statusText)
+          logToStorage('[Login Page] Complete response', { status: completeResponse.status, statusText: completeResponse.statusText })
           const completeData = await completeResponse.json().catch(() => ({}))
-          console.log('[Login Page] Complete response data:', completeData)
+          logToStorage('[Login Page] Complete response data', completeData)
           
           // Check cookies after complete
-          console.log('[Login Page] Cookies after complete:', document.cookie)
+          logToStorage('[Login Page] Cookies after complete', { cookies: document.cookie })
           
           // Wait for cookies to be set
           await new Promise(resolve => setTimeout(resolve, 300))
           
           // Check auth status before redirect
-          console.log('[Login Page] Checking auth status before redirect...')
+          logToStorage('[Login Page] Checking auth status before redirect...')
           const authCheck = await fetch('/api/admin/login/check', { credentials: 'include' })
           const authData = await authCheck.json()
-          console.log('[Login Page] Auth check result:', authData)
+          logToStorage('[Login Page] Auth check result', authData)
+          
+          // Update logs state
+          try {
+            const savedLogs = JSON.parse(localStorage.getItem('admin-login-logs') || '[]')
+            setLogs(savedLogs)
+          } catch (e) {}
           
           // Redirect to admin panel
-          console.log('[Login Page] Redirecting to /admin')
+          logToStorage('[Login Page] Redirecting to /admin')
           window.location.href = '/admin'
         } catch (completeError: any) {
           // If complete fails but verify succeeded, still try to redirect
           // (session might already be created by verify route)
-          console.error('[Login Page] Complete endpoint error:', completeError)
-          console.log('[Login Page] Checking auth status anyway...')
+          logToStorage('[Login Page] Complete endpoint error', { error: completeError.message, stack: completeError.stack })
+          logToStorage('[Login Page] Checking auth status anyway...')
           const authCheck = await fetch('/api/admin/login/check', { credentials: 'include' })
           const authData = await authCheck.json()
-          console.log('[Login Page] Auth check result:', authData)
+          logToStorage('[Login Page] Auth check result', authData)
+          
+          // Update logs state
+          try {
+            const savedLogs = JSON.parse(localStorage.getItem('admin-login-logs') || '[]')
+            setLogs(savedLogs)
+          } catch (e) {}
+          
           await new Promise(resolve => setTimeout(resolve, 300))
-          console.log('[Login Page] Redirecting to /admin despite complete error')
+          logToStorage('[Login Page] Redirecting to /admin despite complete error')
           window.location.href = '/admin'
         }
       } else {
-        console.error('[Login Page] 2FA verification failed:', data.error)
+        logToStorage('[Login Page] 2FA verification failed', { error: data.error })
         setError(data.error || 'Invalid verification code')
       }
     } catch (err: any) {
-      console.error('[Login Page] 2FA verification exception:', err)
+      logToStorage('[Login Page] 2FA verification exception', { error: err.message, stack: err.stack })
       setError(err?.message || 'An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -129,6 +183,33 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-4">
+      {/* Debug Logs Panel */}
+      {logs.length > 0 && (
+        <div className="fixed top-4 right-4 w-96 max-h-96 overflow-auto bg-black/90 text-white text-xs p-4 rounded-lg border border-gray-700 z-50">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold">Debug Logs ({logs.length})</h3>
+            <button
+              onClick={clearLogs}
+              className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
+            >
+              Clear
+            </button>
+          </div>
+          <div className="space-y-1">
+            {logs.slice(-20).reverse().map((log, idx) => (
+              <div key={idx} className="border-b border-gray-700 pb-1">
+                <div className="text-gray-400 text-xs">{new Date(log.timestamp).toLocaleTimeString()}</div>
+                <div className="text-white">{log.message}</div>
+                {log.data && (
+                  <pre className="text-gray-300 text-xs mt-1 overflow-x-auto">
+                    {JSON.stringify(log.data, null, 2)}
+                  </pre>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
