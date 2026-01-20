@@ -28,8 +28,20 @@ export async function POST(request: NextRequest) {
     const ipAddress = getClientIP(request)
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
+    console.log('[Login Complete] Creating session...', {
+      ipAddress,
+      userAgent: userAgent.substring(0, 50),
+    })
+    
     // Create secure session and get session data
     const sessionResult = await createSession('admin', ipAddress, userAgent)
+
+    console.log('[Login Complete] Session created:', {
+      hasSessionToken: !!sessionResult.sessionToken,
+      hasCsrfToken: !!sessionResult.csrfToken,
+      sessionTokenLength: sessionResult.sessionToken?.length,
+      csrfTokenLength: sessionResult.csrfToken?.length,
+    })
 
     // Create response
     const response = NextResponse.json({ success: true })
@@ -38,8 +50,14 @@ export async function POST(request: NextRequest) {
     const { setSessionCookies } = await import('@/lib/session-manager')
     setSessionCookies(response, sessionResult.sessionToken, sessionResult.csrfToken)
 
+    // Check if cookies were set
+    const setCookieHeaders = response.headers.getSetCookie()
+    console.log('[Login Complete] Set-Cookie headers:', setCookieHeaders)
+
     // Delete temp auth cookie (keep admin-2fa-verified for session validation)
     response.cookies.delete('admin-auth-temp')
+    console.log('[Login Complete] Deleted admin-auth-temp cookie')
+    
     // Note: admin-2fa-verified is kept for session validation in isAdminAuthenticated
     // It will expire naturally or be cleared on logout
 

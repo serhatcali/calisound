@@ -147,6 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (isValid) {
+      console.log('[2FA Verify] Token is valid, creating response...')
       // Set 2FA verified cookie
       const response = NextResponse.json({ success: true })
       
@@ -162,20 +163,39 @@ export async function POST(request: NextRequest) {
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/',
       })
+      console.log('[2FA Verify] Set admin-2fa-verified cookie')
       
       // If no session exists but 2FA is verified, create a session
       // This allows re-verification after session expires
+      console.log('[2FA Verify] Checking session state:', {
+        hasSessionCookie: !!sessionCookie?.value,
+        hasTempAuth: !!tempAuth?.value,
+      })
+      
       if (!sessionCookie?.value && !tempAuth?.value) {
+        console.log('[2FA Verify] No session or temp auth, creating new session...')
         const { createSession, getClientIP } = await import('@/lib/session-manager')
         const ipAddress = getClientIP(request)
         const userAgent = request.headers.get('user-agent') || 'unknown'
         const sessionResult = await createSession('admin', ipAddress, userAgent)
         
+        console.log('[2FA Verify] Session created:', {
+          hasSessionToken: !!sessionResult.sessionToken,
+          hasCsrfToken: !!sessionResult.csrfToken,
+          sessionTokenLength: sessionResult.sessionToken?.length,
+          csrfTokenLength: sessionResult.csrfToken?.length,
+        })
+        
         // Set session cookies in response
         const { setSessionCookies } = await import('@/lib/session-manager')
         setSessionCookies(response, sessionResult.sessionToken, sessionResult.csrfToken)
         
+        // Check if cookies were set
+        const setCookieHeaders = response.headers.getSetCookie()
+        console.log('[2FA Verify] Set-Cookie headers:', setCookieHeaders)
         console.log('[2FA Verify] Created new session after 2FA verification')
+      } else {
+        console.log('[2FA Verify] Session or temp auth exists, skipping session creation')
       }
 
       return response

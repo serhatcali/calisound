@@ -59,16 +59,23 @@ export default function AdminLoginPage() {
     setError('')
     setLoading(true)
 
+    console.log('[Login Page] Starting 2FA verification...')
+
     try {
+      console.log('[Login Page] Calling /api/admin/2fa/verify with token:', twoFACode.substring(0, 2) + '****')
       const response = await fetch('/api/admin/2fa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Important: include cookies
         body: JSON.stringify({ token: twoFACode }),
       })
 
+      console.log('[Login Page] 2FA verify response status:', response.status, response.statusText)
       const data = await response.json()
+      console.log('[Login Page] 2FA verify response data:', { success: data.success, error: data.error })
 
       if (data.success) {
+        console.log('[Login Page] 2FA verified successfully, calling /api/admin/login/complete')
         // 2FA verify route already creates session if needed
         // But we still need to call complete endpoint to clean up temp cookies
         try {
@@ -77,23 +84,43 @@ export default function AdminLoginPage() {
             credentials: 'include' // Important: include cookies
           })
           
+          console.log('[Login Page] Complete response status:', completeResponse.status, completeResponse.statusText)
+          const completeData = await completeResponse.json().catch(() => ({}))
+          console.log('[Login Page] Complete response data:', completeData)
+          
+          // Check cookies after complete
+          console.log('[Login Page] Cookies after complete:', document.cookie)
+          
           // Wait for cookies to be set
-          await new Promise(resolve => setTimeout(resolve, 200))
+          await new Promise(resolve => setTimeout(resolve, 300))
+          
+          // Check auth status before redirect
+          console.log('[Login Page] Checking auth status before redirect...')
+          const authCheck = await fetch('/api/admin/login/check', { credentials: 'include' })
+          const authData = await authCheck.json()
+          console.log('[Login Page] Auth check result:', authData)
           
           // Redirect to admin panel
+          console.log('[Login Page] Redirecting to /admin')
           window.location.href = '/admin'
         } catch (completeError: any) {
           // If complete fails but verify succeeded, still try to redirect
           // (session might already be created by verify route)
-          console.warn('Complete endpoint failed, but trying redirect anyway:', completeError)
-          await new Promise(resolve => setTimeout(resolve, 200))
+          console.error('[Login Page] Complete endpoint error:', completeError)
+          console.log('[Login Page] Checking auth status anyway...')
+          const authCheck = await fetch('/api/admin/login/check', { credentials: 'include' })
+          const authData = await authCheck.json()
+          console.log('[Login Page] Auth check result:', authData)
+          await new Promise(resolve => setTimeout(resolve, 300))
+          console.log('[Login Page] Redirecting to /admin despite complete error')
           window.location.href = '/admin'
         }
       } else {
+        console.error('[Login Page] 2FA verification failed:', data.error)
         setError(data.error || 'Invalid verification code')
       }
     } catch (err: any) {
-      console.error('2FA verification error:', err)
+      console.error('[Login Page] 2FA verification exception:', err)
       setError(err?.message || 'An error occurred. Please try again.')
     } finally {
       setLoading(false)

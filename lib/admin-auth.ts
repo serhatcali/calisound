@@ -126,51 +126,47 @@ export async function isAdminAuthenticated(
     const cookieStore = await cookies()
     const twoFAVerified = cookieStore.get('admin-2fa-verified')
     const sessionCookie = cookieStore.get('admin_session')
+    const csrfCookie = cookieStore.get('admin_csrf')
     
-    // Only log in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('[isAdminAuthenticated] Cookie check:', {
-        hasSessionCookie: !!sessionCookie,
-        has2FAVerified: !!twoFAVerified,
-      })
-    }
+    console.log('[isAdminAuthenticated] Cookie check:', {
+      hasSessionCookie: !!sessionCookie,
+      sessionCookieValue: sessionCookie?.value ? sessionCookie.value.substring(0, 20) + '...' : null,
+      hasCsrfCookie: !!csrfCookie,
+      has2FAVerified: !!twoFAVerified,
+      twoFAVerifiedValue: twoFAVerified?.value,
+    })
 
     // Check if 2FA is enabled
     const twoFAEnabled = await is2FAEnabled()
+    console.log('[isAdminAuthenticated] 2FA enabled:', twoFAEnabled)
 
     // Verify session (works without request parameter in server components)
     const sessionCheck = await verifySession(request)
     
-    // Only log in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('[isAdminAuthenticated] Session check:', {
-        valid: sessionCheck.valid,
-        error: sessionCheck.error,
-        twoFAEnabled,
-      })
-    }
+    console.log('[isAdminAuthenticated] Session check:', {
+      valid: sessionCheck.valid,
+      error: sessionCheck.error,
+      twoFAEnabled,
+    })
 
     if (twoFAEnabled) {
       // If session is valid, it means 2FA was already verified (session is created after 2FA)
       // So we only need to check session validity
       // The admin-2fa-verified cookie is temporary and gets deleted after session creation
       const result = sessionCheck.valid
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('[isAdminAuthenticated] 2FA enabled, result:', result, {
-          sessionValid: sessionCheck.valid,
-          has2FAVerifiedCookie: !!twoFAVerified,
-        })
-      }
+      console.log('[isAdminAuthenticated] 2FA enabled, result:', result, {
+        sessionValid: sessionCheck.valid,
+        has2FAVerifiedCookie: !!twoFAVerified,
+      })
       return result
     } else {
       // Just secure session required
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('[isAdminAuthenticated] 2FA disabled, result:', sessionCheck.valid)
-      }
+      console.log('[isAdminAuthenticated] 2FA disabled, result:', sessionCheck.valid)
       return sessionCheck.valid
     }
   } catch (error: any) {
     console.error('[isAdminAuthenticated] Error:', error)
+    console.error('[isAdminAuthenticated] Error stack:', error.stack)
     return false
   }
 }
