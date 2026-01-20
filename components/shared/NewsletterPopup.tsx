@@ -12,6 +12,7 @@ export function NewsletterPopup() {
   const { content: newsletterContent } = useSiteContent(['newsletter_title', 'newsletter_description', 'newsletter_button', 'newsletter_success'])
   const [isOpen, setIsOpen] = useState(false)
   const [dontShowAgain, setDontShowAgain] = useState(false)
+  const [hasChecked, setHasChecked] = useState(false)
   const pathname = usePathname()
   
   // Fallback values
@@ -19,8 +20,12 @@ export function NewsletterPopup() {
   const description = newsletterContent.newsletter_description || 'Get notified when new cities are released'
 
   useEffect(() => {
+    // Only check once on mount
+    if (hasChecked) return
+    
     // Don't show on admin pages (including login)
     if (pathname?.startsWith('/admin')) {
+      setHasChecked(true)
       return
     }
 
@@ -34,6 +39,7 @@ export function NewsletterPopup() {
         const hoursSinceDismissal = (Date.now() - parseInt(dismissedTimestamp)) / (1000 * 60 * 60)
         // If less than 24 hours, don't show
         if (hoursSinceDismissal < 24) {
+          setHasChecked(true)
           return
         } else {
           // 24 hours passed, clear dismissal to show again
@@ -42,19 +48,19 @@ export function NewsletterPopup() {
         }
       } else {
         // Old dismissal without timestamp, don't show
+        setHasChecked(true)
         return
       }
     }
     
-    // Only show if not already open and not dismissed
-    if (!isOpen) {
-      // Show popup after a short delay
-      const timer = setTimeout(() => {
-        setIsOpen(true)
-      }, 2000) // 2 seconds delay
-      return () => clearTimeout(timer)
-    }
-  }, [pathname, isOpen])
+    // Mark as checked and show popup after a short delay
+    setHasChecked(true)
+    const timer = setTimeout(() => {
+      setIsOpen(true)
+    }, 2000) // 2 seconds delay
+    
+    return () => clearTimeout(timer)
+  }, [pathname, hasChecked])
 
   const handleClose = () => {
     setIsOpen(false)
@@ -81,14 +87,14 @@ export function NewsletterPopup() {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - removed backdrop-blur to prevent text blur */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm z-50"
-            style={{ willChange: 'opacity, backdrop-filter' }}
+            className="fixed inset-0 bg-white/90 dark:bg-black/90 z-50"
+            style={{ willChange: 'opacity' }}
           />
 
           {/* Popup */}

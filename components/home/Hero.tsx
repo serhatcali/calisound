@@ -126,7 +126,12 @@ export function Hero({ globalLinks }: HeroProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleClick('youtube', globalLinks.youtube)}
-                  className="group relative w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 bg-white/20 dark:bg-white/10 backdrop-blur-xl border border-white/30 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg text-white shadow-2xl hover:bg-white/30 dark:hover:bg-white/20 transition-all duration-300 overflow-hidden border-glow"
+                  className="group relative w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 bg-white/20 dark:bg-white/10 border border-white/30 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg text-white shadow-2xl hover:bg-white/30 dark:hover:bg-white/20 transition-all duration-300 overflow-hidden border-glow"
+                  style={{ 
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    isolation: 'isolate'
+                  }}
                   style={{
                     transformStyle: 'preserve-3d',
                   }}
@@ -148,7 +153,12 @@ export function Hero({ globalLinks }: HeroProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleClick('spotify', globalLinks.spotify)}
-                  className="group relative w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 bg-white/20 dark:bg-white/10 backdrop-blur-xl border border-white/30 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg text-white shadow-2xl hover:bg-white/30 dark:hover:bg-white/20 transition-all duration-300 overflow-hidden border-glow"
+                  className="group relative w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 bg-white/20 dark:bg-white/10 border border-white/30 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg text-white shadow-2xl hover:bg-white/30 dark:hover:bg-white/20 transition-all duration-300 overflow-hidden border-glow"
+                  style={{ 
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    isolation: 'isolate'
+                  }}
                   style={{
                     transformStyle: 'preserve-3d',
                   }}

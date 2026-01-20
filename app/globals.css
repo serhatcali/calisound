@@ -100,16 +100,54 @@ a {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 200ms;
   will-change: backdrop-filter;
+  /* Isolate backdrop-blur from children */
+  isolation: isolate;
 }
 
-/* Prevent text blur during animations */
-h1, h2, h3, h4, h5, h6, p, span, a, button, label {
+/* Prevent backdrop-blur from affecting text - use separate layers */
+[class*="backdrop-blur"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  backdrop-filter: inherit;
+  -webkit-backdrop-filter: inherit;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Prevent text blur during animations - isolate text from backdrop-blur */
+h1, h2, h3, h4, h5, h6, p, span, a, button, label, div[class*="text"], div[class*="font"] {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* Prevent blur during transforms */
+  /* Force GPU acceleration and isolate from backdrop-blur */
   transform: translateZ(0);
   backface-visibility: hidden;
+  isolation: isolate;
+  /* Prevent text from being affected by backdrop-blur */
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure text elements are not affected by parent backdrop-blur */
+[class*="backdrop-blur"] h1,
+[class*="backdrop-blur"] h2,
+[class*="backdrop-blur"] h3,
+[class*="backdrop-blur"] h4,
+[class*="backdrop-blur"] h5,
+[class*="backdrop-blur"] h6,
+[class*="backdrop-blur"] p,
+[class*="backdrop-blur"] span,
+[class*="backdrop-blur"] a,
+[class*="backdrop-blur"] button,
+[class*="backdrop-blur"] label {
+  /* Create new stacking context to isolate from backdrop-blur */
+  isolation: isolate;
+  position: relative;
+  z-index: 1;
+  /* Force hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Prevent layout shift - critical */
