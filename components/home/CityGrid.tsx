@@ -23,15 +23,15 @@ export function CityGrid({ cities }: CityGridProps) {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-4 md:mb-6 bg-gradient-to-r from-primary-600 to-accent-600 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent px-4">
             Explore Cities
           </h2>
-          <p className="text-2xl text-gray-600 dark:text-gray-300 font-medium">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-medium px-4">
             Discover Afro House experiences from around the world
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 px-4 sm:px-0">
           {cities.map((city, index) => (
             <motion.div
               key={city.id}
@@ -42,7 +42,6 @@ export function CityGrid({ cities }: CityGridProps) {
               style={{ 
                 transformStyle: 'preserve-3d', 
                 perspective: '1000px',
-                minHeight: '400px', // Prevent layout shift
                 contain: 'layout style'
               }}
               className="group relative rounded-3xl overflow-hidden cursor-pointer border-glow"

@@ -108,7 +108,7 @@ body {
 }
 
 /* Mobile optimizations */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   * {
     /* Reduce animations on mobile for better performance */
     animation-duration: 0.3s !important;
@@ -122,11 +122,6 @@ body {
     height: auto;
   }
   
-  /* Prevent image layout shift with aspect ratio containers */
-  img[width][height] {
-    aspect-ratio: attr(width) / attr(height);
-  }
-  
   /* Optimize touch targets */
   button, a {
     min-height: 44px;
@@ -138,6 +133,40 @@ body {
   h1, h2, h3, h4, h5, h6, p {
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Responsive text sizing */
+  h1 {
+    font-size: clamp(2rem, 8vw, 3rem) !important;
+  }
+  
+  h2 {
+    font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
+  }
+  
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  /* Container padding */
+  .max-w-7xl {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  /* Tablet optimizations */
+  h1 {
+    font-size: clamp(2.5rem, 6vw, 4rem) !important;
+  }
+  
+  h2 {
+    font-size: clamp(2rem, 5vw, 3rem) !important;
   }
 }
 
