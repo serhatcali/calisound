@@ -144,6 +144,7 @@ export function setSessionCookies(
   
   const isProduction = process.env.NODE_ENV === 'production'
   const isVercel = !!process.env.VERCEL
+  // In development, don't use secure cookies (localhost doesn't support secure)
   const isSecure = isProduction && isVercel
   
   console.log('[Session] Setting cookies with config:', {
@@ -153,25 +154,37 @@ export function setSessionCookies(
     sessionCookieName: SESSION_COOKIE_NAME,
     csrfCookieName: CSRF_COOKIE_NAME,
     maxAge: SESSION_DURATION,
+    sessionTokenLength: sessionToken?.length,
+    csrfTokenLength: csrfToken?.length,
   })
   
   // Set session cookie
-  response.cookies.set(SESSION_COOKIE_NAME, sessionToken, {
-    httpOnly: true,
-    secure: isSecure,
-    sameSite: 'lax',
-    maxAge: SESSION_DURATION,
-    path: '/',
-  })
+  try {
+    response.cookies.set(SESSION_COOKIE_NAME, sessionToken, {
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: 'lax',
+      maxAge: SESSION_DURATION,
+      path: '/',
+    })
+    console.log('[Session] Session cookie set successfully')
+  } catch (error: any) {
+    console.error('[Session] Error setting session cookie:', error)
+  }
   
   // Set CSRF cookie
-  response.cookies.set(CSRF_COOKIE_NAME, csrfToken, {
-    httpOnly: false,
-    secure: isSecure,
-    sameSite: 'lax',
-    maxAge: SESSION_DURATION,
-    path: '/',
-  })
+  try {
+    response.cookies.set(CSRF_COOKIE_NAME, csrfToken, {
+      httpOnly: false,
+      secure: isSecure,
+      sameSite: 'lax',
+      maxAge: SESSION_DURATION,
+      path: '/',
+    })
+    console.log('[Session] CSRF cookie set successfully')
+  } catch (error: any) {
+    console.error('[Session] Error setting CSRF cookie:', error)
+  }
   
   // Verify cookies were set
   const sessionCookie = response.cookies.get(SESSION_COOKIE_NAME)

@@ -50,9 +50,28 @@ export async function POST(request: NextRequest) {
     const { setSessionCookies } = await import('@/lib/session-manager')
     setSessionCookies(response, sessionResult.sessionToken, sessionResult.csrfToken)
 
-    // Check if cookies were set
+    // Check if cookies were set in response object
+    const sessionCookieInResponse = response.cookies.get('admin_session')
+    const csrfCookieInResponse = response.cookies.get('admin_csrf')
+    console.log('[Login Complete] Cookies in response object:', {
+      hasSessionCookie: !!sessionCookieInResponse,
+      hasCsrfCookie: !!csrfCookieInResponse,
+      sessionCookieValue: sessionCookieInResponse?.value ? sessionCookieInResponse.value.substring(0, 30) + '...' : null,
+      csrfCookieValue: csrfCookieInResponse?.value,
+    })
+
+    // Check if cookies were set in headers
     const setCookieHeaders = response.headers.getSetCookie()
     console.log('[Login Complete] Set-Cookie headers:', setCookieHeaders)
+    console.log('[Login Complete] Set-Cookie headers count:', setCookieHeaders.length)
+    
+    // Verify admin_session is in headers
+    const hasSessionInHeaders = setCookieHeaders.some(header => header.startsWith('admin_session='))
+    const hasCsrfInHeaders = setCookieHeaders.some(header => header.startsWith('admin_csrf='))
+    console.log('[Login Complete] Cookie presence in headers:', {
+      hasSessionInHeaders,
+      hasCsrfInHeaders,
+    })
 
     // Delete temp auth cookie (keep admin-2fa-verified for session validation)
     response.cookies.delete('admin-auth-temp')
