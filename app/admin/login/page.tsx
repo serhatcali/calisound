@@ -141,6 +141,11 @@ export default function AdminLoginPage() {
           const authData = await authCheck.json()
           logToStorage('[Login Page] Auth check result', authData)
           
+          // Also check session debug
+          const sessionDebug = await fetch('/api/admin/debug/session', { credentials: 'include' })
+          const sessionDebugData = await sessionDebug.json()
+          logToStorage('[Login Page] Session debug result', sessionDebugData)
+          
           // Update logs state
           try {
             const savedLogs = JSON.parse(localStorage.getItem('admin-login-logs') || '[]')
