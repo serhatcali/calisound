@@ -32,6 +32,7 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
 
   // Platform-specific variant states
   const [variants, setVariants] = useState<Record<SocialPlatform, {
+    id?: string
     title?: string
     caption?: string
     description?: string
@@ -43,6 +44,7 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
     PLATFORMS.forEach(p => {
       const existing = initialPost?.variants?.find(v => v.platform === p.value)
       defaultVariants[p.value] = {
+        id: existing?.id,
         title: existing?.title || '',
         caption: existing?.caption || '',
         description: existing?.description || '',
@@ -66,17 +68,106 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
   }
 
   const handleSave = async () => {
+    if (!title.trim() || !baseText.trim()) {
+      alert('Please fill in title and base text')
+      return
+    }
+
     setSaving(true)
     try {
-      // TODO: Implement save logic
-      alert('Save functionality will be implemented')
-    } catch (error) {
-      console.error('Error saving:', error)
-      alert('Failed to save post')
+      const postData = {
+        title: title.trim(),
+        base_text: baseText.trim(),
+        city_id: selectedCity,
+        campaign_id: selectedCampaign,
+        timezone: 'Europe/Istanbul',
+      }
+
+      let postId = initialPost?.id
+
+      // Create or update post
+      if (postId) {
+        // Update existing post
+        const response = await fetch(`/api/admin/social/posts/${postId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(postData),
+        })
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || 'Failed to update post')
+        }
+
+        const updatedPost = await response.json()
+        postId = updatedPost.id
+      } else {
+        // Create new post
+        const response = await fetch('/api/admin/social/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(postData),
+        })
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || 'Failed to create post')
+        }
+
+        const newPost = await response.json()
+        postId = newPost.id
+      }
+
+      // Save variants
+      for (const [platform, variant] of Object.entries(variants)) {
+        if (!variant || (!variant.caption && !variant.description && !variant.title)) {
+          continue // Skip empty variants
+        }
+
+        try {
+          if (variant.id) {
+            // Update existing variant
+            await fetch('/api/admin/social/variants', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: variant.id,
+                ...variant,
+                post_id: postId,
+                platform,
+              }),
+            })
+          } else {
+            // Create new variant
+            await fetch('/api/admin/social/variants', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...variant,
+                post_id: postId,
+                platform,
+              }),
+            })
+          }
+        } catch (variantError: any) {
+          console.error(`Error saving variant for ${platform}:`, variantError)
+        }
+      }
+
+      alert('Post saved successfully!')
+      
+      // Redirect to edit page if this was a new post
+      if (!initialPost?.id && postId) {
+        window.location.href = `/admin/social/compose?id=${postId}`
+      }
+    } catch (error: any) {
+      console.error('Error saving post:', error)
+      alert(`Error: ${error.message || 'Failed to save post'}`)
     } finally {
       setSaving(false)
     }
   }
+
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
