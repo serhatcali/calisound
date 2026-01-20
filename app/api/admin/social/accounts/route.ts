@@ -46,21 +46,21 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
-    if (!body.platform || !body.handle) {
+    if (!body.platform) {
       return NextResponse.json(
-        { error: 'platform and handle are required' },
+        { error: 'platform is required' },
         { status: 400 }
       )
     }
 
-    // TODO: Implement OAuth flow
-    // For now, return a placeholder response
+    // For now, OAuth is not implemented
+    // Return a message that assisted mode should be used
     return NextResponse.json({
-      message: 'OAuth flow will be implemented here',
+      message: 'OAuth integration is not yet implemented. Please use "Assisted" mode for now.',
       platform: body.platform,
-      handle: body.handle,
-      oauth_url: `https://example.com/oauth/${body.platform}`, // Placeholder
-    })
+      mode: 'assisted',
+      note: 'Auto-publish mode requires OAuth integration. For now, create posts and manually upload the generated content.',
+    }, { status: 501 }) // 501 Not Implemented
   } catch (error: any) {
     console.error('[API] Error connecting account:', error)
     return NextResponse.json(

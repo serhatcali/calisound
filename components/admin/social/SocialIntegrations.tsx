@@ -40,12 +40,20 @@ export function SocialIntegrations() {
   const handleConnect = async (platform: SocialPlatform) => {
     setConnecting(platform)
     try {
+      // For now, show a message that OAuth is not yet implemented
+      // In the future, this will redirect to OAuth flow
+      alert(`OAuth integration for ${platform} is not yet implemented.\n\nFor now, you can use "Assisted" mode:\n1. Create your post in the composer\n2. Copy the generated content\n3. Manually upload to ${platform}\n\nAuto-publish mode will be available after OAuth integration.`)
+      setConnecting(null)
+      return
+
+      // TODO: When OAuth is implemented, uncomment this:
+      /*
       const response = await fetch('/api/admin/social/accounts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           platform,
-          handle: '', // Will be filled after OAuth
+          handle: 'placeholder', // Will be filled after OAuth
         }),
       })
 
