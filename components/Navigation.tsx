@@ -38,9 +38,9 @@ export function Navigation() {
     : 'bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-900'
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-300 ${navClasses}`}>
+    <nav className={`sticky top-0 z-50 transition-all duration-300 ${navClasses}`} style={{ minHeight: '64px', contain: 'layout style' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-20">
+        <div className="flex justify-between items-center h-16 md:h-20" style={{ minHeight: '64px' }}>
           <div className="flex items-center space-x-2 group">
             <Link href="/" className="transition-transform duration-300 group-hover:scale-105 active:scale-95">
               <span className="text-2xl md:text-3xl font-black bg-gradient-to-r from-primary-600 via-accent-600 to-primary-600 dark:from-gray-200 dark:via-white dark:to-gray-200 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">

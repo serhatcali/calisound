@@ -13,7 +13,7 @@ interface HeroProps {
 }
 
 export function Hero({ globalLinks }: HeroProps) {
-  const { content: heroContent } = useSiteContent(['hero_title', 'hero_subtitle', 'hero_description', 'hero_cta'])
+  const { content: heroContent, loading } = useSiteContent(['hero_title', 'hero_subtitle', 'hero_description', 'hero_cta'])
   
   const sectionRef = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
@@ -25,7 +25,7 @@ export function Hero({ globalLinks }: HeroProps) {
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
   const y = useTransform(scrollYProgress, [0, 0.5], [0, 100])
   
-  // Fallback values
+  // Fallback values - use immediately to prevent layout shift
   const heroTitle = heroContent.hero_title || 'CALI Sound - Global Afro House City Series'
   const heroSubtitle = heroContent.hero_subtitle || 'Experience the world through Afro House music'
   const heroDescription = heroContent.hero_description || 'CALI Sound brings you city-inspired melodic club music from around the globe.'
@@ -42,6 +42,11 @@ export function Hero({ globalLinks }: HeroProps) {
     <section 
       ref={sectionRef}
       className="relative min-h-[100vh] flex items-center justify-center overflow-hidden -mt-16 md:-mt-20"
+      style={{ 
+        minHeight: '100vh',
+        contain: 'layout style paint',
+        willChange: 'transform'
+      }}
     >
       {/* Full-Screen Video Background */}
       <div className="hero-video">
@@ -90,11 +95,11 @@ export function Hero({ globalLinks }: HeroProps) {
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-tight">
+            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-tight" style={{ minHeight: '200px' }}>
               <span className="block bg-gradient-to-r from-white via-primary-100 to-accent-100 dark:from-gray-200 dark:via-gray-100 dark:to-gray-200 bg-clip-text text-transparent animate-gradient">
                 CALI
               </span>
-              <span className="block text-white text-5xl md:text-7xl lg:text-8xl font-extrabold mt-2">
+              <span className="block text-white text-5xl md:text-7xl lg:text-8xl font-extrabold mt-2" style={{ minHeight: '80px' }}>
                 {heroTitle.split(' - ')[1] || heroTitle}
               </span>
             </h1>
