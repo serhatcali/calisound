@@ -8,20 +8,30 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    const pending2FA = await isAdminPending2FA()
-
-    if (!pending2FA) {
-      return NextResponse.json(
-        { error: 'Not pending 2FA verification' },
-        { status: 400 }
-      )
-    }
-
     const cookieStore = await cookies()
-    // Check if 2FA is verified
+    
+    // Check if 2FA is verified (this is the main requirement)
     const twoFAVerified = cookieStore.get('admin-2fa-verified')
     if (twoFAVerified?.value !== 'true') {
       return NextResponse.json({ error: '2FA not verified' }, { status: 401 })
+    }
+
+    // Check if already has a valid session
+    const { verifySession } = await import('@/lib/session-manager')
+    const sessionCheck = await verifySession(request)
+    if (sessionCheck.valid) {
+      console.log('[Login Complete] Session already valid, skipping creation')
+      const response = NextResponse.json({ success: true, message: 'Already authenticated' })
+      // Clean up temp cookies
+      response.cookies.delete('admin-auth-temp')
+      return response
+    }
+
+    // If no pending 2FA but 2FA is verified, we can still create a session
+    // This allows re-login after session expires
+    const pending2FA = await isAdminPending2FA()
+    if (!pending2FA) {
+      console.log('[Login Complete] No pending 2FA but 2FA verified, creating session anyway')
     }
 
     // Get IP and User-Agent for secure session
