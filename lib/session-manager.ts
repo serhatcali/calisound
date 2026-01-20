@@ -67,15 +67,28 @@ function encryptSessionData(data: SessionData): string {
  */
 function decryptSessionData(encrypted: string): SessionData | null {
   try {
+    console.log('[decryptSessionData] Starting decryption, encrypted length:', encrypted.length)
+    console.log('[decryptSessionData] Encrypted preview:', encrypted.substring(0, 50) + '...')
+    
     const algorithm = 'aes-256-gcm'
     const key = crypto.scryptSync(SESSION_SECRET, 'salt', 32)
+    console.log('[decryptSessionData] Key generated, length:', key.length)
     
     const parts = encrypted.split(':')
-    if (parts.length !== 3) return null
+    console.log('[decryptSessionData] Split parts count:', parts.length)
+    if (parts.length !== 3) {
+      console.error('[decryptSessionData] Invalid format: expected 3 parts, got', parts.length)
+      return null
+    }
     
     const iv = Buffer.from(parts[0], 'hex')
     const authTag = Buffer.from(parts[1], 'hex')
     const encryptedData = Buffer.from(parts[2], 'hex')
+    console.log('[decryptSessionData] Parsed parts:', {
+      ivLength: iv.length,
+      authTagLength: authTag.length,
+      encryptedDataLength: encryptedData.length,
+    })
     
     const decipher = crypto.createDecipheriv(algorithm, key, iv)
     decipher.setAuthTag(authTag)
@@ -85,9 +98,19 @@ function decryptSessionData(encrypted: string): SessionData | null {
       decipher.final(),
     ])
     
-    return JSON.parse(decrypted.toString('utf8'))
-  } catch (error) {
-    console.error('Session decryption error:', error)
+    console.log('[decryptSessionData] Decrypted successfully, length:', decrypted.length)
+    const parsed = JSON.parse(decrypted.toString('utf8'))
+    console.log('[decryptSessionData] Parsed session data:', {
+      userId: parsed.userId,
+      hasIpAddress: !!parsed.ipAddress,
+      hasUserAgent: !!parsed.userAgent,
+    })
+    
+    return parsed
+  } catch (error: any) {
+    console.error('[decryptSessionData] Decryption error:', error.message)
+    console.error('[decryptSessionData] Error stack:', error.stack)
+    console.error('[decryptSessionData] Error name:', error.name)
     return null
   }
 }
@@ -208,13 +231,29 @@ export async function verifySession(
     const cookieStore = await cookies()
     const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
     
+    console.log('[verifySession] Cookie check:', {
+      hasSessionCookie: !!sessionCookie,
+      cookieValueLength: sessionCookie?.value?.length,
+      cookieValuePreview: sessionCookie?.value ? sessionCookie.value.substring(0, 50) + '...' : null,
+    })
+    
     if (!sessionCookie?.value) {
+      console.log('[verifySession] No session cookie found')
       return { valid: false, error: 'No session found' }
     }
     
+    console.log('[verifySession] Attempting to decrypt session data...')
     const sessionData = decryptSessionData(sessionCookie.value)
     
+    console.log('[verifySession] Decrypt result:', {
+      hasSessionData: !!sessionData,
+      userId: sessionData?.userId,
+      createdAt: sessionData?.createdAt ? new Date(sessionData.createdAt).toISOString() : null,
+      lastActivity: sessionData?.lastActivity ? new Date(sessionData.lastActivity).toISOString() : null,
+    })
+    
     if (!sessionData) {
+      console.error('[verifySession] Failed to decrypt session data')
       return { valid: false, error: 'Invalid session' }
     }
     
