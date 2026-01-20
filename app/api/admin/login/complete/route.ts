@@ -28,13 +28,23 @@ export async function POST(request: NextRequest) {
     const ipAddress = getClientIP(request)
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
-    // Create secure session instead of simple cookie
-    await createSession('admin', ipAddress, userAgent)
+    // Create secure session and get session data
+    const sessionResult = await createSession('admin', ipAddress, userAgent)
 
-    // Delete temp cookie
-    cookieStore.delete('admin-auth-temp')
+    // Create response
+    const response = NextResponse.json({ success: true })
+    
+    // Set session cookies in response
+    const { setSessionCookies } = await import('@/lib/session-manager')
+    setSessionCookies(response, sessionResult.sessionToken, sessionResult.csrfToken)
 
-    return NextResponse.json({ success: true })
+    // Delete temp cookies
+    response.cookies.delete('admin-auth-temp')
+    response.cookies.delete('admin-2fa-verified')
+
+    console.log('[Login Complete] Session created and cookies set')
+
+    return response
   } catch (error: any) {
     console.error('Error completing login:', error)
     return NextResponse.json(

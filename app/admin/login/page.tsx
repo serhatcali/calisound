@@ -69,14 +69,25 @@ export default function AdminLoginPage() {
       const data = await response.json()
 
       if (data.success) {
-        // Set full auth cookie
-        const completeResponse = await fetch('/api/admin/login/complete', { method: 'POST' })
-        if (completeResponse.ok) {
+        // 2FA verify route already creates session if needed
+        // But we still need to call complete endpoint to clean up temp cookies
+        try {
+          const completeResponse = await fetch('/api/admin/login/complete', { 
+            method: 'POST',
+            credentials: 'include' // Important: include cookies
+          })
+          
           // Wait for cookies to be set
-          await new Promise(resolve => setTimeout(resolve, 100))
+          await new Promise(resolve => setTimeout(resolve, 200))
+          
+          // Redirect to admin panel
           window.location.href = '/admin'
-        } else {
-          setError('Failed to complete login')
+        } catch (completeError: any) {
+          // If complete fails but verify succeeded, still try to redirect
+          // (session might already be created by verify route)
+          console.warn('Complete endpoint failed, but trying redirect anyway:', completeError)
+          await new Promise(resolve => setTimeout(resolve, 200))
+          window.location.href = '/admin'
         }
       } else {
         setError(data.error || 'Invalid verification code')
