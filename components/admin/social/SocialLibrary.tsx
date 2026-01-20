@@ -100,7 +100,12 @@ export function SocialLibrary() {
           upsert: false,
         })
 
-      if (uploadError) throw uploadError
+      if (uploadError) {
+        if (uploadError.message?.includes('Bucket not found') || uploadError.message?.includes('not found')) {
+          throw new Error('Storage bucket "media" not found. Please create it in Supabase Dashboard > Storage > Create Bucket. Make it public for asset access.')
+        }
+        throw uploadError
+      }
 
       // Get image dimensions if it's an image
       let width: number | undefined
@@ -147,7 +152,12 @@ export function SocialLibrary() {
       await loadData()
     } catch (error: any) {
       console.error('Error uploading asset:', error)
-      alert(`Error: ${error.message || 'Failed to upload asset'}`)
+      const errorMessage = error.message || 'Failed to upload asset'
+      if (errorMessage.includes('Bucket not found')) {
+        alert(`Error: ${errorMessage}\n\nPlease create a "media" bucket in Supabase Dashboard:\n1. Go to Storage\n2. Click "Create Bucket"\n3. Name it "media"\n4. Make it public\n5. Try uploading again`)
+      } else {
+        alert(`Error: ${errorMessage}`)
+      }
     } finally {
       setUploading(false)
     }
@@ -348,9 +358,16 @@ export function SocialLibrary() {
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {filteredAssets.map((asset) => {
-                    const { data: urlData } = supabase.storage
-                      .from('media')
-                      .getPublicUrl(asset.storage_path)
+                    let publicUrl = ''
+                    try {
+                      const { data: urlData } = supabase.storage
+                        .from('media')
+                        .getPublicUrl(asset.storage_path)
+                      publicUrl = urlData.publicUrl
+                    } catch (error) {
+                      console.error('Error getting public URL:', error)
+                      publicUrl = '#'
+                    }
 
                     return (
                       <div
@@ -359,9 +376,12 @@ export function SocialLibrary() {
                       >
                         {asset.type === 'image' ? (
                           <img
-                            src={urlData.publicUrl}
+                            src={publicUrl}
                             alt={asset.storage_path}
                             className="w-full h-32 object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23ccc" width="100" height="100"/%3E%3Ctext x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999"%3EImage%3C/text%3E%3C/svg%3E'
+                            }}
                           />
                         ) : (
                           <div className="w-full h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
