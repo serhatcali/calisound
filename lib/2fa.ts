@@ -36,50 +36,65 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
 
     // If secret not provided, get from database
     if (!secretToUse) {
-      const { data, error } = await supabaseAdmin
-        .from('admin_settings')
-        .select('value')
-        .eq('key', '2fa_secret')
-        .single()
+      try {
+        const { data, error } = await supabaseAdmin
+          .from('admin_settings')
+          .select('value')
+          .eq('key', '2fa_secret')
+          .single()
 
-      if (error) {
-        console.error('[2FA Verify] Error fetching secret:', error)
+        if (error) {
+          console.error('[2FA Verify] Error fetching secret:', error)
+          return false
+        }
+
+        if (!data?.value) {
+          console.error('[2FA Verify] No secret found in database')
+          return false
+        }
+
+        secretToUse = data.value
+      } catch (dbError: any) {
+        console.error('[2FA Verify] Database error:', dbError)
         return false
       }
-
-      if (!data?.value) {
-        console.error('[2FA Verify] No secret found in database')
-        return false
-      }
-
-      secretToUse = data.value
     }
 
-    if (!secretToUse) {
-      console.error('[2FA Verify] No secret available')
+    if (!secretToUse || typeof secretToUse !== 'string') {
+      console.error('[2FA Verify] No secret available or invalid type')
       return false
     }
 
-    // Validate secret format
+    // Normalize secret - remove whitespace, uppercase
+    secretToUse = secretToUse.trim().toUpperCase()
+
+    // Validate secret format (base32)
     if (!/^[A-Z2-7]+$/.test(secretToUse)) {
-      console.error('[2FA Verify] Invalid secret format (must be base32)')
+      console.error('[2FA Verify] Invalid secret format (must be base32):', secretToUse.substring(0, 10) + '...')
       return false
     }
 
     console.log('[2FA Verify] Verifying:', {
       token: cleanToken,
       secretLength: secretToUse.length,
-      secretFormat: /^[A-Z2-7]+$/.test(secretToUse),
+      secretPreview: secretToUse.substring(0, 10) + '...',
       currentTime: new Date().toISOString()
     })
     
-    // Generate current token for comparison (debug)
-    const currentToken = authenticator.generate(secretToUse)
-    console.log('[2FA Verify] Current valid token:', currentToken)
+    // Generate current token for comparison (debug and fallback)
+    let currentToken: string | null = null
+    try {
+      currentToken = authenticator.generate(secretToUse)
+      console.log('[2FA Verify] Current valid token:', currentToken)
+    } catch (genError: any) {
+      console.error('[2FA Verify] Error generating current token:', genError.message)
+      // Continue anyway, we'll try verify
+    }
     
     // Try multiple windows for better compatibility
-    // First try with window [5, 5] (very lenient)
     let isValid = false
+    
+    // Method 1: Standard verify with window [5, 5]
     try {
       isValid = authenticator.verify({ 
         token: cleanToken, 
@@ -88,10 +103,10 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
       })
       console.log('[2FA Verify] Window [5,5] result:', isValid)
     } catch (verifyError: any) {
-      console.error('[2FA Verify] Error in verify with window [5,5]:', verifyError.message)
+      console.error('[2FA Verify] Error in verify with window [5,5]:', verifyError.message, verifyError.stack)
     }
     
-    // If that fails, try with even wider window [10, 10] (extremely lenient)
+    // Method 2: Wider window [10, 10]
     if (!isValid) {
       console.log('[2FA Verify] Trying wider window [10, 10]')
       try {
@@ -106,20 +121,23 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
       }
     }
     
-    // Last resort: manual check with current token
-    if (!isValid) {
+    // Method 3: Manual token comparison (fallback)
+    if (!isValid && currentToken) {
       console.log('[2FA Verify] Manual token comparison')
       if (currentToken === cleanToken) {
         console.log('[2FA Verify] Token matches current generated token')
         isValid = true
-      } else {
-        // Try generating tokens for adjacent time steps
-        const currentTime = Math.floor(Date.now() / 1000)
-        for (let offset = -5; offset <= 5; offset++) {
-          const testTime = currentTime + (offset * 30)
-          // Note: authenticator.generate doesn't accept time parameter directly
-          // We'll rely on the window-based verification
-        }
+      }
+    }
+    
+    // Method 4: Try default window (no custom window)
+    if (!isValid) {
+      console.log('[2FA Verify] Trying default window')
+      try {
+        isValid = authenticator.verify(cleanToken, secretToUse)
+        console.log('[2FA Verify] Default window result:', isValid)
+      } catch (verifyError: any) {
+        console.error('[2FA Verify] Error in default verify:', verifyError.message)
       }
     }
     
@@ -135,7 +153,9 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
     return isValid
   } catch (error: any) {
     console.error('[2FA Verify] Exception in verify2FAToken:', error)
+    console.error('[2FA Verify] Error message:', error.message)
     console.error('[2FA Verify] Error stack:', error.stack)
+    console.error('[2FA Verify] Error name:', error.name)
     return false
   }
 }

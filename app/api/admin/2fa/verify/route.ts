@@ -165,9 +165,18 @@ export async function POST(request: NextRequest) {
       }, { status: 401 })
     }
   } catch (error: any) {
-    console.error('Error verifying 2FA token:', error)
+    console.error('[2FA Verify] Exception in route handler:', error)
+    console.error('[2FA Verify] Error message:', error.message)
+    console.error('[2FA Verify] Error stack:', error.stack)
+    console.error('[2FA Verify] Error name:', error.name)
+    
+    // Return detailed error in development
+    const errorMessage = process.env.NODE_ENV === 'production'
+      ? 'Failed to verify token. Please try again.'
+      : `Failed to verify token: ${error.message || 'Unknown error'}. Check server logs.`
+    
     return NextResponse.json(
-      { error: 'Failed to verify token' },
+      { error: errorMessage },
       { status: 500 }
     )
   }
