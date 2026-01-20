@@ -24,6 +24,12 @@ export async function generate2FASecret(email: string = 'admin@calisound.com') {
 
 export async function verify2FAToken(token: string, secret?: string): Promise<boolean> {
   try {
+    // Validate token input
+    if (!token || typeof token !== 'string') {
+      console.error('[2FA Verify] Invalid token input:', typeof token)
+      return false
+    }
+
     // Clean token - remove spaces and ensure it's 6 digits
     const cleanToken = token.replace(/\s/g, '').trim()
     
@@ -70,14 +76,22 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
 
     // Validate secret format (base32)
     if (!/^[A-Z2-7]+$/.test(secretToUse)) {
-      console.error('[2FA Verify] Invalid secret format (must be base32):', secretToUse.substring(0, 10) + '...')
+      const secretPreview = secretToUse && secretToUse.length >= 10
+        ? secretToUse.substring(0, 10) + '...'
+        : 'invalid'
+      console.error('[2FA Verify] Invalid secret format (must be base32):', secretPreview)
       return false
     }
+
+    // Safe substring for logging
+    const secretPreview = secretToUse && secretToUse.length >= 10
+      ? secretToUse.substring(0, 10) + '...'
+      : secretToUse || 'missing'
 
     console.log('[2FA Verify] Verifying:', {
       token: cleanToken,
       secretLength: secretToUse.length,
-      secretPreview: secretToUse.substring(0, 10) + '...',
+      secretPreview,
       currentTime: new Date().toISOString()
     })
     
@@ -181,7 +195,10 @@ export async function is2FAEnabled(): Promise<boolean> {
 
 export async function enable2FA(secret: string): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log('Enabling 2FA with secret:', secret.substring(0, 10) + '...')
+    const secretPreview = secret && secret.length >= 10
+      ? secret.substring(0, 10) + '...'
+      : secret || 'missing'
+    console.log('Enabling 2FA with secret:', secretPreview)
     
     // First, try to check if table exists and is accessible
     const { data: testData, error: testError } = await supabaseAdmin

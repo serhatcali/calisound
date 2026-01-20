@@ -60,7 +60,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    let body: any
+    try {
+      body = await request.json()
+    } catch (parseError: any) {
+      console.error('[2FA Verify] JSON parse error:', parseError)
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      )
+    }
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      )
+    }
+
     const tokenValidation = validateString(body.token, {
       required: true,
       minLength: 6,
@@ -68,16 +85,20 @@ export async function POST(request: NextRequest) {
       pattern: /^\d{6}$/, // 6 digits
     })
 
-    if (!tokenValidation.valid) {
+    if (!tokenValidation.valid || !tokenValidation.value) {
       return NextResponse.json(
-        { error: 'Token must be a 6-digit number' },
+        { error: tokenValidation.error || 'Token must be a 6-digit number' },
         { status: 400 }
       )
     }
 
-    const { token } = tokenValidation.value!
+    const token = tokenValidation.value
 
-    console.log('[2FA Verify] Verifying token:', token.substring(0, 2) + '****')
+    // Safe substring for logging
+    const tokenPreview = token && token.length >= 2 
+      ? token.substring(0, 2) + '****' 
+      : '****'
+    console.log('[2FA Verify] Verifying token:', tokenPreview)
 
     // Verify token with detailed error handling
     let isValid = false
