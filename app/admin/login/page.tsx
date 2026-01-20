@@ -152,9 +152,22 @@ export default function AdminLoginPage() {
             setLogs(savedLogs)
           } catch (e) {}
           
-          // Redirect to admin panel
-          logToStorage('[Login Page] Redirecting to /admin')
-          window.location.href = '/admin'
+          // Wait a bit more to ensure cookies are fully set
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
+          // Double-check auth before redirect
+          const finalAuthCheck = await fetch('/api/admin/login/check', { credentials: 'include' })
+          const finalAuthData = await finalAuthCheck.json()
+          logToStorage('[Login Page] Final auth check before redirect', finalAuthData)
+          
+          if (finalAuthData.authenticated) {
+            logToStorage('[Login Page] Authenticated, redirecting to /admin')
+            // Use router.push instead of window.location for better cookie handling
+            window.location.href = '/admin'
+          } else {
+            logToStorage('[Login Page] Not authenticated, staying on login page', finalAuthData)
+            setError('Authentication failed. Please try again.')
+          }
         } catch (completeError: any) {
           // If complete fails but verify succeeded, still try to redirect
           // (session might already be created by verify route)
