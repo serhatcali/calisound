@@ -35,24 +35,21 @@ body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Prevent layout shift during font loading */
-  font-display: swap;
-  /* Force layout stability */
   text-rendering: optimizeLegibility;
-  /* Prevent text blur during animations */
-  will-change: auto;
 }
 
 html {
   height: 100%;
+  font-size: 16px;
 }
 
 body {
   height: 100%;
+  min-height: 100vh;
 }
 
 body {
-  @apply bg-white dark:bg-black text-gray-900 dark:text-gray-100 transition-colors duration-300;
+  @apply bg-white dark:bg-black text-gray-900 dark:text-gray-100;
 }
 
 a {
@@ -87,107 +84,52 @@ a {
   scrollbar-color: rgba(234, 179, 8, 0.5) rgba(0, 0, 0, 0.3);
 }
 
-/* Smooth transitions - exclude text from blur transitions */
+/* Minimal transitions - only essential properties */
 * {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-property: color, background-color, border-color, opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
 
-/* Separate transitions for backdrop-blur to prevent text blur */
+/* Disable backdrop-blur transitions completely to prevent text blur */
 [class*="backdrop-blur"] {
-  transition-property: opacity, backdrop-filter;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
-  will-change: backdrop-filter;
-  /* Isolate backdrop-blur from children */
-  isolation: isolate;
+  transition: none !important;
+  will-change: auto !important;
 }
 
-/* Prevent backdrop-blur from affecting text - use separate layers */
-[class*="backdrop-blur"]::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  backdrop-filter: inherit;
-  -webkit-backdrop-filter: inherit;
-  z-index: -1;
-  pointer-events: none;
-}
-
-/* Prevent text blur during animations - isolate text from backdrop-blur */
-h1, h2, h3, h4, h5, h6, p, span, a, button, label, div[class*="text"], div[class*="font"] {
+/* Remove all transform and isolation from text - these cause blur */
+h1, h2, h3, h4, h5, h6, p, span, a, button, label {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* Force GPU acceleration and isolate from backdrop-blur */
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  isolation: isolate;
-  /* Prevent text from being affected by backdrop-blur */
-  position: relative;
-  z-index: 1;
-}
-
-/* Ensure text elements are not affected by parent backdrop-blur */
-[class*="backdrop-blur"] h1,
-[class*="backdrop-blur"] h2,
-[class*="backdrop-blur"] h3,
-[class*="backdrop-blur"] h4,
-[class*="backdrop-blur"] h5,
-[class*="backdrop-blur"] h6,
-[class*="backdrop-blur"] p,
-[class*="backdrop-blur"] span,
-[class*="backdrop-blur"] a,
-[class*="backdrop-blur"] button,
-[class*="backdrop-blur"] label {
-  /* Create new stacking context to isolate from backdrop-blur */
-  isolation: isolate;
-  position: relative;
-  z-index: 1;
-  /* Force hardware acceleration */
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-/* Prevent layout shift - critical */
-html {
-  /* Prevent font loading layout shift */
-  font-size: 16px;
-  /* Force layout stability */
-  contain: layout style;
-}
-
-body {
-  /* Prevent initial layout shift */
-  min-height: 100vh;
-  /* Force layout stability */
-  contain: layout style;
+  /* Remove problematic properties */
+  transform: none !important;
+  backface-visibility: visible !important;
+  isolation: auto !important;
+  position: static !important;
+  z-index: auto !important;
+  will-change: auto !important;
 }
 
 /* Mobile optimizations */
 @media (max-width: 640px) {
   * {
-    /* Reduce animations on mobile for better performance */
-    animation-duration: 0.3s !important;
-    transition-duration: 0.2s !important;
+    animation-duration: 0.2s !important;
+    transition-duration: 0.15s !important;
   }
   
-  /* Prevent layout shift */
   img, video {
     display: block;
     max-width: 100%;
     height: auto;
   }
   
-  /* Optimize touch targets */
   button, a {
     min-height: 44px;
     min-width: 44px;
     touch-action: manipulation;
   }
   
-  /* Prevent text reflow */
   h1, h2, h3, h4, h5, h6, p {
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -195,7 +137,6 @@ body {
     overflow-wrap: break-word;
   }
   
-  /* Responsive text sizing */
   h1 {
     font-size: clamp(2rem, 8vw, 3rem) !important;
   }
@@ -204,13 +145,11 @@ body {
     font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
   }
   
-  /* Prevent horizontal scroll */
   body {
     overflow-x: hidden;
     width: 100%;
   }
   
-  /* Container padding */
   .max-w-7xl {
     padding-left: 1rem;
     padding-right: 1rem;
@@ -218,7 +157,6 @@ body {
 }
 
 @media (min-width: 641px) and (max-width: 768px) {
-  /* Tablet optimizations */
   h1 {
     font-size: clamp(2.5rem, 6vw, 4rem) !important;
   }
@@ -252,18 +190,9 @@ body {
   }
 }
 
-/* Image loading optimization */
-img[loading="lazy"] {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 1000px;
-}
-
-/* Optimize images for mobile */
-@media (max-width: 768px) {
-  img {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-  }
+/* Image loading optimization - prioritize above fold images */
+img {
+  image-rendering: auto;
 }
 
 /* Reduce motion for users who prefer it */
@@ -291,12 +220,10 @@ img[loading="lazy"] {
     box-shadow: var(--shadow-2xl);
   }
   
-  /* Focus visible for accessibility */
   .focus-visible-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black;
   }
   
-  /* Smooth scroll */
   .smooth-scroll {
     scroll-behavior: smooth;
   }
@@ -305,7 +232,6 @@ img[loading="lazy"] {
     box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.4);
   }
   
-  /* Animated Gradient */
   @keyframes gradientShift {
     0%, 100% {
       background-position: 0% 50%;
@@ -321,12 +247,10 @@ img[loading="lazy"] {
   }
 }
 
-/* Smooth scroll - but prevent on page load */
 html {
   scroll-behavior: smooth;
 }
 
-/* Prevent scroll on page load for CALI Club */
 html:has(body > div > div[class*="cali-club"]) {
   scroll-behavior: auto;
 }
@@ -374,9 +298,6 @@ html:has(body > div > div[class*="cali-club"]) {
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  /* Prevent layout shift */
-  contain: layout style paint;
-  will-change: transform;
 }
 
 @media (min-width: 768px) {
@@ -397,12 +318,8 @@ html:has(body > div > div[class*="cali-club"]) {
   min-height: 100%;
   object-fit: cover;
   object-position: center;
-  /* Prevent layout shift */
-  contain: layout style paint;
-  will-change: transform;
 }
 
-/* Mobile and Desktop video visibility */
 .hero-video-mobile {
   display: block;
 }
