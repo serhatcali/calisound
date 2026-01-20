@@ -26,7 +26,7 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
   const [activePlatform, setActivePlatform] = useState<SocialPlatform>('youtube')
   const [title, setTitle] = useState(initialPost?.title || '')
   const [baseText, setBaseText] = useState(initialPost?.base_text || '')
-  const [selectedCity, setSelectedCity] = useState<number | undefined>(initialPost?.city_id)
+  const [selectedCity, setSelectedCity] = useState<string | undefined>(initialPost?.city_id)
   const [selectedCampaign, setSelectedCampaign] = useState<string | undefined>(initialPost?.campaign_id)
   const [saving, setSaving] = useState(false)
 
@@ -206,7 +206,7 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
             </label>
             <select
               value={selectedCity || ''}
-              onChange={(e) => setSelectedCity(e.target.value ? Number(e.target.value) : undefined)}
+              onChange={(e) => setSelectedCity(e.target.value || undefined)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
               <option value="">None</option>

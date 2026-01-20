@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     const post = await createSocialPost({
       title: titleValidation.value!,
       base_text: baseTextValidation.value!,
-      city_id: body.city_id ? parseInt(body.city_id) : undefined,
+      city_id: body.city_id || undefined, // UUID, no need to parse
       campaign_id: body.campaign_id || undefined,
       scheduled_at: body.scheduled_at || undefined,
       timezone: body.timezone || 'Europe/Istanbul',

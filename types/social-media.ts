@@ -56,7 +56,7 @@ export interface SocialPost {
   status: PostStatus
   scheduled_at?: string
   timezone: string
-  city_id?: number
+  city_id?: string // UUID
   campaign_id?: string
   created_by: string
   approved_by?: string
@@ -66,7 +66,7 @@ export interface SocialPost {
   created_at: string
   updated_at: string
   // Relations
-  city?: { id: number; name: string; slug: string }
+  city?: { id: string; name: string; slug: string } // id is UUID
   campaign?: { id: string; name: string }
   variants?: SocialPostVariant[]
 }
@@ -102,7 +102,7 @@ export interface SocialAsset {
   dpi: number
   checksum?: string
   usage?: string
-  city_id?: number
+  city_id?: string // UUID
   created_by: string
   created_at: string
   updated_at: string

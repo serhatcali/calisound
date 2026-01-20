@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS social_posts (
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'review', 'approved', 'scheduled', 'publishing', 'published', 'failed')),
   scheduled_at TIMESTAMPTZ,
   timezone TEXT NOT NULL DEFAULT 'Europe/Istanbul', -- UTC+3
-  city_id INTEGER REFERENCES cities(id) ON DELETE SET NULL,
+  city_id UUID REFERENCES cities(id) ON DELETE SET NULL,
   campaign_id UUID REFERENCES campaigns(id) ON DELETE SET NULL,
   created_by TEXT NOT NULL DEFAULT 'admin',
   approved_by TEXT,
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS social_assets (
   dpi INTEGER DEFAULT 72,
   checksum TEXT, -- For deduplication
   usage TEXT, -- 'cover', 'banner', 'story', etc.
-  city_id INTEGER REFERENCES cities(id) ON DELETE SET NULL,
+  city_id UUID REFERENCES cities(id) ON DELETE SET NULL,
   created_by TEXT NOT NULL DEFAULT 'admin',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

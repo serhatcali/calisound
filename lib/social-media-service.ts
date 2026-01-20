@@ -16,7 +16,7 @@ import type {
 // Social Posts
 export async function getSocialPosts(filters?: {
   status?: PostStatus
-  city_id?: number
+  city_id?: string // UUID
   limit?: number
 }) {
   let query = supabaseAdmin
@@ -63,7 +63,7 @@ export async function getSocialPost(id: string) {
 export async function createSocialPost(post: {
   title: string
   base_text: string
-  city_id?: number
+  city_id?: string // UUID
   campaign_id?: string
   scheduled_at?: string
   timezone?: string
@@ -183,7 +183,7 @@ export async function getSocialAccounts() {
 
 // Assets
 export async function getSocialAssets(filters?: {
-  city_id?: number
+  city_id?: string // UUID
   aspect_ratio?: string
   type?: string
 }) {
