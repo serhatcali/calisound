@@ -1,6 +1,18 @@
 -- Social Media Suite Database Schema
 -- Run this in Supabase SQL Editor
 
+-- Campaigns (must be created first as it's referenced by social_posts)
+CREATE TABLE IF NOT EXISTS campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  utm_defaults JSONB DEFAULT '{}'::JSONB, -- { utm_source, utm_medium, utm_campaign }
+  start_at TIMESTAMPTZ,
+  end_at TIMESTAMPTZ,
+  created_by TEXT NOT NULL DEFAULT 'admin',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Social Media Accounts (for auto-publish mode)
 CREATE TABLE IF NOT EXISTS social_accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -133,18 +145,6 @@ CREATE TABLE IF NOT EXISTS social_audit_log (
   entity_id UUID,
   meta JSONB DEFAULT '{}'::JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Campaigns
-CREATE TABLE IF NOT EXISTS campaigns (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  utm_defaults JSONB DEFAULT '{}'::JSONB, -- { utm_source, utm_medium, utm_campaign }
-  start_at TIMESTAMPTZ,
-  end_at TIMESTAMPTZ,
-  created_by TEXT NOT NULL DEFAULT 'admin',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Indexes for performance
