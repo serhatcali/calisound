@@ -19,6 +19,8 @@ export function SocialPublishing({
   jobs
 }: SocialPublishingProps) {
   const [activeTab, setActiveTab] = useState<'published' | 'failed' | 'publishing' | 'jobs'>('published')
+  const [retryingPost, setRetryingPost] = useState<string | null>(null)
+  const [retryingJob, setRetryingJob] = useState<string | null>(null)
 
   const getJobForPost = (postId: string) => {
     return jobs.filter(job => job.post_id === postId)
@@ -32,6 +34,66 @@ export function SocialPublishing({
       case 'failed': return 'bg-red-500'
       case 'cancelled': return 'bg-gray-500'
       default: return 'bg-gray-500'
+    }
+  }
+
+  const handleRetryPost = async (postId: string) => {
+    if (!confirm('Retry publishing this post? This will create new jobs for all platforms.')) {
+      return
+    }
+
+    setRetryingPost(postId)
+    try {
+      const response = await fetch(`/api/admin/social/posts/${postId}/retry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to retry post')
+      }
+
+      const result = await response.json()
+      alert(`Retry initiated! ${result.message || 'Check the Publishing tab for status.'}`)
+      
+      // Refresh page to show updated status
+      window.location.reload()
+    } catch (error: any) {
+      console.error('Error retrying post:', error)
+      alert(`Error: ${error.message || 'Failed to retry post'}`)
+    } finally {
+      setRetryingPost(null)
+    }
+  }
+
+  const handleRetryJob = async (jobId: string) => {
+    if (!confirm('Retry this job?')) {
+      return
+    }
+
+    setRetryingJob(jobId)
+    try {
+      const response = await fetch(`/api/admin/social/jobs/${jobId}/retry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to retry job')
+      }
+
+      const result = await response.json()
+      alert(`Job retry initiated! ${result.message || 'Check the Jobs tab for status.'}`)
+      
+      // Refresh page to show updated status
+      window.location.reload()
+    } catch (error: any) {
+      console.error('Error retrying job:', error)
+      alert(`Error: ${error.message || 'Failed to retry job'}`)
+    } finally {
+      setRetryingJob(null)
     }
   }
 
@@ -176,8 +238,12 @@ export function SocialPublishing({
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
-                        <button className="px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                          Retry
+                        <button
+                          onClick={() => handleRetryPost(post.id)}
+                          disabled={retryingPost === post.id}
+                          className="px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {retryingPost === post.id ? 'Retrying...' : 'Retry'}
                         </button>
                         <Link
                           href={`/admin/social/compose?id=${post.id}`}
@@ -274,8 +340,12 @@ export function SocialPublishing({
                         </div>
                       </div>
                       {job.status === 'failed' && (
-                        <button className="ml-4 px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                          Retry
+                        <button
+                          onClick={() => handleRetryJob(job.id)}
+                          disabled={retryingJob === job.id}
+                          className="ml-4 px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {retryingJob === job.id ? 'Retrying...' : 'Retry'}
                         </button>
                       )}
                     </div>
