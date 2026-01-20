@@ -26,19 +26,47 @@ export function NewsletterPopup() {
 
     // Check if user has dismissed the popup
     const dismissed = localStorage.getItem(STORAGE_KEY)
-    if (!dismissed) {
+    const dismissedTimestamp = localStorage.getItem(`${STORAGE_KEY}-timestamp`)
+    
+    // If dismissed, check if 24 hours have passed
+    if (dismissed) {
+      if (dismissedTimestamp) {
+        const hoursSinceDismissal = (Date.now() - parseInt(dismissedTimestamp)) / (1000 * 60 * 60)
+        // If less than 24 hours, don't show
+        if (hoursSinceDismissal < 24) {
+          return
+        } else {
+          // 24 hours passed, clear dismissal to show again
+          localStorage.removeItem(STORAGE_KEY)
+          localStorage.removeItem(`${STORAGE_KEY}-timestamp`)
+        }
+      } else {
+        // Old dismissal without timestamp, don't show
+        return
+      }
+    }
+    
+    // Only show if not already open and not dismissed
+    if (!isOpen) {
       // Show popup after a short delay
       const timer = setTimeout(() => {
         setIsOpen(true)
       }, 2000) // 2 seconds delay
       return () => clearTimeout(timer)
     }
-  }, [pathname])
+  }, [pathname, isOpen])
 
   const handleClose = () => {
     setIsOpen(false)
+    // Always save dismissal state to prevent popup from showing again
     if (dontShowAgain) {
       localStorage.setItem(STORAGE_KEY, 'true')
+    } else {
+      // Even if "don't show again" is not checked, save a temporary dismissal
+      // This prevents immediate re-opening, but allows showing again on next visit
+      localStorage.setItem(STORAGE_KEY, 'true')
+      // Set a timestamp to allow showing again after 24 hours
+      localStorage.setItem(`${STORAGE_KEY}-timestamp`, Date.now().toString())
     }
   }
 
@@ -60,6 +88,7 @@ export function NewsletterPopup() {
             exit={{ opacity: 0 }}
             onClick={handleClose}
             className="fixed inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm z-50"
+            style={{ willChange: 'opacity, backdrop-filter' }}
           />
 
           {/* Popup */}
