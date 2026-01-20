@@ -38,41 +38,9 @@ export function SocialIntegrations() {
   }
 
   const handleConnect = async (platform: SocialPlatform) => {
-    setConnecting(platform)
-    
-    // For now, show a message that OAuth is not yet implemented
-    // In the future, this will redirect to OAuth flow
-    alert(`OAuth integration for ${platform} is not yet implemented.\n\nFor now, you can use "Assisted" mode:\n1. Create your post in the composer\n2. Copy the generated content\n3. Manually upload to ${platform}\n\nAuto-publish mode will be available after OAuth integration.`)
-    setConnecting(null)
-    
-    // TODO: When OAuth is implemented, uncomment this:
-    /*
-    try {
-      const response = await fetch('/api/admin/social/accounts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          platform,
-          handle: 'placeholder', // Will be filled after OAuth
-        }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        // TODO: Redirect to OAuth URL when implemented
-        alert(`OAuth flow for ${platform} will be implemented. For now, accounts are in "Assisted" mode.`)
-      } else {
-        const error = await response.json()
-        alert(`Error: ${error.error || 'Failed to connect'}`)
-      }
-    } catch (error: any) {
-      console.error('Error connecting account:', error)
-      alert(`Error: ${error.message || 'Failed to connect'}`)
-    } finally {
-      setConnecting(null)
-      fetchAccounts()
-    }
-    */
+    // OAuth is not yet implemented - show info in UI instead of alert
+    // This function will be implemented when OAuth is ready
+    return
   }
 
   const handleDisconnect = async (accountId: string) => {
@@ -122,11 +90,26 @@ export function SocialIntegrations() {
   return (
     <div className="space-y-6">
       {/* Info Banner */}
-      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-        <p className="text-sm text-blue-800 dark:text-blue-400">
-          <strong>Note:</strong> Auto-publish mode requires OAuth integration. 
-          Currently, all platforms are in <strong>&quot;Assisted&quot;</strong> mode (manual upload with generated content).
-        </p>
+      <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">ℹ️</span>
+          <div>
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">
+              <strong>Assisted Mode Active</strong>
+            </p>
+            <p className="text-sm text-blue-800 dark:text-blue-400 mb-2">
+              OAuth integration is coming soon. For now, use <strong>&quot;Assisted&quot;</strong> mode:
+            </p>
+            <ol className="text-sm text-blue-800 dark:text-blue-400 list-decimal list-inside space-y-1">
+              <li>Create your post in the composer</li>
+              <li>Copy the generated content for each platform</li>
+              <li>Manually upload to your social media accounts</li>
+            </ol>
+            <p className="text-xs text-blue-700 dark:text-blue-500 mt-2">
+              Auto-publish mode will be available after OAuth integration.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Platform Cards */}
@@ -181,25 +164,30 @@ export function SocialIntegrations() {
 
               <div className="flex gap-2">
                 {isConnected ? (
-                  <button
-                    onClick={() => handleDisconnect(account!.id)}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                  >
-                    Disconnect
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleDisconnect(account!.id)}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Disconnect
+                    </button>
+                    <button className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      Test
+                    </button>
+                  </>
                 ) : (
-                  <button
-                    onClick={() => handleConnect(platform.value)}
-                    disabled={isConnecting}
-                    className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {isConnecting ? 'Connecting...' : 'Connect'}
-                  </button>
-                )}
-                {isConnected && (
-                  <button className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    Test
-                  </button>
+                  <div className="flex-1">
+                    <button
+                      disabled
+                      className="w-full px-4 py-2 bg-gray-400 dark:bg-gray-700 text-white rounded-lg cursor-not-allowed opacity-60"
+                      title="OAuth integration coming soon. Use Assisted mode: Create post → Copy content → Manual upload"
+                    >
+                      Connect (Coming Soon)
+                    </button>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+                      Use Assisted mode for now
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
