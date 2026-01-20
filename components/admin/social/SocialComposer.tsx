@@ -32,6 +32,8 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
     initialPost?.scheduled_at ? new Date(initialPost.scheduled_at).toISOString().slice(0, 16) : ''
   )
   const [saving, setSaving] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [copying, setCopying] = useState(false)
 
   // Platform-specific variant states
   const [variants, setVariants] = useState<Record<SocialPlatform, {
@@ -62,6 +64,11 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
   const currentVariant = variants[activePlatform]
   const rules = PLATFORM_RULES[activePlatform]
   const validation = validatePostVariant(activePlatform, currentVariant)
+  
+  // Check if there's any content in variants
+  const hasContent = Object.values(variants).some(
+    v => v && (v.caption || v.description || v.title)
+  )
 
   const updateVariant = (platform: SocialPlatform, updates: Partial<typeof currentVariant>) => {
     setVariants(prev => ({
@@ -170,6 +177,147 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
       alert(`Error: ${error.message || 'Failed to save post'}`)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleCopyAll = async () => {
+    if (!initialPost?.id) {
+      alert('Please save the post first before copying')
+      return
+    }
+
+    setCopying(true)
+    try {
+      // Get all variants with content
+      const variantsWithContent = Object.entries(variants)
+        .filter(([_, variant]) => variant && (variant.caption || variant.description || variant.title))
+        .map(([platform, variant]) => {
+          const platformInfo = PLATFORMS.find(p => p.value === platform)
+          let content = ''
+
+          if (platform.includes('youtube')) {
+            content = `${variant.title || ''}\n\n${variant.description || ''}`
+            if (variant.tags) {
+              content += `\n\nTags: ${variant.tags}`
+            }
+          } else {
+            content = variant.caption || ''
+            if (variant.hashtags && variant.hashtags.length > 0) {
+              content += `\n\n${variant.hashtags.join(' ')}`
+            }
+            if (variant.first_comment) {
+              content += `\n\nFirst Comment: ${variant.first_comment}`
+            }
+          }
+
+          return {
+            platform: platformInfo?.label || platform,
+            content: content.trim()
+          }
+        })
+
+      if (variantsWithContent.length === 0) {
+        alert('No content to copy. Please add content for at least one platform.')
+        return
+      }
+
+      // Format for clipboard
+      const clipboardText = variantsWithContent
+        .map(v => `=== ${v.platform} ===\n${v.content}\n`)
+        .join('\n')
+
+      await navigator.clipboard.writeText(clipboardText)
+      alert(`Copied content from ${variantsWithContent.length} platform(s) to clipboard!`)
+    } catch (error: any) {
+      console.error('Error copying content:', error)
+      alert(`Error: ${error.message || 'Failed to copy content'}`)
+    } finally {
+      setCopying(false)
+    }
+  }
+
+  const handleExportPack = () => {
+    if (!initialPost?.id) {
+      alert('Please save the post first before exporting')
+      return
+    }
+
+    try {
+      // Collect all variants with content
+      const exportData = {
+        post: {
+          id: initialPost.id,
+          title,
+          base_text: baseText,
+          city_id: selectedCity,
+          campaign_id: selectedCampaign,
+          scheduled_at: scheduledAt || null,
+        },
+        variants: Object.entries(variants)
+          .filter(([_, variant]) => variant && (variant.caption || variant.description || variant.title))
+          .map(([platform, variant]) => ({
+            platform,
+            ...variant
+          })),
+        exported_at: new Date().toISOString(),
+        exported_by: 'admin' // TODO: Get from session
+      }
+
+      // Create JSON blob
+      const jsonBlob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(jsonBlob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `social-post-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${Date.now()}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      alert('Export pack downloaded successfully!')
+    } catch (error: any) {
+      console.error('Error exporting pack:', error)
+      alert(`Error: ${error.message || 'Failed to export pack'}`)
+    }
+  }
+
+  const handlePublish = async () => {
+    if (!initialPost?.id) {
+      alert('Please save the post first before publishing')
+      return
+    }
+
+    if (!hasContent) {
+      alert('Please add content for at least one platform before publishing')
+      return
+    }
+
+    if (!confirm('Publish this post now? This will attempt to publish to all platforms with content.')) {
+      return
+    }
+
+    setPublishing(true)
+    try {
+      const response = await fetch(`/api/admin/social/posts/${initialPost.id}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to publish post')
+      }
+
+      const result = await response.json()
+      alert(`Publish job started! ${result.message || 'Check the Publishing page for status.'}`)
+      
+      // Refresh page to show updated status
+      window.location.reload()
+    } catch (error: any) {
+      console.error('Error publishing post:', error)
+      alert(`Error: ${error.message || 'Failed to publish post'}`)
+    } finally {
+      setPublishing(false)
     }
   }
 
@@ -343,20 +491,45 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
       </div>
 
       {/* Action Buttons */}
-      <div className="mt-6 flex gap-4">
+      <div className="mt-6 flex flex-wrap gap-4">
         <button
           onClick={handleSave}
           disabled={saving || !validation.valid}
-          className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? 'Saving...' : 'Save Draft'}
         </button>
-        <button className="px-6 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-          Copy All
-        </button>
-        <button className="px-6 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-          Export Pack
-        </button>
+        
+        {initialPost?.id && initialPost.status === 'draft' && (
+          <button
+            onClick={handlePublish}
+            disabled={publishing || !hasContent}
+            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="Publish this post to all platforms with content"
+          >
+            {publishing ? 'Publishing...' : 'Publish Now'}
+          </button>
+        )}
+
+        {initialPost?.id && (
+          <>
+            <button
+              onClick={handleCopyAll}
+              disabled={copying}
+              className="px-6 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Copy all platform content to clipboard"
+            >
+              {copying ? 'Copying...' : 'Copy All'}
+            </button>
+            <button
+              onClick={handleExportPack}
+              className="px-6 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              title="Export post as JSON file"
+            >
+              Export Pack
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
