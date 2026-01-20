@@ -44,7 +44,7 @@ export function CityGrid({ cities }: CityGridProps) {
                 perspective: '1000px',
                 contain: 'layout style'
               }}
-              className="group relative rounded-3xl overflow-hidden cursor-pointer border-glow"
+              className="group relative rounded-3xl overflow-hidden cursor-pointer border-glow city-grid-item"
               whileHover={{ 
                 scale: 1.05,
                 rotateY: 5,

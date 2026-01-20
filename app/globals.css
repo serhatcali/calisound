@@ -179,6 +179,21 @@ body {
   aspect-ratio: 16 / 9;
 }
 
+/* Responsive min-heights for cards */
+@media (max-width: 640px) {
+  .city-card,
+  .city-grid-item {
+    min-height: 300px !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .city-card,
+  .city-grid-item {
+    min-height: 400px !important;
+  }
+}
+
 /* Image loading optimization */
 img[loading="lazy"] {
   content-visibility: auto;
