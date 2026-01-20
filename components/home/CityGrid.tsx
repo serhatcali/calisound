@@ -38,8 +38,13 @@ export function CityGrid({ cities }: CityGridProps) {
               initial={{ opacity: 0, y: 30, rotateX: -15 }}
               whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
               viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
+              transition={{ duration: 0.6, delay: Math.min(index * 0.1, 0.5) }}
+              style={{ 
+                transformStyle: 'preserve-3d', 
+                perspective: '1000px',
+                minHeight: '400px', // Prevent layout shift
+                contain: 'layout style'
+              }}
               className="group relative rounded-3xl overflow-hidden cursor-pointer border-glow"
               whileHover={{ 
                 scale: 1.05,

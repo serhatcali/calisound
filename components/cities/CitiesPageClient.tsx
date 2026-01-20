@@ -333,8 +333,12 @@ export function CitiesPageClient({ initialCities }: CitiesPageClientProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.5) }}
+              style={{ 
+                minHeight: '350px', // Prevent layout shift
+                contain: 'layout style'
+              }}
             >
-              <div className="group relative bg-white dark:bg-black rounded-2xl shadow-soft overflow-hidden cursor-pointer hover:shadow-soft-xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+              <div className="group relative bg-white dark:bg-black rounded-2xl shadow-soft overflow-hidden cursor-pointer hover:shadow-soft-xl transition-all duration-300 border border-gray-100 dark:border-gray-800" style={{ minHeight: '350px' }}>
                 {/* Favorite Button - Above everything */}
                 <div className="absolute top-4 right-4 z-50">
                   <FavoriteButton cityId={city.id} size="sm" />
