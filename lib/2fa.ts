@@ -28,9 +28,7 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
     const cleanToken = token.replace(/\s/g, '').trim()
     
     if (cleanToken.length !== 6 || !/^\d+$/.test(cleanToken)) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.error('Invalid token format:', cleanToken, 'Length:', cleanToken.length)
-      }
+      console.error('[2FA Verify] Invalid token format:', cleanToken, 'Length:', cleanToken.length)
       return false
     }
 
@@ -45,16 +43,12 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
         .single()
 
       if (error) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('Error fetching secret:', error)
-        }
+        console.error('[2FA Verify] Error fetching secret:', error)
         return false
       }
 
       if (!data?.value) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('No secret found in database')
-        }
+        console.error('[2FA Verify] No secret found in database')
         return false
       }
 
@@ -62,70 +56,86 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
     }
 
     if (!secretToUse) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.error('No secret available')
-      }
+      console.error('[2FA Verify] No secret available')
       return false
     }
 
-    // Only log in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Verifying token:', cleanToken)
-      console.log('Secret length:', secretToUse.length)
-      console.log('Secret format check:', /^[A-Z2-7]+$/.test(secretToUse))
+    // Validate secret format
+    if (!/^[A-Z2-7]+$/.test(secretToUse)) {
+      console.error('[2FA Verify] Invalid secret format (must be base32)')
+      return false
     }
+
+    console.log('[2FA Verify] Verifying:', {
+      token: cleanToken,
+      secretLength: secretToUse.length,
+      secretFormat: /^[A-Z2-7]+$/.test(secretToUse),
+      currentTime: new Date().toISOString()
+    })
+    
+    // Generate current token for comparison (debug)
+    const currentToken = authenticator.generate(secretToUse)
+    console.log('[2FA Verify] Current valid token:', currentToken)
     
     // Try multiple windows for better compatibility
     // First try with window [5, 5] (very lenient)
-    let isValid = authenticator.verify({ 
-      token: cleanToken, 
-      secret: secretToUse,
-      window: [5, 5]
-    })
-    
-    // If that fails, try with even wider window [10, 10] (extremely lenient)
-    if (!isValid) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('First verification failed, trying wider window [10, 10]')
-      }
+    let isValid = false
+    try {
       isValid = authenticator.verify({ 
         token: cleanToken, 
         secret: secretToUse,
-        window: [10, 10]
+        window: [5, 5]
       })
+      console.log('[2FA Verify] Window [5,5] result:', isValid)
+    } catch (verifyError: any) {
+      console.error('[2FA Verify] Error in verify with window [5,5]:', verifyError.message)
     }
     
-    // Last resort: try with no window limit (check all possible tokens)
-    if (!isValid && process.env.NODE_ENV !== 'production') {
-      console.log('Trying with no window limit')
-      // Check current and adjacent steps manually
-      const currentTime = Math.floor(Date.now() / 1000)
-      for (let offset = -10; offset <= 10; offset++) {
-        const testTime = currentTime + (offset * 30)
-        const testToken = authenticator.generate(secretToUse)
-        if (testToken === cleanToken) {
-          isValid = true
-          break
+    // If that fails, try with even wider window [10, 10] (extremely lenient)
+    if (!isValid) {
+      console.log('[2FA Verify] Trying wider window [10, 10]')
+      try {
+        isValid = authenticator.verify({ 
+          token: cleanToken, 
+          secret: secretToUse,
+          window: [10, 10]
+        })
+        console.log('[2FA Verify] Window [10,10] result:', isValid)
+      } catch (verifyError: any) {
+        console.error('[2FA Verify] Error in verify with window [10,10]:', verifyError.message)
+      }
+    }
+    
+    // Last resort: manual check with current token
+    if (!isValid) {
+      console.log('[2FA Verify] Manual token comparison')
+      if (currentToken === cleanToken) {
+        console.log('[2FA Verify] Token matches current generated token')
+        isValid = true
+      } else {
+        // Try generating tokens for adjacent time steps
+        const currentTime = Math.floor(Date.now() / 1000)
+        for (let offset = -5; offset <= 5; offset++) {
+          const testTime = currentTime + (offset * 30)
+          // Note: authenticator.generate doesn't accept time parameter directly
+          // We'll rely on the window-based verification
         }
       }
     }
     
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Token verification result:', isValid)
-      if (!isValid) {
-        // Try to get current valid tokens for debugging
-        const currentTime = Math.floor(Date.now() / 1000)
-        const currentStep = Math.floor(currentTime / 30)
-        console.log('Current time step:', currentStep)
-        console.log('Current time:', new Date().toISOString())
-      }
+    console.log('[2FA Verify] Final result:', isValid)
+    if (!isValid) {
+      console.log('[2FA Verify] Token mismatch:', {
+        entered: cleanToken,
+        current: currentToken,
+        time: new Date().toISOString()
+      })
     }
     
     return isValid
-  } catch (error) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('Error verifying 2FA token:', error)
-    }
+  } catch (error: any) {
+    console.error('[2FA Verify] Exception in verify2FAToken:', error)
+    console.error('[2FA Verify] Error stack:', error.stack)
     return false
   }
 }

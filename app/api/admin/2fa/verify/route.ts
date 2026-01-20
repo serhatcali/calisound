@@ -79,10 +79,17 @@ export async function POST(request: NextRequest) {
 
     console.log('[2FA Verify] Verifying token:', token.substring(0, 2) + '****')
 
-    // Verify token
-    const isValid = await verify2FAToken(token)
+    // Verify token with detailed error handling
+    let isValid = false
+    let verifyError: Error | null = null
     
-    console.log('[2FA Verify] Token verification result:', isValid)
+    try {
+      isValid = await verify2FAToken(token)
+      console.log('[2FA Verify] Token verification result:', isValid)
+    } catch (error: any) {
+      console.error('[2FA Verify] Exception during verification:', error)
+      verifyError = error
+    }
 
     // In development, provide more debugging info
     if (!isValid) {
@@ -93,6 +100,7 @@ export async function POST(request: NextRequest) {
       console.log('[2FA Verify] Secret check:', {
         hasSecret: !!secret,
         secretLength: secret?.length,
+        secretFormat: secret ? /^[A-Z2-7]+$/.test(secret) : false,
       })
       
       if (!secret) {
@@ -100,6 +108,21 @@ export async function POST(request: NextRequest) {
           error: '2FA is not set up. Please set up 2FA first in the admin settings.' 
         }, { status: 400 })
       }
+      
+      // Generate test token for debugging
+      if (process.env.NODE_ENV !== 'production') {
+        const { authenticator } = await import('otplib')
+        const testToken = authenticator.generate(secret)
+        console.log('[2FA Verify] Test token for current time:', testToken)
+      }
+    }
+    
+    // If there was an exception, return error
+    if (verifyError) {
+      console.error('[2FA Verify] Verification error:', verifyError)
+      return NextResponse.json({ 
+        error: `Verification failed: ${verifyError.message || 'Unknown error'}. Please check server logs.` 
+      }, { status: 500 })
     }
 
     if (isValid) {
