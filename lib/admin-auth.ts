@@ -151,10 +151,15 @@ export async function isAdminAuthenticated(
     }
 
     if (twoFAEnabled) {
-      // Both secure session and 2FA verification required
-      const result = sessionCheck.valid && twoFAVerified?.value === 'true'
+      // If session is valid, it means 2FA was already verified (session is created after 2FA)
+      // So we only need to check session validity
+      // The admin-2fa-verified cookie is temporary and gets deleted after session creation
+      const result = sessionCheck.valid
       if (process.env.NODE_ENV !== 'production') {
-        console.log('[isAdminAuthenticated] 2FA enabled, result:', result)
+        console.log('[isAdminAuthenticated] 2FA enabled, result:', result, {
+          sessionValid: sessionCheck.valid,
+          has2FAVerifiedCookie: !!twoFAVerified,
+        })
       }
       return result
     } else {

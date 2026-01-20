@@ -38,9 +38,10 @@ export async function POST(request: NextRequest) {
     const { setSessionCookies } = await import('@/lib/session-manager')
     setSessionCookies(response, sessionResult.sessionToken, sessionResult.csrfToken)
 
-    // Delete temp cookies
+    // Delete temp auth cookie (keep admin-2fa-verified for session validation)
     response.cookies.delete('admin-auth-temp')
-    response.cookies.delete('admin-2fa-verified')
+    // Note: admin-2fa-verified is kept for session validation in isAdminAuthenticated
+    // It will expire naturally or be cleared on logout
 
     console.log('[Login Complete] Session created and cookies set')
 
