@@ -1,10 +1,8 @@
-import { requireAdmin } from '@/lib/admin-auth'
 import { SocialScheduler } from '@/components/admin/social/SocialScheduler'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SocialSchedulePage() {
-  await requireAdmin()
 
   return (
     <div className="space-y-6">

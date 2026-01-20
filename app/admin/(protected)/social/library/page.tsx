@@ -1,10 +1,8 @@
-import { requireAdmin } from '@/lib/admin-auth'
 import { SocialLibrary } from '@/components/admin/social/SocialLibrary'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SocialLibraryPage() {
-  await requireAdmin()
 
   return (
     <div className="space-y-6">

@@ -1,10 +1,8 @@
-import { requireAdmin } from '@/lib/admin-auth'
 import { SocialSettings } from '@/components/admin/social/SocialSettings'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SocialSettingsPage() {
-  await requireAdmin()
 
   return (
     <div className="space-y-6">

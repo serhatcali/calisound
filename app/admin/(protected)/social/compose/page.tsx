@@ -1,4 +1,3 @@
-import { requireAdmin } from '@/lib/admin-auth'
 import { getSocialPost } from '@/lib/social-media-service'
 import { getCampaigns } from '@/lib/social-media-service'
 import { getAllCities } from '@/lib/db'
@@ -11,7 +10,6 @@ export default async function SocialComposePage({
 }: {
   searchParams: { id?: string }
 }) {
-  await requireAdmin()
 
   const [post, campaigns, cities] = await Promise.all([
     searchParams.id ? getSocialPost(searchParams.id).catch(() => null) : Promise.resolve(null),

@@ -1,11 +1,11 @@
-import { requireAdmin } from '@/lib/admin-auth'
 import { getSocialPosts } from '@/lib/social-media-service'
 import { SocialOverview } from '@/components/admin/social/SocialOverview'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SocialMediaPage() {
-  await requireAdmin()
+  // Layout already calls requireAdmin(), so we don't need to call it again
+  // But we can add error handling for the data fetching
 
   // Get today's and this week's posts
   const today = new Date()
@@ -13,12 +13,22 @@ export default async function SocialMediaPage() {
   const weekStart = new Date(today)
   weekStart.setDate(today.getDate() - today.getDay())
 
-  const [drafts, scheduled, published, failed] = await Promise.all([
-    getSocialPosts({ status: 'draft', limit: 10 }),
-    getSocialPosts({ status: 'scheduled', limit: 20 }),
-    getSocialPosts({ status: 'published', limit: 10 }),
-    getSocialPosts({ status: 'failed', limit: 10 })
-  ])
+  let drafts: any[] = []
+  let scheduled: any[] = []
+  let published: any[] = []
+  let failed: any[] = []
+
+  try {
+    [drafts, scheduled, published, failed] = await Promise.all([
+      getSocialPosts({ status: 'draft', limit: 10 }),
+      getSocialPosts({ status: 'scheduled', limit: 20 }),
+      getSocialPosts({ status: 'published', limit: 10 }),
+      getSocialPosts({ status: 'failed', limit: 10 })
+    ])
+  } catch (error: any) {
+    console.error('[Social Page] Error fetching posts:', error)
+    // Continue with empty arrays if there's an error
+  }
 
   // Get scheduled posts for this week
   const thisWeekScheduled = scheduled.filter(post => {
