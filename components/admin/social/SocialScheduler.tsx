@@ -1,0 +1,19 @@
+'use client'
+
+export function SocialScheduler() {
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+      <p className="text-gray-600 dark:text-gray-400">
+        Scheduler - Coming soon. This will include:
+      </p>
+      <ul className="mt-4 space-y-2 text-gray-600 dark:text-gray-400 list-disc list-inside">
+        <li>Calendar view</li>
+        <li>Queue list</li>
+        <li>Timezone-aware scheduling (UTC+3 default)</li>
+        <li>Recurring posts</li>
+        <li>Quiet hours</li>
+        <li>Approval workflow</li>
+      </ul>
+    </div>
+  )
+}

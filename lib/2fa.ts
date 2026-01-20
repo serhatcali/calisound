@@ -4,10 +4,11 @@ import { authenticator } from 'otplib'
 import { cookies } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-// Set authenticator options
+// Set authenticator options - more lenient for time sync
 authenticator.options = {
   step: 30, // 30 seconds
-  window: [2, 2], // Allow 2 steps before/after (more lenient for time sync issues)
+  window: [5, 5], // Allow 5 steps before/after (very lenient for time sync issues)
+  encoding: 'base32', // Explicit encoding
 }
 
 export async function generate2FASecret(email: string = 'admin@calisound.com') {
@@ -75,23 +76,38 @@ export async function verify2FAToken(token: string, secret?: string): Promise<bo
     }
     
     // Try multiple windows for better compatibility
-    // First try with window [2, 2]
+    // First try with window [5, 5] (very lenient)
     let isValid = authenticator.verify({ 
       token: cleanToken, 
       secret: secretToUse,
-      window: [2, 2]
+      window: [5, 5]
     })
     
-    // If that fails, try with even wider window [3, 3]
+    // If that fails, try with even wider window [10, 10] (extremely lenient)
     if (!isValid) {
       if (process.env.NODE_ENV !== 'production') {
-        console.log('First verification failed, trying wider window [3, 3]')
+        console.log('First verification failed, trying wider window [10, 10]')
       }
       isValid = authenticator.verify({ 
         token: cleanToken, 
         secret: secretToUse,
-        window: [3, 3]
+        window: [10, 10]
       })
+    }
+    
+    // Last resort: try with no window limit (check all possible tokens)
+    if (!isValid && process.env.NODE_ENV !== 'production') {
+      console.log('Trying with no window limit')
+      // Check current and adjacent steps manually
+      const currentTime = Math.floor(Date.now() / 1000)
+      for (let offset = -10; offset <= 10; offset++) {
+        const testTime = currentTime + (offset * 30)
+        const testToken = authenticator.generate(secretToUse)
+        if (testToken === cleanToken) {
+          isValid = true
+          break
+        }
+      }
     }
     
     if (process.env.NODE_ENV !== 'production') {

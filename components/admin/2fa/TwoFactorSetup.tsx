@@ -48,6 +48,20 @@ export function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
     setLoading(true)
 
     try {
+      // Ensure we have secret before submitting
+      if (!secret) {
+        setError('Secret not generated. Please refresh and try again.')
+        setLoading(false)
+        return
+      }
+
+      console.log('Submitting 2FA setup:', {
+        hasSecret: !!secret,
+        secretLength: secret.length,
+        tokenLength: verificationCode.length,
+        token: verificationCode
+      })
+
       const response = await fetch('/api/admin/2fa/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,14 +70,16 @@ export function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
 
       const data = await response.json()
 
+      console.log('2FA setup response:', { success: data.success, error: data.error })
+
       if (data.success) {
         onComplete()
       } else {
         setError(data.error || 'Failed to enable 2FA')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error enabling 2FA:', error)
-      setError('Failed to enable 2FA')
+      setError(`Failed to enable 2FA: ${error.message || 'Unknown error'}`)
     } finally {
       setLoading(false)
     }

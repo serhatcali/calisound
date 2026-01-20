@@ -60,13 +60,31 @@ export async function POST(request: NextRequest) {
       token: tokenValidation.value!,
     }
 
-    // Verify the token before enabling (don't log sensitive data)
+    // Verify the token before enabling
     const { verify2FAToken } = await import('@/lib/2fa')
+    
+    console.log('[2FA Setup] Verifying token:', {
+      secretLength: secret.length,
+      secretFormat: /^[A-Z2-7]+$/.test(secret),
+      tokenLength: token.length,
+      tokenFormat: /^\d{6}$/.test(token)
+    })
+    
     const isValid = await verify2FAToken(token, secret)
+    
+    console.log('[2FA Setup] Verification result:', isValid)
 
     if (!isValid) {
+      // Generate a test token for debugging (dev only)
+      if (process.env.NODE_ENV !== 'production') {
+        const { authenticator } = await import('otplib')
+        const testToken = authenticator.generate(secret)
+        console.log('[2FA Setup] Test token for this secret:', testToken)
+        console.log('[2FA Setup] Current time:', new Date().toISOString())
+      }
+      
       return NextResponse.json({ 
-        error: 'Invalid verification code. Please check:\n1. The code is from the correct authenticator app\n2. Your device time is synchronized\n3. You entered all 6 digits correctly\n4. The code hasn\'t expired (codes refresh every 30 seconds)\n5. Try waiting for a new code to generate' 
+        error: 'Invalid verification code. Please check:\n1. The code is from the correct authenticator app\n2. Your device time is synchronized\n3. You entered all 6 digits correctly\n4. The code hasn\'t expired (codes refresh every 30 seconds)\n5. Try waiting for a new code to generate\n6. Make sure you scanned the QR code correctly' 
       }, { status: 400 })
     }
 

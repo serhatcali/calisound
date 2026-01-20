@@ -10,6 +10,7 @@ const menuItems = [
   { href: '/admin/sets', label: 'Sets', icon: '🎵' },
   { href: '/admin/media', label: 'Media Library', icon: '🖼️' },
   { href: '/admin/links', label: 'Global Links', icon: '🔗' },
+  { href: '/admin/social', label: 'Social', icon: '📱' },
   { href: '/admin/contacts', label: 'Contacts', icon: '📧' },
   { href: '/admin/comments', label: 'Comments', icon: '💬' },
   { href: '/admin/activity', label: 'Activity Logs', icon: '📝' },
