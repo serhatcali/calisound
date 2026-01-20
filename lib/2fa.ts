@@ -5,10 +5,10 @@ import { cookies } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 // Set authenticator options - more lenient for time sync
+// Note: otplib already uses base32 encoding by default, no need to specify
 authenticator.options = {
   step: 30, // 30 seconds
   window: [5, 5], // Allow 5 steps before/after (very lenient for time sync issues)
-  encoding: 'base32', // Explicit encoding
 }
 
 export async function generate2FASecret(email: string = 'admin@calisound.com') {
