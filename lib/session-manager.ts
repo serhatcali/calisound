@@ -9,12 +9,16 @@ import crypto from 'crypto'
 
 // SESSION_SECRET must be set in production!
 // If not set, generate a warning and use a random value (sessions will be invalidated on restart)
+// In development, use a fixed secret so sessions persist across restarts
 const SESSION_SECRET = process.env.SESSION_SECRET || (() => {
   // Only show warning during runtime, not during build
   if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
     console.error('⚠️ CRITICAL: SESSION_SECRET not set in production! Sessions will be invalidated on restart.')
+    return crypto.randomBytes(32).toString('hex')
   }
-  return crypto.randomBytes(32).toString('hex')
+  // In development, use a fixed secret so sessions persist
+  console.warn('⚠️ SESSION_SECRET not set, using fixed development secret. Set SESSION_SECRET in .env for production.')
+  return 'dev-session-secret-fixed-for-development-only-do-not-use-in-production-12345678901234567890123456789012'
 })()
 const SESSION_DURATION = 60 * 60 * 24 * 7 // 7 days in seconds
 const SESSION_COOKIE_NAME = 'admin_session'
