@@ -102,12 +102,25 @@ export function SocialLibrary() {
     setUploading(true)
 
     try {
-      // First check if bucket is accessible
-      const checkResponse = await fetch('/api/admin/social/storage/check')
-      const checkData = await checkResponse.json()
-      
-      if (!checkData.exists) {
-        throw new Error(checkData.details || 'Storage bucket not accessible')
+      // First check if bucket is accessible (client-side check)
+      try {
+        const { data: listData, error: listError } = await supabase.storage
+          .from('media')
+          .list('', { limit: 1 })
+        
+        if (listError) {
+          console.error('Bucket check error:', listError)
+          if (listError.message?.includes('Bucket not found') || listError.message?.includes('not found')) {
+            throw new Error('Storage bucket "media" not found. Please create it in Supabase Dashboard > Storage > Create Bucket. Make it public for asset access.')
+          }
+          throw new Error(`Storage bucket error: ${listError.message}`)
+        }
+      } catch (checkError: any) {
+        if (checkError.message?.includes('Bucket not found')) {
+          throw checkError
+        }
+        console.warn('Bucket check warning:', checkError)
+        // Continue anyway, might be a permission issue but upload might work
       }
 
       // Upload to Supabase Storage
@@ -124,9 +137,12 @@ export function SocialLibrary() {
       if (uploadError) {
         console.error('Upload error:', uploadError)
         if (uploadError.message?.includes('Bucket not found') || uploadError.message?.includes('not found')) {
-          throw new Error('Storage bucket "media" not found. Please create it in Supabase Dashboard > Storage > Create Bucket. Make it public for asset access.')
+          throw new Error('Storage bucket "media" not found. Please verify:\n1. Bucket name is exactly "media" (lowercase)\n2. Bucket is set to Public in Supabase Dashboard\n3. Your NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are correct')
         }
-        throw uploadError
+        if (uploadError.message?.includes('new row violates row-level security')) {
+          throw new Error('Storage bucket RLS policy error. Please check bucket permissions in Supabase Dashboard.')
+        }
+        throw new Error(`Upload failed: ${uploadError.message || 'Unknown error'}`)
       }
 
       // Get image dimensions if it's an image
