@@ -105,7 +105,7 @@ export function SocialLibrary() {
       // First check if bucket is accessible (client-side check)
       try {
         const { data: listData, error: listError } = await supabase.storage
-          .from('media')
+          .from('calisound')
           .list('', { limit: 1 })
         
         if (listError) {
@@ -128,7 +128,7 @@ export function SocialLibrary() {
       const fileName = `social-assets/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
       
       const { error: uploadError } = await supabase.storage
-        .from('media')
+        .from('calisound')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false,
@@ -399,7 +399,7 @@ export function SocialLibrary() {
                     let publicUrl = ''
                     try {
                       const { data: urlData } = supabase.storage
-                        .from('media')
+                        .from('calisound')
                         .getPublicUrl(asset.storage_path)
                       publicUrl = urlData.publicUrl
                     } catch (error) {
