@@ -139,8 +139,8 @@ export function SocialLibrary() {
         if (uploadError.message?.includes('Bucket not found') || uploadError.message?.includes('not found')) {
           throw new Error('Storage bucket "media" not found. Please verify:\n1. Bucket name is exactly "media" (lowercase)\n2. Bucket is set to Public in Supabase Dashboard\n3. Your NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are correct')
         }
-        if (uploadError.message?.includes('new row violates row-level security')) {
-          throw new Error('Storage bucket RLS policy error. Please check bucket permissions in Supabase Dashboard.')
+        if (uploadError.message?.includes('new row violates row-level security') || uploadError.message?.includes('RLS')) {
+          throw new Error('Storage bucket RLS policy error. Please run the SQL in supabase/storage-rls-policies.sql in your Supabase SQL Editor to create the necessary policies.')
         }
         throw new Error(`Upload failed: ${uploadError.message || 'Unknown error'}`)
       }
