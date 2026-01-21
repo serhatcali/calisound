@@ -1,41 +1,37 @@
 -- Storage RLS Policies for 'calisound' bucket
--- Run this in Supabase SQL Editor
+-- NOTE: This SQL cannot be run directly because storage.objects is a system table.
+-- Use Supabase Dashboard > Storage > Policies instead, or see STORAGE_SETUP_GUIDE.md
 
--- Enable RLS on storage.objects
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- Alternative: Use Supabase Dashboard
+-- 1. Go to Storage > Policies
+-- 2. Select 'calisound' bucket
+-- 3. Create policies using the Policy Definition below
 
--- Drop existing policies if they exist (to avoid conflicts)
-DROP POLICY IF EXISTS "Public Access for calisound bucket" ON storage.objects;
-DROP POLICY IF EXISTS "Authenticated users can upload to calisound" ON storage.objects;
-DROP POLICY IF EXISTS "Authenticated users can update calisound files" ON storage.objects;
-DROP POLICY IF EXISTS "Authenticated users can delete calisound files" ON storage.objects;
-DROP POLICY IF EXISTS "Anonymous can upload to calisound" ON storage.objects;
-DROP POLICY IF EXISTS "Anonymous can update calisound files" ON storage.objects;
-DROP POLICY IF EXISTS "Anonymous can delete calisound files" ON storage.objects;
+-- Policy Definitions (use these in Dashboard):
 
--- Policy: Allow public read access to all files in calisound bucket
-CREATE POLICY "Public Access for calisound bucket"
-ON storage.objects
-FOR SELECT
-USING (bucket_id = 'calisound');
+-- Policy 1: Public Read Access
+-- Name: "Public Access for calisound bucket"
+-- Operation: SELECT
+-- Definition:
+bucket_id = 'calisound'
 
--- Policy: Allow anonymous uploads to calisound bucket (simpler for admin panel)
-CREATE POLICY "Anonymous can upload to calisound"
-ON storage.objects
-FOR INSERT
-WITH CHECK (bucket_id = 'calisound');
+-- Policy 2: Anonymous Upload
+-- Name: "Anonymous can upload to calisound"
+-- Operation: INSERT
+-- Definition:
+bucket_id = 'calisound'
 
--- Policy: Allow anonymous updates to calisound bucket
-CREATE POLICY "Anonymous can update calisound files"
-ON storage.objects
-FOR UPDATE
-USING (bucket_id = 'calisound');
+-- Policy 3: Anonymous Update
+-- Name: "Anonymous can update calisound files"
+-- Operation: UPDATE
+-- Definition:
+bucket_id = 'calisound'
 
--- Policy: Allow anonymous deletes to calisound bucket
-CREATE POLICY "Anonymous can delete calisound files"
-ON storage.objects
-FOR DELETE
-USING (bucket_id = 'calisound');
+-- Policy 4: Anonymous Delete
+-- Name: "Anonymous can delete calisound files"
+-- Operation: DELETE
+-- Definition:
+bucket_id = 'calisound'
 
 -- Note: The policies above allow anonymous access for simplicity.
 -- If you want authenticated-only access, replace the INSERT/UPDATE/DELETE policies with:
