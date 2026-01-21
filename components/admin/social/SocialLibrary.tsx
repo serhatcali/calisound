@@ -102,6 +102,14 @@ export function SocialLibrary() {
     setUploading(true)
 
     try {
+      // First check if bucket is accessible
+      const checkResponse = await fetch('/api/admin/social/storage/check')
+      const checkData = await checkResponse.json()
+      
+      if (!checkData.exists) {
+        throw new Error(checkData.details || 'Storage bucket not accessible')
+      }
+
       // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop()
       const fileName = `social-assets/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
@@ -114,6 +122,7 @@ export function SocialLibrary() {
         })
 
       if (uploadError) {
+        console.error('Upload error:', uploadError)
         if (uploadError.message?.includes('Bucket not found') || uploadError.message?.includes('not found')) {
           throw new Error('Storage bucket "media" not found. Please create it in Supabase Dashboard > Storage > Create Bucket. Make it public for asset access.')
         }
