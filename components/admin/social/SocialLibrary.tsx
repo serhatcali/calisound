@@ -42,7 +42,20 @@ export function SocialLibrary() {
 
   useEffect(() => {
     loadData()
+    checkStorage()
   }, [])
+
+  const checkStorage = async () => {
+    try {
+      const response = await fetch('/api/admin/social/storage/check')
+      const data = await response.json()
+      if (!data.exists) {
+        console.warn('Storage bucket check:', data)
+      }
+    } catch (error) {
+      console.error('Error checking storage:', error)
+    }
+  }
 
   const loadData = async () => {
     setLoading(true)
