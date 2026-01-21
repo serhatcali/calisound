@@ -140,7 +140,7 @@ export function SocialLibrary() {
           throw new Error('Storage bucket "media" not found. Please verify:\n1. Bucket name is exactly "media" (lowercase)\n2. Bucket is set to Public in Supabase Dashboard\n3. Your NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are correct')
         }
         if (uploadError.message?.includes('new row violates row-level security') || uploadError.message?.includes('RLS')) {
-          throw new Error('Storage bucket RLS policy error. Please run the SQL in supabase/storage-rls-policies.sql in your Supabase SQL Editor to create the necessary policies.')
+          throw new Error('Storage bucket RLS policy error. Please create policies via Supabase Dashboard:\n\n1. Go to Storage > Policies\n2. Select "calisound" bucket\n3. Create 4 policies (SELECT, INSERT, UPDATE, DELETE)\n4. Policy Definition: bucket_id = \'calisound\'\n\nSee STORAGE_POLICY_SETUP.md for detailed instructions.')
         }
         throw new Error(`Upload failed: ${uploadError.message || 'Unknown error'}`)
       }
