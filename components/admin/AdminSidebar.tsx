@@ -73,6 +73,7 @@ export function AdminSidebar() {
       <nav className="p-4 space-y-2" suppressHydrationWarning>
         {menuItems.map((item, index) => {
           const isActive = normalizedPath === item.href || normalizedPath.startsWith(item.href + '/')
+          const isLinks = item.href === '/admin/links'
           
           // Debug logging for each item
           if (typeof window !== 'undefined' && index < 3) {
@@ -82,67 +83,72 @@ export function AdminSidebar() {
               icon: item.icon,
               isActive,
               isExpandable: item.isExpandable,
-              isSocial: item.href === '/admin/social'
+              isSocial: item.href === '/admin/social',
+              isLinks
             })
           }
           
-          // Regular menu items
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                isActive
-                  ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                  : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          )
-        })}
-        
-        {/* Social menu - rendered separately after Links, always same DOM structure */}
-        <Link
-          href="/admin/social"
-          onClick={(e) => {
-            e.preventDefault()
-            setIsSocialOpen(!isSocialOpen)
-          }}
-          className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
-            isSocialActive
-              ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-              : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-          }`}
-          suppressHydrationWarning
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xl">📱</span>
-            <span>Social</span>
-          </div>
-          <span className="text-sm">▼</span>
-        </Link>
-        {/* Always render submenu container to match server/client DOM */}
-        <div className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'} suppressHydrationWarning>
-          {socialSubMenuItems.map((subItem) => {
-            const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
-            return (
+            <div key={item.href}>
               <Link
-                key={subItem.href}
-                href={subItem.href}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                  isSubActive
-                    ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive
+                    ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                    : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
                 }`}
               >
-                <span className="text-base">{subItem.icon}</span>
-                <span>{subItem.label}</span>
+                <span className="text-xl">{item.icon}</span>
+                <span>{item.label}</span>
               </Link>
-            )
-          })}
-        </div>
+              
+              {/* Insert Social menu immediately after Links */}
+              {isLinks && (
+                <>
+                  <Link
+                    href="/admin/social"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setIsSocialOpen(!isSocialOpen)
+                    }}
+                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
+                      isSocialActive
+                        ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                        : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+                    }`}
+                    suppressHydrationWarning
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">📱</span>
+                      <span>Social</span>
+                    </div>
+                    <span className="text-sm">▼</span>
+                  </Link>
+                  {/* Always render submenu container to match server/client DOM */}
+                  <div className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'} suppressHydrationWarning>
+                    {socialSubMenuItems.map((subItem) => {
+                      const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
+                      return (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                            isSubActive
+                              ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+                          }`}
+                        >
+                          <span className="text-base">{subItem.icon}</span>
+                          <span>{subItem.label}</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          )
+        })}
         
         <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
           <button
