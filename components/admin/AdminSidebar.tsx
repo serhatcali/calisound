@@ -59,24 +59,24 @@ export function AdminSidebar() {
       <nav className="p-4 space-y-2">
         {menuItems.map((item) => {
           const isActive = normalizedPath === item.href || normalizedPath.startsWith(item.href + '/')
+          const isLinks = item.href === '/admin/links'
+          
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                isActive
-                  ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                  : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          )
-        })}
-
-        {/* Social Media Submenu - Client-side only to avoid hydration issues */}
-        {isMounted && (
+            <div key={item.href}>
+              <Link
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive
+                    ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                    : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+                }`}
+              >
+                <span className="text-xl">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+              
+              {/* Insert Social menu after Links - Client-side only */}
+              {isLinks && isMounted && (
           <div>
             <button
               onClick={() => setIsSocialOpen(!isSocialOpen)}
