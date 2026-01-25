@@ -10,7 +10,7 @@ const menuItems = [
   { href: '/admin/sets', label: 'Sets', icon: '🎵' },
   { href: '/admin/media', label: 'Media Library', icon: '🖼️' },
   { href: '/admin/links', label: 'Global Links', icon: '🔗' },
-  { href: '/admin/social', label: 'Social', icon: '📱', isExpandable: true },
+  // Social menu is handled separately to avoid hydration issues
   { href: '/admin/contacts', label: 'Contacts', icon: '📧' },
   { href: '/admin/comments', label: 'Comments', icon: '💬' },
   { href: '/admin/activity', label: 'Activity Logs', icon: '📝' },
@@ -39,12 +39,11 @@ export function AdminSidebar() {
   const pathname = usePathname()
   const normalizedPath = pathname.replace('/admin/(protected)', '/admin')
   const isSocialActive = normalizedPath.startsWith('/admin/social')
-  
-  // Initialize with false to match server render, then update on client
   const [isSocialOpen, setIsSocialOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
-  // Update state on client mount - this runs after hydration
   useEffect(() => {
+    setIsMounted(true)
     if (isSocialActive) {
       setIsSocialOpen(true)
     }
@@ -55,75 +54,76 @@ export function AdminSidebar() {
     window.location.href = '/admin/login'
   }
 
+  // Find Links index to insert Social menu after it
+  const linksIndex = menuItems.findIndex(item => item.href === '/admin/links')
+
   return (
     <aside className="w-64 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-800 min-h-screen fixed left-0 top-16 z-40">
       <nav className="p-4 space-y-2">
-        {menuItems.map((item) => {
+        {menuItems.map((item, index) => {
           const isActive = normalizedPath === item.href || normalizedPath.startsWith(item.href + '/')
           
-          // Handle expandable Social menu
-          if (item.isExpandable && item.href === '/admin/social') {
-            return (
-              <div key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setIsSocialOpen(!isSocialOpen)
-                  }}
-                  className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isSocialActive
-                      ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                      : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{item.icon}</span>
-                    <span>{item.label}</span>
-                  </div>
-                  <span className="text-sm">▼</span>
-                </Link>
-                {/* Submenu - always render, visibility controlled by CSS to avoid hydration issues */}
-                <div 
-                  className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'}
-                  suppressHydrationWarning
-                >
-                  {socialSubMenuItems.map((subItem) => {
-                    const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
-                    return (
-                      <Link
-                        key={subItem.href}
-                        href={subItem.href}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                          isSubActive
-                            ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
-                        }`}
-                      >
-                        <span className="text-base">{subItem.icon}</span>
-                        <span>{subItem.label}</span>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          }
-          
-          // Regular menu items
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                isActive
-                  ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                  : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
+            <>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive
+                    ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                    : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+                }`}
+              >
+                <span className="text-xl">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+              
+              {/* Insert Social menu after Links - only on client to avoid hydration issues */}
+              {index === linksIndex && isMounted && (
+                <div key="social-menu">
+                  <Link
+                    href="/admin/social"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setIsSocialOpen(!isSocialOpen)
+                    }}
+                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
+                      isSocialActive
+                        ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                        : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">📱</span>
+                      <span>Social</span>
+                    </div>
+                    <span className="text-sm">▼</span>
+                  </Link>
+                  <div 
+                    className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'}
+                    suppressHydrationWarning
+                  >
+                    {socialSubMenuItems.map((subItem) => {
+                      const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
+                      return (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                            isSubActive
+                              ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+                          }`}
+                        >
+                          <span className="text-base">{subItem.icon}</span>
+                          <span>{subItem.label}</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
           )
         })}
         
