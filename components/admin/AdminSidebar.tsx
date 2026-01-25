@@ -99,13 +99,13 @@ export function AdminSidebar() {
             
             return (
               <div key={item.href} suppressHydrationWarning>
-                <button
-                  type="button"
+                <Link
+                  href={item.href}
                   onClick={(e) => {
                     e.preventDefault()
                     setIsSocialOpen(!isSocialOpen)
                   }}
-                  className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
+                  className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
                     isSocialActive
                       ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
                       : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
@@ -116,7 +116,7 @@ export function AdminSidebar() {
                     <span>{item.label}</span>
                   </div>
                   <span className="text-sm">▼</span>
-                </button>
+                </Link>
                 {/* Always render submenu container to match server/client DOM */}
                 <div className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'}>
                   {socialSubMenuItems.map((subItem) => {
