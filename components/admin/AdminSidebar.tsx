@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -10,7 +11,6 @@ const menuItems = [
   { href: '/admin/sets', label: 'Sets', icon: '🎵' },
   { href: '/admin/media', label: 'Media Library', icon: '🖼️' },
   { href: '/admin/links', label: 'Global Links', icon: '🔗' },
-  { href: '/admin/social', label: 'Social', icon: '📱' },
   { href: '/admin/contacts', label: 'Contacts', icon: '📧' },
   { href: '/admin/comments', label: 'Comments', icon: '💬' },
   { href: '/admin/activity', label: 'Activity Logs', icon: '📝' },
@@ -23,8 +23,23 @@ const menuItems = [
   { href: '/admin/settings', label: 'Settings', icon: '⚙️' },
 ]
 
+const socialSubMenuItems = [
+  { href: '/admin/social', label: 'Overview', icon: '📊' },
+  { href: '/admin/social/compose', label: 'Compose', icon: '✍️' },
+  { href: '/admin/social/posts', label: 'Posts', icon: '📝' },
+  { href: '/admin/social/schedule', label: 'Schedule', icon: '📅' },
+  { href: '/admin/social/publishing', label: 'Publishing', icon: '🚀' },
+  { href: '/admin/social/analytics', label: 'Analytics', icon: '📈' },
+  { href: '/admin/social/library', label: 'Library', icon: '📚' },
+  { href: '/admin/social/integrations', label: 'Integrations', icon: '🔌' },
+  { href: '/admin/social/settings', label: 'Settings', icon: '⚙️' },
+]
+
 export function AdminSidebar() {
   const pathname = usePathname()
+  const normalizedPath = pathname.replace('/admin/(protected)', '/admin')
+  const isSocialActive = normalizedPath.startsWith('/admin/social')
+  const [isSocialOpen, setIsSocialOpen] = useState(isSocialActive)
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' })
@@ -35,8 +50,6 @@ export function AdminSidebar() {
     <aside className="w-64 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-800 min-h-screen fixed left-0 top-16 z-40">
       <nav className="p-4 space-y-2">
         {menuItems.map((item) => {
-          // Handle both /admin and /admin/(protected) routes
-          const normalizedPath = pathname.replace('/admin/(protected)', '/admin')
           const isActive = normalizedPath === item.href || normalizedPath.startsWith(item.href + '/')
           return (
             <Link
@@ -53,6 +66,61 @@ export function AdminSidebar() {
             </Link>
           )
         })}
+
+        {/* Social Media Submenu */}
+        <div>
+          <button
+            onClick={() => setIsSocialOpen(!isSocialOpen)}
+            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
+              isSocialActive
+                ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-xl">📱</span>
+              <span>Social</span>
+            </div>
+            <motion.span
+              animate={{ rotate: isSocialOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm"
+            >
+              ▼
+            </motion.span>
+          </button>
+          <AnimatePresence>
+            {isSocialOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
+                  {socialSubMenuItems.map((item) => {
+                    const isActive = normalizedPath === item.href || normalizedPath.startsWith(item.href + '/')
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isActive
+                            ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+                        }`}
+                      >
+                        <span className="text-base">{item.icon}</span>
+                        <span>{item.label}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         
         <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
           <button
