@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -39,15 +39,8 @@ export function AdminSidebar() {
   const pathname = usePathname()
   const normalizedPath = pathname.replace('/admin/(protected)', '/admin')
   const isSocialActive = normalizedPath.startsWith('/admin/social')
-  // Always start with false to match server render, then update on client
+  // Always start with false to match server render
   const [isSocialOpen, setIsSocialOpen] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
-
-  // Update state after mount to avoid hydration mismatch
-  useEffect(() => {
-    setIsMounted(true)
-    setIsSocialOpen(isSocialActive)
-  }, [isSocialActive])
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' })
@@ -75,9 +68,9 @@ export function AdminSidebar() {
                 <span>{item.label}</span>
               </Link>
               
-              {/* Insert Social menu after Links - Client-side only */}
-              {isLinks && isMounted && (
-                <div>
+              {/* Insert Social menu after Links - Always render to match server/client DOM */}
+              {isLinks && (
+                <div suppressHydrationWarning>
                   <button
                     onClick={() => setIsSocialOpen(!isSocialOpen)}
                     className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
