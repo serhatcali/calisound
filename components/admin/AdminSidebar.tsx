@@ -56,80 +56,90 @@ export function AdminSidebar() {
   return (
     <aside className="w-64 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-800 min-h-screen fixed left-0 top-16 z-40">
       <nav className="p-4 space-y-2">
-        {menuItems.map((item) => {
+        {menuItems.map((item, index) => {
           const isActive = normalizedPath === item.href || normalizedPath.startsWith(item.href + '/')
+          const shouldInsertSocial = item.href === '/admin/links' && index === menuItems.findIndex(m => m.href === '/admin/links')
+          
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                isActive
-                  ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                  : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
+            <div key={item.href}>
+              <Link
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive
+                    ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                    : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+                }`}
+              >
+                <span className="text-xl">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+              
+              {/* Insert Social menu after Links */}
+              {shouldInsertSocial && (
+                <div suppressHydrationWarning>
+                  {isMounted ? (
+                    <div>
+                      <button
+                        onClick={() => setIsSocialOpen(!isSocialOpen)}
+                        className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
+                          isSocialActive
+                            ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                            : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">📱</span>
+                          <span>Social</span>
+                        </div>
+                        <motion.span
+                          animate={{ rotate: isSocialOpen ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-sm"
+                        >
+                          ▼
+                        </motion.span>
+                      </button>
+                      <AnimatePresence>
+                        {isSocialOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
+                              {socialSubMenuItems.map((subItem) => {
+                                const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
+                                return (
+                                  <Link
+                                    key={subItem.href}
+                                    href={subItem.href}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                                      isSubActive
+                                        ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
+                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+                                    }`}
+                                  >
+                                    <span className="text-base">{subItem.icon}</span>
+                                    <span>{subItem.label}</span>
+                                  </Link>
+                                )
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    // Placeholder div on server to maintain DOM structure
+                    <div className="w-full h-12" aria-hidden="true" />
+                  )}
+                </div>
+              )}
+            </div>
           )
         })}
-
-        {/* Social Media Submenu - Client-side only to avoid hydration issues */}
-        {isMounted && (
-          <div>
-            <button
-              onClick={() => setIsSocialOpen(!isSocialOpen)}
-              className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
-                isSocialActive
-                  ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                  : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">📱</span>
-                <span>Social</span>
-              </div>
-              <motion.span
-                animate={{ rotate: isSocialOpen ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-                className="text-sm"
-              >
-                ▼
-              </motion.span>
-            </button>
-            <AnimatePresence>
-              {isSocialOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
-                    {socialSubMenuItems.map((subItem) => {
-                      const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
-                      return (
-                        <Link
-                          key={subItem.href}
-                          href={subItem.href}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                            isSubActive
-                              ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
-                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
-                          }`}
-                        >
-                          <span className="text-base">{subItem.icon}</span>
-                          <span>{subItem.label}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
         
         <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
           <button
