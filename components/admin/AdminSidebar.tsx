@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -41,6 +41,13 @@ export function AdminSidebar() {
   const isSocialActive = normalizedPath.startsWith('/admin/social')
   // Always start with false to match server render
   const [isSocialOpen, setIsSocialOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Only render Social menu on client-side
+  useEffect(() => {
+    setIsMounted(true)
+    setIsSocialOpen(isSocialActive)
+  }, [isSocialActive])
 
   // Debug logging
   if (typeof window !== 'undefined') {
@@ -89,66 +96,64 @@ export function AdminSidebar() {
           }
           
           return (
-            <>
-              <div key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive
-                      ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                      : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-                  }`}
-                >
-                  <span className="text-xl">{item.icon}</span>
-                  <span>{item.label}</span>
-                </Link>
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                isActive
+                  ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                  : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
+          )
+        })}
+        
+        {/* Social menu - Client-side only to avoid hydration issues */}
+        {isMounted && isLinks && (
+          <div suppressHydrationWarning>
+            <Link
+              href="/admin/social"
+              onClick={(e) => {
+                e.preventDefault()
+                setIsSocialOpen(!isSocialOpen)
+              }}
+              className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
+                isSocialActive
+                  ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                  : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">📱</span>
+                <span>Social</span>
               </div>
-              
-              {/* Insert Social menu immediately after Links */}
-              {isLinks && (
-                <div key="social-menu" suppressHydrationWarning>
+              <span className="text-sm">▼</span>
+            </Link>
+            {/* Always render submenu container to match server/client DOM */}
+            <div className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'} suppressHydrationWarning>
+              {socialSubMenuItems.map((subItem) => {
+                const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
+                return (
                   <Link
-                    href="/admin/social"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      setIsSocialOpen(!isSocialOpen)
-                    }}
-                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
-                      isSocialActive
-                        ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                        : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+                    key={subItem.href}
+                    href={subItem.href}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                      isSubActive
+                        ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">📱</span>
-                      <span>Social</span>
-                    </div>
-                    <span className="text-sm">▼</span>
+                    <span className="text-base">{subItem.icon}</span>
+                    <span>{subItem.label}</span>
                   </Link>
-                  {/* Always render submenu container to match server/client DOM */}
-                  <div className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'} suppressHydrationWarning>
-                    {socialSubMenuItems.map((subItem) => {
-                      const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
-                      return (
-                        <Link
-                          key={subItem.href}
-                          href={subItem.href}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                            isSubActive
-                              ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
-                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
-                          }`}
-                        >
-                          <span className="text-base">{subItem.icon}</span>
-                          <span>{subItem.label}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-            </>
-          )
+                )
+              })}
+            </div>
+          </div>
+        )}
         })}
         
         <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
