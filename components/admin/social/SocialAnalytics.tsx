@@ -143,7 +143,10 @@ export function SocialAnalytics() {
     csv += '\nTop Posts\n'
     csv += 'Title,City,Campaign,Published Date\n'
     topPosts.forEach(post => {
-      csv += `"${post.title}","${post.city?.name || 'N/A"}","${post.campaign?.name || 'N/A"}","${format(new Date(post.updated_at), 'yyyy-MM-dd')}"\n`
+      const cityName = post.city?.name || 'N/A'
+      const campaignName = post.campaign?.name || 'N/A'
+      const publishedDate = format(new Date(post.updated_at), 'yyyy-MM-dd')
+      csv += `"${post.title}","${cityName}","${campaignName}","${publishedDate}"\n`
     })
 
     // Download
