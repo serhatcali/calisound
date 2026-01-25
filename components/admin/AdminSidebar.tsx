@@ -11,7 +11,6 @@ const menuItems = [
   { href: '/admin/sets', label: 'Sets', icon: '🎵' },
   { href: '/admin/media', label: 'Media Library', icon: '🖼️' },
   { href: '/admin/links', label: 'Global Links', icon: '🔗' },
-  { href: '/admin/social', label: 'Social', icon: '📱', isExpandable: true },
   { href: '/admin/contacts', label: 'Contacts', icon: '📧' },
   { href: '/admin/comments', label: 'Comments', icon: '💬' },
   { href: '/admin/activity', label: 'Activity Logs', icon: '📝' },
@@ -85,11 +84,6 @@ export function AdminSidebar() {
               isExpandable: item.isExpandable,
               isSocial: item.href === '/admin/social'
             })
-          }
-          
-          // Skip Social from menuItems - render separately
-          if (item.isExpandable && item.href === '/admin/social') {
-            return null
           }
           
           // Regular menu items
