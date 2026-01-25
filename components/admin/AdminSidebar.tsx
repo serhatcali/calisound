@@ -104,7 +104,7 @@ export function AdminSidebar() {
               
               {/* Insert Social menu immediately after Links */}
               {isLinks && (
-                <>
+                <div suppressHydrationWarning>
                   <Link
                     href="/admin/social"
                     onClick={(e) => {
@@ -116,7 +116,6 @@ export function AdminSidebar() {
                         ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
                         : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
                     }`}
-                    suppressHydrationWarning
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xl">📱</span>
@@ -144,7 +143,7 @@ export function AdminSidebar() {
                       )
                     })}
                   </div>
-                </>
+                </div>
               )}
             </div>
           )
