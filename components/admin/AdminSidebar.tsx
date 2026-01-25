@@ -39,11 +39,12 @@ export function AdminSidebar() {
   const pathname = usePathname()
   const normalizedPath = pathname.replace('/admin/(protected)', '/admin')
   const isSocialActive = normalizedPath.startsWith('/admin/social')
+  
+  // Initialize with false to match server render, then update on client
   const [isSocialOpen, setIsSocialOpen] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
 
+  // Update state on client mount - this runs after hydration
   useEffect(() => {
-    setIsMounted(true)
     if (isSocialActive) {
       setIsSocialOpen(true)
     }
@@ -67,10 +68,8 @@ export function AdminSidebar() {
                 <Link
                   href={item.href}
                   onClick={(e) => {
-                    if (isMounted) {
-                      e.preventDefault()
-                      setIsSocialOpen(!isSocialOpen)
-                    }
+                    e.preventDefault()
+                    setIsSocialOpen(!isSocialOpen)
                   }}
                   className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
                     isSocialActive
@@ -84,8 +83,11 @@ export function AdminSidebar() {
                   </div>
                   <span className="text-sm">▼</span>
                 </Link>
-                {/* Always render submenu - hidden on server, visible on client when open */}
-                <div className={isMounted && isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'}>
+                {/* Submenu - always render, visibility controlled by CSS to avoid hydration issues */}
+                <div 
+                  className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'}
+                  suppressHydrationWarning
+                >
                   {socialSubMenuItems.map((subItem) => {
                     const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
                     return (
