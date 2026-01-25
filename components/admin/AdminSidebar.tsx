@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -40,7 +40,15 @@ export function AdminSidebar() {
   const pathname = usePathname()
   const normalizedPath = pathname.replace('/admin/(protected)', '/admin')
   const isSocialActive = normalizedPath.startsWith('/admin/social')
-  const [isSocialOpen, setIsSocialOpen] = useState(isSocialActive)
+  // Always start with false to match server render, then update on client
+  const [isSocialOpen, setIsSocialOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Update state after mount to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true)
+    setIsSocialOpen(isSocialActive)
+  }, [isSocialActive])
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' })
@@ -55,6 +63,27 @@ export function AdminSidebar() {
           
           // Handle expandable Social menu
           if (item.isExpandable && item.href === '/admin/social') {
+            // On server, render as Link to match client structure
+            // On client, render as button with expandable functionality
+            if (!isMounted) {
+              // Server-side: render as simple Link to match client initial render
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    isSocialActive
+                      ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                      : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+                  }`}
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  <span>{item.label}</span>
+                </Link>
+              )
+            }
+            
+            // Client-side: render as expandable button
             return (
               <div key={item.href}>
                 <button
