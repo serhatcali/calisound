@@ -89,22 +89,24 @@ export function AdminSidebar() {
           }
           
           return (
-            <div key={item.href}>
-              <Link
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                  isActive
-                    ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                    : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-                }`}
-              >
-                <span className="text-xl">{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
+            <>
+              <div key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                      : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+                  }`}
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  <span>{item.label}</span>
+                </Link>
+              </div>
               
               {/* Insert Social menu immediately after Links */}
               {isLinks && (
-                <div suppressHydrationWarning>
+                <div key="social-menu" suppressHydrationWarning>
                   <Link
                     href="/admin/social"
                     onClick={(e) => {
@@ -145,7 +147,7 @@ export function AdminSidebar() {
                   </div>
                 </div>
               )}
-            </div>
+            </>
           )
         })}
         
