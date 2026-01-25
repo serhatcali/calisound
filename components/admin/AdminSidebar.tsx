@@ -43,6 +43,27 @@ export function AdminSidebar() {
   // Always start with false to match server render
   const [isSocialOpen, setIsSocialOpen] = useState(false)
 
+  // Debug logging
+  if (typeof window !== 'undefined') {
+    console.log('[AdminSidebar CLIENT]', {
+      pathname,
+      normalizedPath,
+      isSocialActive,
+      isSocialOpen,
+      menuItemsCount: menuItems.length,
+      timestamp: new Date().toISOString()
+    })
+  } else {
+    console.log('[AdminSidebar SERVER]', {
+      pathname,
+      normalizedPath,
+      isSocialActive,
+      isSocialOpen,
+      menuItemsCount: menuItems.length,
+      timestamp: new Date().toISOString()
+    })
+  }
+
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' })
     window.location.href = '/admin/login'
@@ -50,14 +71,34 @@ export function AdminSidebar() {
 
   return (
     <aside className="w-64 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-800 min-h-screen fixed left-0 top-16 z-40">
-      <nav className="p-4 space-y-2">
-        {menuItems.map((item) => {
+      <nav className="p-4 space-y-2" suppressHydrationWarning>
+        {menuItems.map((item, index) => {
           const isActive = normalizedPath === item.href || normalizedPath.startsWith(item.href + '/')
+          
+          // Debug logging for each item
+          if (typeof window !== 'undefined' && index < 3) {
+            console.log(`[AdminSidebar CLIENT] Item ${index}:`, {
+              href: item.href,
+              label: item.label,
+              icon: item.icon,
+              isActive,
+              isExpandable: item.isExpandable,
+              isSocial: item.href === '/admin/social'
+            })
+          }
           
           // Handle expandable Social menu
           if (item.isExpandable && item.href === '/admin/social') {
+            if (typeof window !== 'undefined') {
+              console.log('[AdminSidebar CLIENT] Rendering Social menu:', {
+                isSocialOpen,
+                isSocialActive,
+                subMenuItemsCount: socialSubMenuItems.length
+              })
+            }
+            
             return (
-              <div key={item.href}>
+              <div key={item.href} suppressHydrationWarning>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -76,27 +117,26 @@ export function AdminSidebar() {
                   </div>
                   <span className="text-sm">▼</span>
                 </button>
-                {isSocialOpen && (
-                  <div className="ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
-                    {socialSubMenuItems.map((subItem) => {
-                      const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
-                      return (
-                        <Link
-                          key={subItem.href}
-                          href={subItem.href}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                            isSubActive
-                              ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
-                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
-                          }`}
-                        >
-                          <span className="text-base">{subItem.icon}</span>
-                          <span>{subItem.label}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                )}
+                {/* Always render submenu container to match server/client DOM */}
+                <div className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'}>
+                  {socialSubMenuItems.map((subItem) => {
+                    const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
+                    return (
+                      <Link
+                        key={subItem.href}
+                        href={subItem.href}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isSubActive
+                            ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+                        }`}
+                      >
+                        <span className="text-base">{subItem.icon}</span>
+                        <span>{subItem.label}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
               </div>
             )
           }
