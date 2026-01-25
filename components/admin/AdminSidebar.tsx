@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -39,7 +39,13 @@ export function AdminSidebar() {
   const pathname = usePathname()
   const normalizedPath = pathname.replace('/admin/(protected)', '/admin')
   const isSocialActive = normalizedPath.startsWith('/admin/social')
-  const [isSocialOpen, setIsSocialOpen] = useState(isSocialActive)
+  // Use useEffect to set initial state after hydration to avoid hydration mismatch
+  const [isSocialOpen, setIsSocialOpen] = useState(false)
+  
+  // Set initial state after mount to match server render
+  useEffect(() => {
+    setIsSocialOpen(isSocialActive)
+  }, [isSocialActive])
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' })
