@@ -87,58 +87,9 @@ export function AdminSidebar() {
             })
           }
           
-          // Handle expandable Social menu
+          // Skip Social from menuItems - render separately
           if (item.isExpandable && item.href === '/admin/social') {
-            if (typeof window !== 'undefined') {
-              console.log('[AdminSidebar CLIENT] Rendering Social menu:', {
-                isSocialOpen,
-                isSocialActive,
-                subMenuItemsCount: socialSubMenuItems.length
-              })
-            }
-            
-            return (
-              <div key={item.href} suppressHydrationWarning>
-                <Link
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setIsSocialOpen(!isSocialOpen)
-                  }}
-                  className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isSocialActive
-                      ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
-                      : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{item.icon}</span>
-                    <span>{item.label}</span>
-                  </div>
-                  <span className="text-sm">▼</span>
-                </Link>
-                {/* Always render submenu container to match server/client DOM */}
-                <div className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'}>
-                  {socialSubMenuItems.map((subItem) => {
-                    const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
-                    return (
-                      <Link
-                        key={subItem.href}
-                        href={subItem.href}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                          isSubActive
-                            ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
-                        }`}
-                      >
-                        <span className="text-base">{subItem.icon}</span>
-                        <span>{subItem.label}</span>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-            )
+            return null
           }
           
           // Regular menu items
@@ -157,6 +108,48 @@ export function AdminSidebar() {
             </Link>
           )
         })}
+        
+        {/* Social menu - rendered separately after Links, always same DOM structure */}
+        <div suppressHydrationWarning>
+          <Link
+            href="/admin/social"
+            onClick={(e) => {
+              e.preventDefault()
+              setIsSocialOpen(!isSocialOpen)
+            }}
+            className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
+              isSocialActive
+                ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800'
+                : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-xl">📱</span>
+              <span>Social</span>
+            </div>
+            <span className="text-sm">▼</span>
+          </Link>
+          {/* Always render submenu container to match server/client DOM */}
+          <div className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'}>
+            {socialSubMenuItems.map((subItem) => {
+              const isSubActive = normalizedPath === subItem.href || normalizedPath.startsWith(subItem.href + '/')
+              return (
+                <Link
+                  key={subItem.href}
+                  href={subItem.href}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                    isSubActive
+                      ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 font-medium'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+                  }`}
+                >
+                  <span className="text-base">{subItem.icon}</span>
+                  <span>{subItem.label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
         
         <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
           <button
