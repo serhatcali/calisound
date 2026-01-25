@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -40,13 +40,8 @@ export function AdminSidebar() {
   const pathname = usePathname()
   const normalizedPath = pathname.replace('/admin/(protected)', '/admin')
   const isSocialActive = normalizedPath.startsWith('/admin/social')
-  // Use useEffect to set initial state after hydration to avoid hydration mismatch
-  const [isSocialOpen, setIsSocialOpen] = useState(false)
-  
-  // Set initial state after mount to match server render
-  useEffect(() => {
-    setIsSocialOpen(isSocialActive)
-  }, [isSocialActive])
+  // Initialize with isSocialActive to match server and client render
+  const [isSocialOpen, setIsSocialOpen] = useState(isSocialActive)
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' })
@@ -62,7 +57,7 @@ export function AdminSidebar() {
           // Handle expandable Social menu
           if (item.isExpandable && item.href === '/admin/social') {
             return (
-              <div key={item.href}>
+              <div key={item.href} suppressHydrationWarning>
                 <button
                   onClick={() => setIsSocialOpen(!isSocialOpen)}
                   className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
@@ -71,14 +66,15 @@ export function AdminSidebar() {
                       : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{item.icon}</span>
-                    <span>{item.label}</span>
+                  <div className="flex items-center gap-3" suppressHydrationWarning>
+                    <span className="text-xl" suppressHydrationWarning>{item.icon}</span>
+                    <span suppressHydrationWarning>{item.label}</span>
                   </div>
                   <motion.span
                     animate={{ rotate: isSocialOpen ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                     className="text-sm"
+                    suppressHydrationWarning
                   >
                     ▼
                   </motion.span>
