@@ -71,14 +71,43 @@ export function ReleaseDetail({
 
       {/* Status Badge */}
       <div className="flex items-center gap-4">
-        <span className={`px-3 py-1 rounded-lg text-sm font-medium text-white ${
-          release.status === 'draft' ? 'bg-gray-500' :
-          release.status === 'planning' ? 'bg-blue-500' :
-          release.status === 'active' ? 'bg-green-500' :
-          'bg-purple-500'
-        }`}>
-          {release.status}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`px-3 py-1 rounded-lg text-sm font-medium text-white ${
+            release.status === 'draft' ? 'bg-gray-500' :
+            release.status === 'planning' ? 'bg-blue-500' :
+            release.status === 'active' ? 'bg-green-500' :
+            'bg-purple-500'
+          }`}>
+            {release.status}
+          </span>
+          {release.status !== 'active' && (
+            <button
+              onClick={async () => {
+                if (confirm(`Change status from "${release.status}" to "active"?`)) {
+                  try {
+                    const response = await fetch(`/api/admin/releases/${release.id}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ status: 'active' }),
+                    })
+                    if (response.ok) {
+                      alert('Status updated to active!')
+                      window.location.reload()
+                    } else {
+                      const error = await response.json()
+                      throw new Error(error.error || 'Failed to update status')
+                    }
+                  } catch (error: any) {
+                    alert(`Error: ${error.message || 'Failed to update status'}`)
+                  }
+                }
+              }}
+              className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+            >
+              Activate
+            </button>
+          )}
+        </div>
         {release.fast_mode && (
           <span className="px-3 py-1 bg-yellow-500 text-white rounded-lg text-sm font-medium">
             ⚡ Fast Mode
