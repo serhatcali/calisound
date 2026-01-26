@@ -195,7 +195,7 @@ export function ReleaseDetail({
                 </div>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-4 flex gap-2">
                 <button
                   onClick={async () => {
                     const message = (promotionDays.length > 0 || platformPlans.length > 0)
@@ -223,6 +223,44 @@ export function ReleaseDetail({
                 >
                   {(promotionDays.length > 0 || platformPlans.length > 0) ? 'Regenerate' : 'Generate'} Timeline & Platform Plans
                 </button>
+                {release.status === 'active' && promotionDays.length > 0 && (
+                  <button
+                    onClick={async () => {
+                      if (confirm('Send test emails? This will send a daily task email and a reminder email to test the system.')) {
+                        try {
+                          const response = await fetch('/api/admin/releases/test-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ releaseId: release.id }),
+                          })
+                          const result = await response.json()
+                          if (response.ok) {
+                            const messages = []
+                            if (result.results.dailyTaskEmail.sent) {
+                              messages.push('✅ Daily task email sent!')
+                            } else {
+                              messages.push(`❌ Daily task email: ${result.results.dailyTaskEmail.error || 'Failed'}`)
+                            }
+                            if (result.results.reminderEmail.sent) {
+                              messages.push('✅ Reminder email sent!')
+                            } else {
+                              messages.push(`❌ Reminder email: ${result.results.reminderEmail.error || 'Failed'}`)
+                            }
+                            alert(messages.join('\n'))
+                            window.location.reload()
+                          } else {
+                            throw new Error(result.error || 'Failed to send test emails')
+                          }
+                        } catch (error: any) {
+                          alert(`Error: ${error.message || 'Failed to send test emails'}`)
+                        }
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    📧 Test Emails
+                  </button>
+                )}
               </div>
             </div>
 
