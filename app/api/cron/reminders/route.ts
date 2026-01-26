@@ -13,7 +13,8 @@ export const runtime = 'nodejs'
 export async function GET(request: Request) {
   // Verify cron secret (optional but recommended)
   const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET?.trim() // Remove leading/trailing whitespace
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
