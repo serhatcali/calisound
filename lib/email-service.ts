@@ -28,7 +28,10 @@ function formatDate(date: Date, formatStr: string): string {
 function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
-    throw new Error('RESEND_API_KEY environment variable is not set')
+    throw new Error('RESEND_API_KEY environment variable is not set. Please add it to Vercel environment variables.')
+  }
+  if (!apiKey.startsWith('re_')) {
+    throw new Error('RESEND_API_KEY appears to be invalid. It should start with "re_".')
   }
   return new Resend(apiKey)
 }
@@ -151,7 +154,7 @@ export async function sendDailyTaskEmail(
 
     if (error) {
       console.error('Error sending daily task email:', error)
-      return false
+      throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`)
     }
 
     // Log email
@@ -259,7 +262,7 @@ export async function sendReminderEmail(
 
     if (error) {
       console.error('Error sending reminder email:', error)
-      return false
+      throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`)
     }
 
     // Log email and update platform plan status

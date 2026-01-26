@@ -49,15 +49,16 @@ export async function POST(request: NextRequest) {
           const sent = await sendDailyTaskEmail(release, dayTasks, firstDay)
           results.dailyTaskEmail.sent = sent
           if (!sent) {
-            results.dailyTaskEmail.error = 'Failed to send daily task email'
+            results.dailyTaskEmail.error = 'sendDailyTaskEmail returned false'
           }
         } else {
           results.dailyTaskEmail.error = 'No tasks found for first promotion day'
         }
       } else {
-        results.dailyTaskEmail.error = 'No promotion days or tasks found'
+        results.dailyTaskEmail.error = `No promotion days (${promotionDays.length}) or tasks (${allTasks.length}) found`
       }
     } catch (error: any) {
+      console.error('Test daily task email error:', error)
       results.dailyTaskEmail.error = error.message || 'Error sending daily task email'
     }
 
@@ -70,12 +71,13 @@ export async function POST(request: NextRequest) {
         const sent = await sendReminderEmail(release, firstPlan)
         results.reminderEmail.sent = sent
         if (!sent) {
-          results.reminderEmail.error = 'Failed to send reminder email'
+          results.reminderEmail.error = 'sendReminderEmail returned false'
         }
       } else {
-        results.reminderEmail.error = 'No platform plans found'
+        results.reminderEmail.error = `No platform plans found (${platformPlans.length})`
       }
     } catch (error: any) {
+      console.error('Test reminder email error:', error)
       results.reminderEmail.error = error.message || 'Error sending reminder email'
     }
 
