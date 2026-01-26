@@ -118,6 +118,14 @@ ALTER TABLE promotion_days ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE email_logs ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist, then create new ones
+DROP POLICY IF EXISTS "Admin only access" ON releases;
+DROP POLICY IF EXISTS "Admin only access" ON release_assets;
+DROP POLICY IF EXISTS "Admin only access" ON platform_plans;
+DROP POLICY IF EXISTS "Admin only access" ON promotion_days;
+DROP POLICY IF EXISTS "Admin only access" ON daily_tasks;
+DROP POLICY IF EXISTS "Admin only access" ON email_logs;
+
 CREATE POLICY "Admin only access" ON releases FOR ALL USING (true);
 CREATE POLICY "Admin only access" ON release_assets FOR ALL USING (true);
 CREATE POLICY "Admin only access" ON platform_plans FOR ALL USING (true);
@@ -125,7 +133,20 @@ CREATE POLICY "Admin only access" ON promotion_days FOR ALL USING (true);
 CREATE POLICY "Admin only access" ON daily_tasks FOR ALL USING (true);
 CREATE POLICY "Admin only access" ON email_logs FOR ALL USING (true);
 
--- Triggers for updated_at
+-- Function for updated_at (if not exists)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Triggers for updated_at (drop if exists, then create)
+DROP TRIGGER IF EXISTS update_releases_updated_at ON releases;
+DROP TRIGGER IF EXISTS update_platform_plans_updated_at ON platform_plans;
+DROP TRIGGER IF EXISTS update_daily_tasks_updated_at ON daily_tasks;
+
 CREATE TRIGGER update_releases_updated_at BEFORE UPDATE ON releases FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_platform_plans_updated_at BEFORE UPDATE ON platform_plans FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_daily_tasks_updated_at BEFORE UPDATE ON daily_tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
