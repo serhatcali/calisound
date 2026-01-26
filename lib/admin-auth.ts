@@ -47,10 +47,18 @@ export async function loginAdmin(
 ): Promise<{ success: boolean; requires2FA?: boolean; error?: string; sessionData?: { sessionToken: string; csrfToken: string } }> {
   // Constant-time password comparison to prevent timing attacks
   const expectedPassword = ADMIN_PASSWORD
-  const passwordMatch = crypto.timingSafeEqual(
-    Buffer.from(password),
-    Buffer.from(expectedPassword)
-  )
+  const passwordBuffer = Buffer.from(password, 'utf8')
+  const expectedBuffer = Buffer.from(expectedPassword, 'utf8')
+  
+  // timingSafeEqual requires buffers to have the same length
+  // If lengths differ, pad the shorter one (but passwords won't match)
+  if (passwordBuffer.length !== expectedBuffer.length) {
+    // Add delay to prevent timing attacks
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    return { success: false, error: 'Invalid password' }
+  }
+  
+  const passwordMatch = crypto.timingSafeEqual(passwordBuffer, expectedBuffer)
 
   if (!passwordMatch) {
     // Add delay to prevent timing attacks
