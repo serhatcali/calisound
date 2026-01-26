@@ -46,10 +46,15 @@ export async function POST(request: NextRequest) {
         const dayTasks = allTasks.filter(t => t.day_offset === firstDay.day_offset)
         
         if (dayTasks.length > 0) {
-          const sent = await sendDailyTaskEmail(release, dayTasks, firstDay)
-          results.dailyTaskEmail.sent = sent
-          if (!sent) {
-            results.dailyTaskEmail.error = 'sendDailyTaskEmail returned false'
+          try {
+            const sent = await sendDailyTaskEmail(release, dayTasks, firstDay)
+            results.dailyTaskEmail.sent = sent
+            if (!sent) {
+              results.dailyTaskEmail.error = 'sendDailyTaskEmail returned false'
+            }
+          } catch (emailError: any) {
+            console.error('Error in sendDailyTaskEmail:', emailError)
+            results.dailyTaskEmail.error = emailError.message || 'Failed to send daily task email'
           }
         } else {
           results.dailyTaskEmail.error = 'No tasks found for first promotion day'
@@ -68,10 +73,15 @@ export async function POST(request: NextRequest) {
       
       if (platformPlans.length > 0) {
         const firstPlan = platformPlans[0]
-        const sent = await sendReminderEmail(release, firstPlan)
-        results.reminderEmail.sent = sent
-        if (!sent) {
-          results.reminderEmail.error = 'sendReminderEmail returned false'
+        try {
+          const sent = await sendReminderEmail(release, firstPlan)
+          results.reminderEmail.sent = sent
+          if (!sent) {
+            results.reminderEmail.error = 'sendReminderEmail returned false'
+          }
+        } catch (emailError: any) {
+          console.error('Error in sendReminderEmail:', emailError)
+          results.reminderEmail.error = emailError.message || 'Failed to send reminder email'
         }
       } else {
         results.reminderEmail.error = `No platform plans found (${platformPlans.length})`

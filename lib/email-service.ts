@@ -145,6 +145,14 @@ export async function sendDailyTaskEmail(
 
   try {
     const resend = getResendClient()
+    console.log('[Email] Sending daily task email:', {
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject,
+      hasApiKey: !!process.env.RESEND_API_KEY,
+      apiKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 5),
+    })
+    
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
@@ -153,9 +161,11 @@ export async function sendDailyTaskEmail(
     })
 
     if (error) {
-      console.error('Error sending daily task email:', error)
+      console.error('[Email] Resend API error:', error)
       throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`)
     }
+
+    console.log('[Email] Daily task email sent successfully:', data)
 
     // Log email
     await createEmailLog({
@@ -166,9 +176,15 @@ export async function sendDailyTaskEmail(
     })
 
     return true
-  } catch (error) {
-    console.error('Error sending daily task email:', error)
-    return false
+  } catch (error: any) {
+    console.error('[Email] Error sending daily task email:', error)
+    console.error('[Email] Error details:', {
+      message: error.message,
+      stack: error.stack,
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+    })
+    throw error // Re-throw to get better error messages
   }
 }
 
@@ -253,6 +269,15 @@ export async function sendReminderEmail(
 
   try {
     const resend = getResendClient()
+    console.log('[Email] Sending reminder email:', {
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject,
+      platform: platformLabel,
+      hasApiKey: !!process.env.RESEND_API_KEY,
+      apiKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 5),
+    })
+    
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
@@ -261,9 +286,11 @@ export async function sendReminderEmail(
     })
 
     if (error) {
-      console.error('Error sending reminder email:', error)
+      console.error('[Email] Resend API error:', error)
       throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`)
     }
+
+    console.log('[Email] Reminder email sent successfully:', data)
 
     // Log email and update platform plan status
     await createEmailLog({
@@ -275,8 +302,14 @@ export async function sendReminderEmail(
     })
 
     return true
-  } catch (error) {
-    console.error('Error sending reminder email:', error)
-    return false
+  } catch (error: any) {
+    console.error('[Email] Error sending reminder email:', error)
+    console.error('[Email] Error details:', {
+      message: error.message,
+      stack: error.stack,
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+    })
+    throw error // Re-throw to get better error messages
   }
 }
