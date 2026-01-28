@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import type { Release } from '@/types/release-planning'
+import type { Release, PlatformPlan } from '@/types/release-planning'
+import { ReleasesCalendar } from './ReleasesCalendar'
 // Safe date formatting - using native JavaScript only
 function formatDate(date: Date, formatStr: string): string {
   if (formatStr === 'MMM d, yyyy HH:mm') {
@@ -20,10 +21,13 @@ function formatDate(date: Date, formatStr: string): string {
 
 interface ReleasesListProps {
   releases: Release[]
+  platformPlans?: Record<string, PlatformPlan[]>
 }
 
-export function ReleasesList({ releases }: ReleasesListProps) {
+export function ReleasesList({ releases, platformPlans = {} }: ReleasesListProps) {
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
   const [filter, setFilter] = useState<'all' | 'draft' | 'planning' | 'active' | 'completed'>('all')
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const filteredReleases = filter === 'all'
     ? releases
@@ -58,25 +62,66 @@ export function ReleasesList({ releases }: ReleasesListProps) {
         </Link>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-800">
-        {(['all', 'draft', 'planning', 'active', 'completed'] as const).map(status => (
+      {/* View Toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2 border-b border-gray-200 dark:border-gray-800">
+          {(['all', 'draft', 'planning', 'active', 'completed'] as const).map(status => (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                filter === status
+                  ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)} ({status === 'all' ? releases.length : releases.filter(r => r.status === status).length})
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
           <button
-            key={status}
-            onClick={() => setFilter(status)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              filter === status
-                ? 'border-orange-500 text-orange-600 dark:text-orange-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            onClick={() => setViewMode('list')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'list'
+                ? 'bg-orange-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
-            {status.charAt(0).toUpperCase() + status.slice(1)} ({status === 'all' ? releases.length : releases.filter(r => r.status === status).length})
+            List
           </button>
-        ))}
+          <button
+            onClick={() => setViewMode('calendar')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'calendar'
+                ? 'bg-orange-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Calendar
+          </button>
+        </div>
       </div>
 
-      {/* Releases Grid */}
-      {filteredReleases.length === 0 ? (
+      {/* Calendar View */}
+      {viewMode === 'calendar' && (
+        <ReleasesCalendar 
+          key={refreshKey}
+          releases={filteredReleases} 
+          platformPlans={platformPlans}
+          onPlanUpdate={() => {
+            // Trigger page refresh to get updated data
+            window.location.reload()
+          }}
+        />
+      )}
+
+      {/* List View */}
+      {viewMode === 'list' && (
+        <>
+          {/* Releases Grid */}
+          {filteredReleases.length === 0 ? (
         <div className="text-center py-12 bg-white dark:bg-black rounded-2xl border border-gray-200 dark:border-gray-800">
           <p className="text-gray-600 dark:text-gray-400 mb-4">No releases found</p>
           <Link
@@ -148,6 +193,8 @@ export function ReleasesList({ releases }: ReleasesListProps) {
             )
           })}
         </div>
+      )}
+        </>
       )}
     </div>
   )

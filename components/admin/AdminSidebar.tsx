@@ -5,45 +5,48 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 const menuItems = [
-  { href: '/admin', label: 'Dashboard', icon: '📊' },
-  { href: '/admin/cities', label: 'Cities', icon: '🏙️' },
-  { href: '/admin/sets', label: 'Sets', icon: '🎵' },
-  { href: '/admin/media', label: 'Media Library', icon: '🖼️' },
-  { href: '/admin/links', label: 'Global Links', icon: '🔗' },
+  { href: '/admin', label: 'Dashboard' },
+  { href: '/admin/releases', label: 'Releases' },
+  { href: '/admin/templates', label: 'Templates' },
+  { href: '/admin/cities', label: 'Cities' },
+  { href: '/admin/sets', label: 'Sets' },
+  { href: '/admin/media', label: 'Media Library' },
+  { href: '/admin/links', label: 'Global Links' },
   // Social menu is handled separately to avoid hydration issues
-  { href: '/admin/contacts', label: 'Contacts', icon: '📧' },
-  { href: '/admin/comments', label: 'Comments', icon: '💬' },
-  { href: '/admin/activity', label: 'Activity Logs', icon: '📝' },
-  { href: '/admin/2fa', label: '2FA Settings', icon: '🔐' },
-  { href: '/admin/seo', label: 'SEO Tools', icon: '🔍' },
-  { href: '/admin/import', label: 'Import', icon: '📥' },
-  { href: '/admin/scheduled', label: 'Scheduled', icon: '⏰' },
-  { href: '/admin/analytics', label: 'Analytics', icon: '📈' },
-  { href: '/admin/content', label: 'Site Content', icon: '✏️' },
-  { href: '/admin/settings', label: 'Settings', icon: '⚙️' },
+  { href: '/admin/contacts', label: 'Contacts' },
+  { href: '/admin/comments', label: 'Comments' },
+  { href: '/admin/activity', label: 'Activity Logs' },
+  { href: '/admin/2fa', label: '2FA Settings' },
+  { href: '/admin/seo', label: 'SEO Tools' },
+  { href: '/admin/import', label: 'Import' },
+  { href: '/admin/scheduled', label: 'Scheduled' },
+  { href: '/admin/analytics', label: 'Analytics' },
+  { href: '/admin/content', label: 'Site Content' },
+  { href: '/admin/settings', label: 'Settings' },
 ]
 
 const socialSubMenuItems = [
-  { href: '/admin/social', label: 'Overview', icon: '📊' },
-  { href: '/admin/social/compose', label: 'Compose', icon: '✍️' },
-  { href: '/admin/social/posts', label: 'Posts', icon: '📝' },
-  { href: '/admin/social/schedule', label: 'Schedule', icon: '📅' },
-  { href: '/admin/social/publishing', label: 'Publishing', icon: '🚀' },
-  { href: '/admin/social/analytics', label: 'Analytics', icon: '📈' },
-  { href: '/admin/social/library', label: 'Library', icon: '📚' },
-  { href: '/admin/social/integrations', label: 'Integrations', icon: '🔌' },
-  { href: '/admin/social/settings', label: 'Settings', icon: '⚙️' },
+  { href: '/admin/social', label: 'Overview' },
+  { href: '/admin/social/compose', label: 'Compose' },
+  { href: '/admin/social/posts', label: 'Posts' },
+  { href: '/admin/social/review', label: 'Review' },
+  { href: '/admin/social/schedule', label: 'Schedule' },
+  { href: '/admin/social/publishing', label: 'Publishing' },
+  { href: '/admin/social/analytics', label: 'Analytics' },
+  { href: '/admin/social/library', label: 'Library' },
+  { href: '/admin/social/integrations', label: 'Integrations' },
+  { href: '/admin/social/settings', label: 'Settings' },
 ]
 
 export function AdminSidebar() {
   const pathname = usePathname()
   const normalizedPath = pathname.replace('/admin/(protected)', '/admin')
   const isSocialActive = normalizedPath.startsWith('/admin/social')
+  // Initialize to false on both server and client to ensure consistency
   const [isSocialOpen, setIsSocialOpen] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    setIsMounted(true)
+    // Only update state on client after mount
     if (isSocialActive) {
       setIsSocialOpen(true)
     }
@@ -64,9 +67,8 @@ export function AdminSidebar() {
           const isActive = normalizedPath === item.href || normalizedPath.startsWith(item.href + '/')
           
           return (
-            <>
+            <div key={item.href}>
               <Link
-                key={item.href}
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                   isActive
@@ -74,12 +76,11 @@ export function AdminSidebar() {
                     : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
                 }`}
               >
-                <span className="text-xl">{item.icon}</span>
                 <span>{item.label}</span>
               </Link>
               
-              {/* Insert Social menu after Links - only on client to avoid hydration issues */}
-              {index === linksIndex && isMounted && (
+              {/* Insert Social menu after Links - always render to avoid hydration issues */}
+              {index === linksIndex && (
                 <div key="social-menu">
                   <Link
                     href="/admin/social"
@@ -93,11 +94,8 @@ export function AdminSidebar() {
                         : 'text-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">📱</span>
-                      <span>Social</span>
-                    </div>
-                    <span className="text-sm">▼</span>
+                    <span>Social</span>
+                    <span className="text-sm">{isSocialOpen ? '▼' : '▶'}</span>
                   </Link>
                   <div 
                     className={isSocialOpen ? 'ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : 'hidden'}
@@ -115,7 +113,6 @@ export function AdminSidebar() {
                               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
                           }`}
                         >
-                          <span className="text-base">{subItem.icon}</span>
                           <span>{subItem.label}</span>
                         </Link>
                       )
@@ -123,7 +120,7 @@ export function AdminSidebar() {
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )
         })}
         
@@ -132,7 +129,6 @@ export function AdminSidebar() {
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
           >
-            <span className="text-xl">🚪</span>
             <span>Logout</span>
           </button>
         </div>

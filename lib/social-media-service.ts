@@ -10,7 +10,9 @@ import type {
   SocialJob,
   Campaign,
   PostStatus,
-  SocialPlatform
+  SocialPlatform,
+  SocialHashtagSet,
+  SocialTagPack
 } from '@/types/social-media'
 
 // Social Posts
@@ -181,6 +183,22 @@ export async function getSocialAccounts() {
   return data as SocialAccount[]
 }
 
+export async function deleteSocialAccount(id: string) {
+  const { error } = await supabaseAdmin
+    .from('social_accounts')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
+
+  await supabaseAdmin.from('social_audit_log').insert({
+    actor_id: 'admin',
+    action: 'disconnect',
+    entity_type: 'account',
+    entity_id: id
+  })
+}
+
 // Assets
 export async function getSocialAssets(filters?: {
   city_id?: string // UUID
@@ -254,4 +272,215 @@ export async function getSocialJobs(filters?: {
   const { data, error } = await query
   if (error) throw error
   return data as SocialJob[]
+}
+
+// Approval workflow
+export async function approveSocialPost(id: string, approvedBy: string) {
+  const { data, error } = await supabaseAdmin
+    .from('social_posts')
+    .update({
+      status: 'approved',
+      approved_by: approvedBy,
+      approved_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+
+  await supabaseAdmin.from('social_audit_log').insert({
+    actor_id: approvedBy,
+    action: 'approve',
+    entity_type: 'post',
+    entity_id: id,
+    meta: { status: 'approved' }
+  })
+
+  return data as SocialPost
+}
+
+export async function rejectSocialPost(id: string, rejectedBy: string, reason?: string) {
+  const { data, error } = await supabaseAdmin
+    .from('social_posts')
+    .update({
+      status: 'draft',
+      approved_by: null,
+      approved_at: null
+    })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+
+  await supabaseAdmin.from('social_audit_log').insert({
+    actor_id: rejectedBy,
+    action: 'reject',
+    entity_type: 'post',
+    entity_id: id,
+    meta: { reason: reason || 'No reason provided' }
+  })
+
+  return data as SocialPost
+}
+
+export async function submitForReview(id: string) {
+  const { data, error } = await supabaseAdmin
+    .from('social_posts')
+    .update({
+      status: 'review'
+    })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+
+  await supabaseAdmin.from('social_audit_log').insert({
+    actor_id: 'admin',
+    action: 'submit_for_review',
+    entity_type: 'post',
+    entity_id: id
+  })
+
+  return data as SocialPost
+}
+
+// Hashtag Sets
+export async function getHashtagSets(platform?: SocialPlatform) {
+  let query = supabaseAdmin
+    .from('social_hashtag_sets')
+    .select('*')
+    .order('usage_count', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  if (platform) {
+    query = query.eq('platform', platform)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return data as SocialHashtagSet[]
+}
+
+export async function createHashtagSet(set: {
+  name: string
+  platform: SocialPlatform
+  hashtags: string[]
+  description?: string
+}) {
+  const { data, error } = await supabaseAdmin
+    .from('social_hashtag_sets')
+    .insert({
+      ...set,
+      created_by: 'admin'
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as SocialHashtagSet
+}
+
+export async function updateHashtagSet(id: string, updates: Partial<SocialHashtagSet>) {
+  const { data, error } = await supabaseAdmin
+    .from('social_hashtag_sets')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as SocialHashtagSet
+}
+
+export async function deleteHashtagSet(id: string) {
+  const { error } = await supabaseAdmin
+    .from('social_hashtag_sets')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
+}
+
+export async function incrementHashtagSetUsage(id: string) {
+  const { data: current } = await supabaseAdmin
+    .from('social_hashtag_sets')
+    .select('usage_count')
+    .eq('id', id)
+    .single()
+  
+  if (current) {
+    await supabaseAdmin
+      .from('social_hashtag_sets')
+      .update({ usage_count: (current.usage_count || 0) + 1 })
+      .eq('id', id)
+  }
+}
+
+// Tag Packs
+export async function getTagPacks() {
+  const { data, error } = await supabaseAdmin
+    .from('social_tag_packs')
+    .select('*')
+    .order('usage_count', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data as SocialTagPack[]
+}
+
+export async function createTagPack(pack: {
+  name: string
+  tags: string
+  description?: string
+}) {
+  const { data, error } = await supabaseAdmin
+    .from('social_tag_packs')
+    .insert({
+      ...pack,
+      created_by: 'admin'
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as SocialTagPack
+}
+
+export async function updateTagPack(id: string, updates: Partial<SocialTagPack>) {
+  const { data, error } = await supabaseAdmin
+    .from('social_tag_packs')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as SocialTagPack
+}
+
+export async function deleteTagPack(id: string) {
+  const { error } = await supabaseAdmin
+    .from('social_tag_packs')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
+}
+
+export async function incrementTagPackUsage(id: string) {
+  const { data: current } = await supabaseAdmin
+    .from('social_tag_packs')
+    .select('usage_count')
+    .eq('id', id)
+    .single()
+  
+  if (current) {
+    await supabaseAdmin
+      .from('social_tag_packs')
+      .update({ usage_count: (current.usage_count || 0) + 1 })
+      .eq('id', id)
+  }
 }

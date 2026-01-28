@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { SocialPost, SocialPlatform, Campaign } from '@/types/social-media'
+import { SocialPost, SocialPlatform, Campaign, SocialHashtagSet, SocialTagPack } from '@/types/social-media'
 import { City } from '@/types/database'
 import { validatePostVariant } from '@/lib/social-media-validation'
 import { PLATFORM_RULES } from '@/types/social-media'
@@ -34,6 +34,11 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [copying, setCopying] = useState(false)
+
+  // Tag packs and hashtag sets
+  const [tagPacks, setTagPacks] = useState<SocialTagPack[]>([])
+  const [hashtagSets, setHashtagSets] = useState<SocialHashtagSet[]>([])
+  const [loadingLibrary, setLoadingLibrary] = useState(false)
 
   // Platform-specific variant states
   const [variants, setVariants] = useState<Record<SocialPlatform, {
@@ -69,6 +74,35 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
   const hasContent = Object.values(variants).some(
     v => v && (v.caption || v.description || v.title)
   )
+
+  // Load tag packs and hashtag sets
+  useEffect(() => {
+    const loadLibrary = async () => {
+      setLoadingLibrary(true)
+      try {
+        const [tagPacksRes, hashtagsRes] = await Promise.all([
+          fetch('/api/admin/social/tagpacks'),
+          fetch(`/api/admin/social/hashtags?platform=${activePlatform}`),
+        ])
+
+        if (tagPacksRes.ok) {
+          const data = await tagPacksRes.json()
+          setTagPacks(data)
+        }
+
+        if (hashtagsRes.ok) {
+          const data = await hashtagsRes.json()
+          setHashtagSets(data)
+        }
+      } catch (error) {
+        console.error('Error loading library:', error)
+      } finally {
+        setLoadingLibrary(false)
+      }
+    }
+
+    loadLibrary()
+  }, [activePlatform])
 
   const updateVariant = (platform: SocialPlatform, updates: Partial<typeof currentVariant>) => {
     setVariants(prev => ({
@@ -447,21 +481,131 @@ export function SocialComposer({ initialPost, campaigns, cities }: SocialCompose
         </div>
 
         {(activePlatform === 'youtube' || activePlatform === 'youtube_shorts') && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description
+                {rules.maxChars && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    ({currentVariant.description?.length || 0} / {rules.maxChars})
+                  </span>
+                )}
+              </label>
+              <textarea
+                value={currentVariant.description || ''}
+                onChange={(e) => updateVariant(activePlatform, { description: e.target.value })}
+                rows={6}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="Enter description..."
+              />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Tags (comma-separated)
+                </label>
+                {tagPacks.length > 0 && (
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const pack = tagPacks.find(p => p.id === e.target.value)
+                        if (pack) {
+                          updateVariant(activePlatform, { tags: pack.tags })
+                        }
+                        e.target.value = ''
+                      }
+                    }}
+                    className="px-3 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    defaultValue=""
+                  >
+                    <option value="">Load from Tag Pack...</option>
+                    {tagPacks.map(pack => (
+                      <option key={pack.id} value={pack.id}>{pack.name}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              <input
+                type="text"
+                value={currentVariant.tags || ''}
+                onChange={(e) => updateVariant(activePlatform, { tags: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="e.g., electronic music, house music, techno"
+              />
+            </div>
+          </>
+        )}
+
+        {!activePlatform.includes('youtube') && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description
-              {rules.maxChars && (
-                <span className="ml-2 text-xs text-gray-500">
-                  ({currentVariant.description?.length || 0} / {rules.maxChars})
-                </span>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Hashtags
+                {rules.maxHashtags && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    ({currentVariant.hashtags?.length || 0} / {rules.maxHashtags} max)
+                  </span>
+                )}
+              </label>
+              {hashtagSets.length > 0 && (
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      const set = hashtagSets.find(s => s.id === e.target.value)
+                      if (set) {
+                        updateVariant(activePlatform, { hashtags: set.hashtags })
+                      }
+                      e.target.value = ''
+                    }
+                  }}
+                  className="px-3 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  defaultValue=""
+                >
+                  <option value="">Load from Hashtag Set...</option>
+                  {hashtagSets.map(set => (
+                    <option key={set.id} value={set.id}>{set.name}</option>
+                  ))}
+                </select>
               )}
-            </label>
-            <textarea
-              value={currentVariant.description || ''}
-              onChange={(e) => updateVariant(activePlatform, { description: e.target.value })}
-              rows={6}
+            </div>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {currentVariant.hashtags?.map((hashtag, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-lg text-sm flex items-center gap-2"
+                >
+                  {hashtag}
+                  <button
+                    onClick={() => {
+                      const newHashtags = currentVariant.hashtags?.filter((_, i) => i !== index) || []
+                      updateVariant(activePlatform, { hashtags: newHashtags })
+                    }}
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <input
+              type="text"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' || e.key === ',') {
+                  e.preventDefault()
+                  const input = e.currentTarget as HTMLInputElement
+                  const value = input.value.trim()
+                  if (value) {
+                    const hashtag = value.startsWith('#') ? value : `#${value}`
+                    const currentHashtags = currentVariant.hashtags || []
+                    if (!currentHashtags.includes(hashtag)) {
+                      updateVariant(activePlatform, { hashtags: [...currentHashtags, hashtag] })
+                    }
+                    input.value = ''
+                  }
+                }
+              }}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="Enter description..."
+              placeholder="Type hashtag and press Enter or comma (e.g., #music)"
             />
           </div>
         )}

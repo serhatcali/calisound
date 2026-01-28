@@ -10,6 +10,7 @@ import type {
   EmailLog,
   ReleasePlatform,
   ReleaseStatus,
+  ReleaseTemplate,
 } from '@/types/release-planning'
 
 // Releases
@@ -40,9 +41,10 @@ export async function getRelease(id: string) {
     .from('releases')
     .select('*')
     .eq('id', id)
-    .single()
+    .maybeSingle()
 
   if (error) throw error
+  if (!data) throw new Error(`Release with id ${id} not found`)
   return data as Release
 }
 
@@ -264,9 +266,17 @@ export async function createDailyTask(task: {
 }
 
 export async function updateDailyTask(id: string, updates: Partial<DailyTask>) {
+  // If marking as completed, set completed_at timestamp
+  const updateData = { ...updates }
+  if (updates.completed === true && !updates.completed_at) {
+    updateData.completed_at = new Date().toISOString()
+  } else if (updates.completed === false) {
+    updateData.completed_at = null
+  }
+  
   const { data, error } = await supabaseAdmin
     .from('daily_tasks')
-    .update(updates)
+    .update(updateData)
     .eq('id', id)
     .select()
     .single()
@@ -324,4 +334,113 @@ export async function createEmailLog(log: {
 
   if (error) throw error
   return data as EmailLog
+}
+
+// Release Templates
+export async function getTemplates(filters?: {
+  is_public?: boolean
+  tags?: string[]
+  search?: string
+}) {
+  let query = supabaseAdmin
+    .from('release_templates')
+    .select('*')
+    .order('usage_count', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  if (filters?.is_public !== undefined) {
+    query = query.eq('is_public', filters.is_public)
+  }
+
+  if (filters?.tags && filters.tags.length > 0) {
+    query = query.contains('tags', filters.tags)
+  }
+
+  if (filters?.search) {
+    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return data as ReleaseTemplate[]
+}
+
+export async function getTemplate(id: string) {
+  const { data, error } = await supabaseAdmin
+    .from('release_templates')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data) throw new Error(`Template with id ${id} not found`)
+  return data as ReleaseTemplate
+}
+
+export async function createTemplate(template: {
+  name: string
+  description?: string
+  default_city?: string
+  default_country?: string
+  default_local_language?: string
+  default_local_language_code?: string
+  default_include_english?: boolean
+  default_timezone?: string
+  default_fast_mode?: boolean
+  default_platforms?: ReleasePlatform[]
+  tags?: string[]
+  is_public?: boolean
+  created_by?: string
+}) {
+  const { data, error } = await supabaseAdmin
+    .from('release_templates')
+    .insert({
+      name: template.name,
+      description: template.description,
+      default_city: template.default_city,
+      default_country: template.default_country,
+      default_local_language: template.default_local_language || 'English',
+      default_local_language_code: template.default_local_language_code || 'en',
+      default_include_english: template.default_include_english ?? true,
+      default_timezone: template.default_timezone || 'Europe/Istanbul',
+      default_fast_mode: template.default_fast_mode ?? false,
+      default_platforms: template.default_platforms || ['youtube', 'instagram_reels', 'tiktok', 'twitter'],
+      tags: template.tags || [],
+      is_public: template.is_public ?? false,
+      created_by: template.created_by || 'admin',
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as ReleaseTemplate
+}
+
+export async function updateTemplate(id: string, updates: Partial<ReleaseTemplate>) {
+  const { data, error } = await supabaseAdmin
+    .from('release_templates')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as ReleaseTemplate
+}
+
+export async function deleteTemplate(id: string) {
+  const { error } = await supabaseAdmin
+    .from('release_templates')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
+}
+
+export async function incrementTemplateUsage(id: string) {
+  const { error } = await supabaseAdmin.rpc('increment_template_usage', {
+    template_id: id,
+  })
+
+  if (error) throw error
 }

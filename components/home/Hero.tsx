@@ -41,7 +41,7 @@ export function Hero({ globalLinks }: HeroProps) {
   return (
     <section 
       ref={sectionRef}
-      className="relative min-h-[100vh] flex items-center justify-center overflow-hidden -mt-16 md:-mt-20"
+      className="relative min-h-[100vh] flex items-center justify-center overflow-hidden -mt-16 md:-mt-20 z-0"
       style={{ 
         minHeight: '100vh',
         contain: 'layout style paint',

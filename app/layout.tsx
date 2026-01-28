@@ -244,7 +244,7 @@ export default async function RootLayout({
           <ErrorBoundary>
             <PerformanceMonitor />
             {!isAdminRoute && !isCaliClubRoute && <Navigation />}
-            <main className={isCaliClubRoute ? "h-full w-full" : "min-h-screen bg-white dark:bg-black transition-colors duration-300"}>
+            <main className={isCaliClubRoute ? "h-full w-full" : "min-h-screen bg-white dark:bg-black transition-colors duration-300 relative z-0"}>
               {children}
             </main>
             {!isAdminRoute && !isCaliClubRoute && (

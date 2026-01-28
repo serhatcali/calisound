@@ -1,9 +1,31 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import type { ReleasePlatform } from '@/types/release-planning'
-import { PLATFORM_LABELS } from '@/types/release-planning'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+
+// Define types locally to avoid import issues
+type ReleasePlatform = 
+  | 'youtube'
+  | 'youtube_shorts'
+  | 'instagram_reels'
+  | 'instagram_story'
+  | 'tiktok'
+  | 'tiktok_story'
+  | 'twitter'
+  | 'soundcloud'
+
+// Platform labels
+const PLATFORM_LABELS: Record<ReleasePlatform, string> = {
+  youtube: 'YouTube',
+  youtube_shorts: 'YouTube Shorts',
+  instagram_reels: 'Instagram Reels',
+  instagram_story: 'Instagram Story',
+  tiktok: 'TikTok',
+  tiktok_story: 'TikTok Story',
+  twitter: 'X (Twitter)',
+  soundcloud: 'SoundCloud',
+}
 
 const PLATFORMS: ReleasePlatform[] = [
   'youtube',
@@ -33,7 +55,12 @@ const LANGUAGE_CODES: Record<string, string> = {
 
 export function NewReleaseForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const templateId = searchParams.get('template')
+  
   const [loading, setLoading] = useState(false)
+  const [loadingTemplate, setLoadingTemplate] = useState(!!templateId)
+  const [templateName, setTemplateName] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     song_title: '',
     city: '',
@@ -45,6 +72,37 @@ export function NewReleaseForm() {
     timezone: 'Europe/Istanbul',
     platforms: [] as ReleasePlatform[],
   })
+
+  // Load template if templateId is provided
+  useEffect(() => {
+    if (templateId) {
+      const loadTemplate = async () => {
+        try {
+          const response = await fetch(`/api/admin/templates/${templateId}`)
+          if (response.ok) {
+            const template = await response.json()
+            setTemplateName(template.name)
+            setFormData({
+              song_title: '',
+              city: template.default_city || '',
+              country: template.default_country || '',
+              local_language: template.default_local_language || 'English',
+              local_language_code: template.default_local_language_code || 'en',
+              include_english: template.default_include_english ?? false,
+              release_at: '',
+              timezone: template.default_timezone || 'Europe/Istanbul',
+              platforms: template.default_platforms || [],
+            })
+          }
+        } catch (error) {
+          console.error('Error loading template:', error)
+        } finally {
+          setLoadingTemplate(false)
+        }
+      }
+      loadTemplate()
+    }
+  }, [templateId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -86,6 +144,17 @@ export function NewReleaseForm() {
         throw new Error('Invalid response from server')
       }
 
+      // Increment template usage if template was used
+      if (templateId) {
+        try {
+          await fetch(`/api/admin/templates/${templateId}/use`, {
+            method: 'POST',
+          })
+        } catch (error) {
+          console.error('Error incrementing template usage:', error)
+        }
+      }
+
       alert('Release created successfully! Timeline and platform plans are being generated in the background.')
       router.push(`/admin/releases/${release.id}`)
     } catch (error: any) {
@@ -124,12 +193,32 @@ export function NewReleaseForm() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-4xl font-black text-white mb-2">
-          New Release
-        </h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-4xl font-black text-white">
+            New Release
+          </h1>
+          <Link
+            href="/admin/templates"
+            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+          >
+            Browse Templates
+          </Link>
+        </div>
         <p className="text-gray-600 dark:text-gray-400">
           Create a new song release with AI-assisted planning
         </p>
+        {templateName && (
+          <div className="mt-2 p-3 bg-blue-500/20 border border-blue-500/50 rounded-lg">
+            <p className="text-sm text-blue-300">
+              Using template: <strong>{templateName}</strong>
+            </p>
+          </div>
+        )}
+        {loadingTemplate && (
+          <div className="mt-2 p-3 bg-gray-800 border border-gray-700 rounded-lg">
+            <p className="text-sm text-gray-400">Loading template...</p>
+          </div>
+        )}
       </div>
 
       {isFastMode && (

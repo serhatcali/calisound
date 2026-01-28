@@ -21,6 +21,29 @@ export function SocialIntegrations() {
 
   useEffect(() => {
     fetchAccounts()
+    
+    // Check for OAuth callback messages
+    const urlParams = new URLSearchParams(window.location.search)
+    const success = urlParams.get('success')
+    const error = urlParams.get('error')
+    
+    if (success) {
+      alert('Account connected successfully!')
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname)
+      fetchAccounts()
+    }
+    
+    if (error) {
+      const errorMsg = decodeURIComponent(error)
+      if (errorMsg.includes('not configured')) {
+        alert(`OAuth Configuration Error: ${errorMsg}\n\nPlease check your environment variables (.env.local file).`)
+      } else {
+        alert(`Connection failed: ${errorMsg}`)
+      }
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname)
+    }
   }, [])
 
   const fetchAccounts = async () => {
@@ -38,9 +61,15 @@ export function SocialIntegrations() {
   }
 
   const handleConnect = async (platform: SocialPlatform) => {
-    // OAuth is not yet implemented - show info in UI instead of alert
-    // This function will be implemented when OAuth is ready
-    return
+    setConnecting(platform)
+    try {
+      // Redirect to OAuth authorization endpoint
+      window.location.href = `/api/admin/social/oauth/${platform}/authorize`
+    } catch (error: any) {
+      console.error('Error initiating OAuth:', error)
+      alert(`Error: ${error.message || 'Failed to connect'}`)
+      setConnecting(null)
+    }
   }
 
   const handleDisconnect = async (accountId: string) => {
@@ -95,18 +124,13 @@ export function SocialIntegrations() {
           <span className="text-2xl">ℹ️</span>
           <div>
             <p className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">
-              <strong>Assisted Mode Active</strong>
+              <strong>OAuth Integration Available</strong>
             </p>
             <p className="text-sm text-blue-800 dark:text-blue-400 mb-2">
-              OAuth integration is coming soon. For now, use <strong>&quot;Assisted&quot;</strong> mode:
+              Connect your social media accounts to enable auto-publishing. <strong>YouTube</strong> is the easiest to set up (Google Cloud Console).
             </p>
-            <ol className="text-sm text-blue-800 dark:text-blue-400 list-decimal list-inside space-y-1">
-              <li>Create your post in the composer</li>
-              <li>Copy the generated content for each platform</li>
-              <li>Manually upload to your social media accounts</li>
-            </ol>
             <p className="text-xs text-blue-700 dark:text-blue-500 mt-2">
-              Auto-publish mode will be available after OAuth integration.
+              <strong>Note:</strong> Instagram/Facebook require Meta for Developers access. Use YouTube, Twitter, or TikTok if you don't have access.
             </p>
           </div>
         </div>
@@ -176,18 +200,14 @@ export function SocialIntegrations() {
                     </button>
                   </>
                 ) : (
-                  <div className="flex-1">
-                    <button
-                      disabled
-                      className="w-full px-4 py-2 bg-gray-400 dark:bg-gray-700 text-white rounded-lg cursor-not-allowed opacity-60"
-                      title="OAuth integration coming soon. Use Assisted mode: Create post → Copy content → Manual upload"
-                    >
-                      Connect (Coming Soon)
-                    </button>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
-                      Use Assisted mode for now
-                    </p>
-                  </div>
+                  <button
+                    onClick={() => handleConnect(platform.value)}
+                    disabled={isConnecting}
+                    className="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    title="Click to connect your account via OAuth"
+                  >
+                    {isConnecting ? 'Connecting...' : 'Connect'}
+                  </button>
                 )}
               </div>
             </div>

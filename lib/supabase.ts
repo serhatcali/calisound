@@ -91,3 +91,8 @@ export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
     return value
   }
 })
+
+// Export function for client-side use to avoid webpack bundling issues
+export function getSupabase() {
+  return getSupabaseClient()
+}

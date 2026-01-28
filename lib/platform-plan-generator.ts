@@ -2,7 +2,7 @@
 
 import type { Release, ReleasePlatform, PlatformPlan } from '@/types/release-planning'
 import { PLATFORM_UPLOAD_LINKS } from '@/types/release-planning'
-import { generateAllPlatformCopy } from './ai-copy-generator'
+import { generateAllPlatformCopy, generateOptimalPostingTimes } from './ai-copy-generator'
 import { createPlatformPlan, getReleaseAssets, getPlatformPlans } from './release-planning-service'
 import { supabaseAdmin } from './supabase-admin'
 
@@ -48,9 +48,46 @@ export async function generatePlatformPlans(
   }>
   
   try {
+    console.log('[Platform Plans] Starting AI copy generation...', {
+      releaseId: release.id,
+      songTitle: release.song_title,
+      platforms: platforms.length,
+      hasOpenAI: !!process.env.OPENAI_API_KEY,
+      apiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 10),
+      nodeEnv: process.env.NODE_ENV,
+    })
+    
     aiCopy = await generateAllPlatformCopy(release, platforms)
+    
+    console.log('[Platform Plans] AI copy generation completed', {
+      platformsGenerated: Object.keys(aiCopy).length,
+      sampleTitle: Object.values(aiCopy)[0]?.title,
+      sampleDescription: Object.values(aiCopy)[0]?.description?.substring(0, 50),
+      sampleHashtags: Object.values(aiCopy)[0]?.hashtags?.length,
+    })
+    
+    // Validate AI copy quality
+    const hasGenericContent = Object.values(aiCopy).some(copy => 
+      copy.description.toLowerCase().includes('new release:') ||
+      copy.title === `${release.song_title}${release.city ? ` - ${release.city}` : ''}` ||
+      copy.hashtags.length < 5
+    )
+    
+    if (hasGenericContent) {
+      console.warn('[Platform Plans] AI copy appears generic, but using it anyway')
+    } else {
+      console.log('[Platform Plans] AI copy generated successfully', {
+        sampleTitle: Object.values(aiCopy)[0]?.title,
+        sampleHashtags: Object.values(aiCopy)[0]?.hashtags.length,
+      })
+    }
   } catch (error) {
-    console.error('Error generating AI copy, using fallback:', error)
+    console.error('[Platform Plans] Error generating AI copy, using fallback:', error)
+    console.error('[Platform Plans] Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
+    
     // Use fallback copy if AI generation fails
     aiCopy = {} as any
     for (const platform of platforms) {
@@ -61,18 +98,29 @@ export async function generatePlatformPlans(
         tags: platform.includes('youtube') ? 'music, afrohouse, electronic' : undefined,
       }
     }
+    console.warn('[Platform Plans] Using fallback copy - AI generation failed')
   }
 
   const plans: PlatformPlan[] = []
 
-  // Determine posting times based on strategy
-  const postingTimes = scheduleStrategy === 'same_day'
-    ? [releaseDate] // All on release day
-    : generatePostingSchedule(releaseDate, platforms.length)
+  // Generate optimal posting times using AI
+  let optimalTimes: Record<ReleasePlatform, Date>
+  try {
+    optimalTimes = await generateOptimalPostingTimes(release, platforms)
+  } catch (error) {
+    console.error('Error generating optimal posting times, using fallback:', error)
+    // Fallback to rule-based schedule
+    const fallbackTimes = scheduleStrategy === 'same_day'
+      ? platforms.reduce((acc, p) => ({ ...acc, [p]: releaseDate }), {} as Record<ReleasePlatform, Date>)
+      : generatePostingSchedule(releaseDate, platforms.length).reduce((acc, time, i) => ({
+          ...acc,
+          [platforms[i]]: time,
+        }), {} as Record<ReleasePlatform, Date>)
+    optimalTimes = fallbackTimes
+  }
 
-  for (let i = 0; i < platforms.length; i++) {
-    const platform = platforms[i]
-    const plannedAt = postingTimes[i] || releaseDate
+  for (const platform of platforms) {
+    const plannedAt = optimalTimes[platform] || releaseDate
     const copy = aiCopy[platform]
 
     // Determine which assets to use for this platform
@@ -112,7 +160,7 @@ export async function generatePlatformPlans(
 }
 
 /**
- * Generate posting schedule (spread posts over release day)
+ * Generate posting schedule (spread posts over release day) - Fallback function
  */
 function generatePostingSchedule(releaseDate: Date, count: number): Date[] {
   const times: Date[] = []

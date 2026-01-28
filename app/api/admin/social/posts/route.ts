@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     // List posts
     const posts = await getSocialPosts({
       status: status as any,
-      city_id: cityId ? parseInt(cityId) : undefined,
+      city_id: cityId || undefined, // UUID, no need to parse
       limit: limit ? parseInt(limit) : undefined,
     })
 

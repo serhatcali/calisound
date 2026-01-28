@@ -95,6 +95,27 @@ export interface EmailLog {
   content_preview?: string
 }
 
+export interface ReleaseTemplate {
+  id: string
+  name: string
+  description?: string
+  default_city?: string
+  default_country?: string
+  default_local_language: string
+  default_local_language_code: string
+  default_include_english: boolean
+  default_timezone: string
+  default_fast_mode: boolean
+  default_platforms: ReleasePlatform[]
+  tags?: string[]
+  is_public: boolean
+  usage_count: number
+  last_used_at?: string
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
 // Quick Upload Links
 export const PLATFORM_UPLOAD_LINKS: Record<ReleasePlatform, string> = {
   youtube: 'https://studio.youtube.com',

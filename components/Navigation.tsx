@@ -38,21 +38,25 @@ export function Navigation() {
     : 'bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-900'
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-300 ${navClasses}`} style={{ minHeight: '64px', contain: 'layout style' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav
+      className={`sticky top-0 z-[100] transition-all duration-300 ${navClasses}`}
+      style={{ minHeight: '64px', contain: 'layout style', isolation: 'isolate' }}
+      aria-label="Main navigation"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-[100]">
         <div className="flex justify-between items-center h-16 md:h-20" style={{ minHeight: '64px' }}>
           <div className="flex items-center space-x-2 group">
-            <Link href="/" className="transition-transform duration-300 group-hover:scale-105 active:scale-95">
+            <Link href="/" className="transition-transform duration-300 group-hover:scale-105 active:scale-95 relative z-10">
               <span className="text-2xl md:text-3xl font-black bg-gradient-to-r from-primary-600 via-accent-600 to-primary-600 dark:from-gray-200 dark:via-white dark:to-gray-200 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
                 CALI
               </span>
             </Link>
-            <span className="text-sm md:text-base text-gray-600 dark:text-gray-300 font-semibold group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+            <span className="text-sm md:text-base text-gray-600 dark:text-gray-300 font-semibold group-hover:text-gray-900 dark:group-hover:text-white transition-colors relative z-10">
               Sound
             </span>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-6">
+          <div className="flex items-center gap-3 md:gap-6 relative z-10">
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-1">
               {navItems.map((item) => {
@@ -62,6 +66,20 @@ export function Navigation() {
                     key={item.href}
                     className="relative group"
                   >
+                    {/* Active background pill - behind link, no pointer events */}
+                    {isActive && (
+                      <div
+                        className="absolute inset-0 bg-gradient-to-r from-orange-500/90 to-amber-500/90 dark:from-orange-500/80 dark:to-amber-500/80 rounded-xl shadow-lg transition-all duration-300 pointer-events-none"
+                        aria-hidden
+                      />
+                    )}
+                    {/* Hover background - behind link, no pointer events */}
+                    {!isActive && (
+                      <div
+                        className="absolute inset-0 bg-gray-100/50 dark:bg-gray-900/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                        aria-hidden
+                      />
+                    )}
                     <Link
                       href={item.href}
                       className={`relative z-10 block px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-xl hover:-translate-y-0.5 ${
@@ -72,18 +90,6 @@ export function Navigation() {
                     >
                       {item.label}
                     </Link>
-                    {/* Active background pill */}
-                    {isActive && (
-                      <div
-                        className="absolute inset-0 bg-gradient-to-r from-orange-500/90 to-amber-500/90 dark:from-orange-500/80 dark:to-amber-500/80 rounded-xl shadow-lg transition-all duration-300"
-                      />
-                    )}
-                    {/* Hover background */}
-                    {!isActive && (
-                      <div
-                        className="absolute inset-0 bg-gray-100/50 dark:bg-gray-900/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      />
-                    )}
                   </div>
                 )
               })}

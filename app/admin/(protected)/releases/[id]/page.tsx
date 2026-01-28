@@ -14,25 +14,49 @@ export default async function ReleaseDetailPage({
 
   try {
     const [release, platformPlans, promotionDays, dailyTasks, assets, emailLogs] = await Promise.all([
-      getRelease(params.id),
-      getPlatformPlans(params.id).catch(() => []),
-      getPromotionDays(params.id).catch(() => []),
-      getDailyTasks(params.id).catch(() => []),
-      getReleaseAssets(params.id).catch(() => []),
-      getEmailLogs({ release_id: params.id }).catch(() => []),
+      getRelease(params.id).catch((err) => {
+        console.error('[Release Detail] Error fetching release:', err)
+        throw err
+      }),
+      getPlatformPlans(params.id).catch((err) => {
+        console.error('[Release Detail] Error fetching platform plans:', err)
+        return []
+      }),
+      getPromotionDays(params.id).catch((err) => {
+        console.error('[Release Detail] Error fetching promotion days:', err)
+        return []
+      }),
+      getDailyTasks(params.id).catch((err) => {
+        console.error('[Release Detail] Error fetching daily tasks:', err)
+        return []
+      }),
+      getReleaseAssets(params.id).catch((err) => {
+        console.error('[Release Detail] Error fetching assets:', err)
+        return []
+      }),
+      getEmailLogs({ release_id: params.id }).catch((err) => {
+        console.error('[Release Detail] Error fetching email logs:', err)
+        return []
+      }),
     ])
+
+    if (!release) {
+      notFound()
+      return null
+    }
 
     return (
       <ReleaseDetail
         release={release}
-        platformPlans={platformPlans}
-        promotionDays={promotionDays}
-        dailyTasks={dailyTasks}
-        assets={assets}
-        emailLogs={emailLogs}
+        platformPlans={platformPlans || []}
+        promotionDays={promotionDays || []}
+        dailyTasks={dailyTasks || []}
+        assets={assets || []}
+        emailLogs={emailLogs || []}
       />
     )
   } catch (error) {
+    console.error('[Release Detail] Error:', error)
     notFound()
   }
 }

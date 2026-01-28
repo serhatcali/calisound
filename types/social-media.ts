@@ -179,6 +179,29 @@ export interface SocialAuditLog {
   created_at: string
 }
 
+export interface SocialHashtagSet {
+  id: string
+  name: string
+  platform: SocialPlatform
+  hashtags: string[]
+  description?: string
+  usage_count: number
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export interface SocialTagPack {
+  id: string
+  name: string
+  tags: string // Comma-separated tags for YouTube
+  description?: string
+  usage_count: number
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
 // Platform-specific validation rules
 export interface PlatformValidation {
   maxChars?: number
