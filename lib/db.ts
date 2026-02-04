@@ -229,7 +229,18 @@ export async function getGlobalLinks(): Promise<GlobalLinks | null> {
   }
 }
 
-export async function trackClick(linkType: string, linkUrl: string) {
+export type TrackClickOptions = {
+  /** Path where click happened, e.g. /links, /city/istanbul */
+  sourcePage?: string
+  /** Human-readable source, e.g. "Links Page", "Home", "City: Paris" */
+  sourceLabel?: string
+}
+
+export async function trackClick(
+  linkType: string,
+  linkUrl: string,
+  options?: TrackClickOptions
+) {
   const { error } = await supabase
     .from('click_tracking')
     .insert({
@@ -238,10 +249,11 @@ export async function trackClick(linkType: string, linkUrl: string) {
       clicked_at: new Date().toISOString(),
       user_agent: typeof window !== 'undefined' ? window.navigator.userAgent : null,
       referrer: typeof window !== 'undefined' ? document.referrer : null,
+      source_page: options?.sourcePage ?? null,
+      source_label: options?.sourceLabel ?? null,
     })
-  
+
   if (error) {
-    // Only log errors during runtime, not during build
     if (!process.env.NEXT_PHASE && process.env.VERCEL_ENV) {
       console.error('Error tracking click:', error)
     }

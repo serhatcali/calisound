@@ -33,7 +33,7 @@ export function Hero({ globalLinks }: HeroProps) {
 
   const handleClick = (type: string, url: string | null) => {
     if (url) {
-      trackClick(type, url)
+      trackClick(type, url, { sourcePage: '/', sourceLabel: 'Home (Hero)' })
       window.open(url, '_blank', 'noopener,noreferrer')
     }
   }

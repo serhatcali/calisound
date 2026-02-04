@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { GlobalLinks } from '@/types/database'
 import { motion } from 'framer-motion'
 import { trackClick } from '@/lib/db'
@@ -70,9 +71,10 @@ const linkConfig = [
 ]
 
 export function LinksPageClient({ links }: LinksPageClientProps) {
+  const pathname = usePathname()
   const handleClick = (type: string, url: string | null) => {
     if (url) {
-      trackClick(type, url)
+      trackClick(type, url, { sourcePage: pathname || '/links', sourceLabel: 'Links Page' })
       window.open(url, '_blank', 'noopener,noreferrer')
     }
   }

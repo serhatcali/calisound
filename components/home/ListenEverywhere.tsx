@@ -56,7 +56,7 @@ const platforms = [
 export function ListenEverywhere({ globalLinks }: ListenEverywhereProps) {
   const handleClick = (platform: string, url: string | null) => {
     if (url) {
-      trackClick(platform, url)
+      trackClick(platform, url, { sourcePage: '/', sourceLabel: 'Listen Everywhere' })
       window.open(url, '_blank', 'noopener,noreferrer')
     }
   }

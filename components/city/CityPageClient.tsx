@@ -21,7 +21,10 @@ interface CityPageClientProps {
 export function CityPageClient({ city, relatedCities }: CityPageClientProps) {
   const handleLinkClick = (type: string, url: string | null) => {
     if (url) {
-      trackClick(type, url)
+      trackClick(type, url, {
+        sourcePage: `/city/${city.slug}`,
+        sourceLabel: `City: ${city.name}`,
+      })
       window.open(url, '_blank', 'noopener,noreferrer')
     }
   }
