@@ -1,4 +1,5 @@
 // Analytics and Event Tracking
+import { GA_MEASUREMENT_ID } from './ga-config'
 
 interface AnalyticsEvent {
   action: string
@@ -29,7 +30,7 @@ export function trackPageView(url: string) {
   if (typeof window === 'undefined') return
 
   if ((window as any).gtag) {
-    ;(window as any).gtag('config', process.env.NEXT_PUBLIC_GA_ID, {
+    ;(window as any).gtag('config', GA_MEASUREMENT_ID, {
       page_path: url,
     })
   }

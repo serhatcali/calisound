@@ -10,6 +10,7 @@ import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import { PerformanceMonitor } from '@/components/shared/PerformanceMonitor'
 import { headers } from 'next/headers'
 import dynamic from 'next/dynamic'
+import { GA_MEASUREMENT_ID } from '@/lib/ga-config'
 
 // Lazy load non-critical components for better performance
 const PlaylistPanel = dynamic(() => import('@/components/shared/PlaylistPanel').then(mod => ({ default: mod.PlaylistPanel })), {
@@ -229,9 +230,7 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://www.youtube.com" />
         <link rel="dns-prefetch" href="https://i.ytimg.com" />
         <link rel="dns-prefetch" href="https://open.spotify.com" />
-        {process.env.NEXT_PUBLIC_GA_ID && (
-          <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        )}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body className="bg-white dark:bg-black">
         {!isAdminRoute && (
@@ -257,23 +256,19 @@ export default async function RootLayout({
             )}
           </ErrorBoundary>
         </ThemeProvider>
-        {/* Google Analytics */}
-        {process.env.NEXT_PUBLIC_GA_ID && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
-              `}
-            </Script>
-          </>
-        )}
+        {/* Google Analytics - manuel ID: G-99S4MG2Q73 (ga-config) */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
       </body>
     </html>
   )
