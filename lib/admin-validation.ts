@@ -160,7 +160,8 @@ export function validateSetData(body: any): {
 }
 
 /**
- * Validate settings data
+ * Validate settings data (Google Analytics, Search Console, Contact, etc.)
+ * Extra keys (e.g. csrfToken) are ignored by validateObject.
  */
 export function validateSettingsData(body: any): {
   valid: boolean
@@ -168,28 +169,24 @@ export function validateSettingsData(body: any): {
   errors?: Record<string, string>
 } {
   const validation = validateObject(body, {
-    key: {
-      type: 'string',
-      required: true,
-      minLength: 2,
-      maxLength: 100,
-      pattern: /^[a-z_]+$/, // Only lowercase and underscores
-    },
-    value: {
-      type: 'string',
-      required: true,
-      maxLength: 10000,
-    },
+    googleAnalyticsId: { type: 'string', required: false, maxLength: 50 },
+    googleSearchConsoleId: { type: 'string', required: false, maxLength: 200 },
+    contactEmail: { type: 'email', required: false },
+    contactEmailSubject: { type: 'string', required: false, maxLength: 200 },
+    adminPassword: { type: 'string', required: false, maxLength: 200 },
   })
 
   if (!validation.valid) {
     return { valid: false, errors: validation.errors }
   }
 
-  // Sanitize
+  const v = validation.value as any
   const sanitized = {
-    key: sanitizeInput(validation.value!.key || '').toLowerCase(),
-    value: sanitizeInput(validation.value!.value || ''),
+    googleAnalyticsId: sanitizeInput((v?.googleAnalyticsId || '').trim()),
+    googleSearchConsoleId: sanitizeInput((v?.googleSearchConsoleId || '').trim()),
+    contactEmail: (v?.contactEmail || '').trim() ? sanitizeInput(String(v.contactEmail)) : '',
+    contactEmailSubject: (v?.contactEmailSubject || '').trim() ? sanitizeInput(String(v.contactEmailSubject)) : '',
+    adminPassword: (v?.adminPassword || '').trim() ? String(v.adminPassword) : '',
   }
 
   return { valid: true, data: sanitized }

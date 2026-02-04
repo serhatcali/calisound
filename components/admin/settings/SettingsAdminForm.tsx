@@ -2,6 +2,12 @@
 
 import { useState, useEffect } from 'react'
 
+function getCsrfFromCookie(): string | null {
+  if (typeof document === 'undefined') return null
+  const match = document.cookie.match(/admin_csrf=([^;]+)/)
+  return match ? decodeURIComponent(match[1].trim()) : null
+}
+
 export function SettingsAdminForm() {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -26,13 +32,18 @@ export function SettingsAdminForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const csrfToken = getCsrfFromCookie()
+    if (!csrfToken) {
+      alert('Güvenlik doğrulaması bulunamadı. Lütfen tekrar giriş yapıp deneyin.')
+      return
+    }
     setLoading(true)
 
     try {
       const response = await fetch('/api/admin/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, csrfToken }),
       })
 
       if (response.ok) {

@@ -64,7 +64,7 @@ export async function requireCSRFToken(
     let body = {}
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
       try {
-        body = await request.json()
+        body = await request.clone().json()
       } catch {
         // Body might be empty or not JSON
         body = {}
