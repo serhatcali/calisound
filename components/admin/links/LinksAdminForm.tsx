@@ -1,16 +1,36 @@
 'use client'
 
 import { GlobalLinks } from '@/types/database'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface LinksAdminFormProps {
   links: GlobalLinks | null
 }
 
+interface ClickStat {
+  link_type: string
+  link_url: string
+  count: number
+  last_clicked_at: string | null
+}
+
+interface RecentClick {
+  id?: string
+  link_type: string
+  link_url: string
+  clicked_at: string | null
+  user_agent: string | null
+  referrer: string | null
+}
+
 export function LinksAdminForm({ links: initialLinks }: LinksAdminFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [clickStats, setClickStats] = useState<ClickStat[]>([])
+  const [recentClicks, setRecentClicks] = useState<RecentClick[]>([])
+  const [totalClicks, setTotalClicks] = useState(0)
+  const [statsLoading, setStatsLoading] = useState(true)
   const [formData, setFormData] = useState({
     youtube: initialLinks?.youtube || '',
     instagram: initialLinks?.instagram || '',
@@ -21,6 +41,25 @@ export function LinksAdminForm({ links: initialLinks }: LinksAdminFormProps) {
     x: initialLinks?.x || '',
     facebook: initialLinks?.facebook || '',
   })
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/admin/links/click-stats')
+        if (!res.ok || cancelled) return
+        const data = await res.json()
+        setClickStats(data.stats ?? [])
+        setRecentClicks(data.recent ?? [])
+        setTotalClicks(data.total_clicks ?? 0)
+      } catch (_) {}
+      finally {
+        if (!cancelled) setStatsLoading(false)
+      }
+    }
+    fetchStats()
+    return () => { cancelled = true }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -112,6 +151,79 @@ export function LinksAdminForm({ links: initialLinks }: LinksAdminFormProps) {
           </button>
         </div>
       </form>
+
+      {/* Link tıklama istatistikleri */}
+      <div className="bg-white dark:bg-black rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <h2 className="text-2xl font-bold text-white">
+            Link tıklama istatistikleri
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+            Sayfadaki linklere kim, kaç kez tıkladı (toplam: {totalClicks} tıklama)
+          </p>
+        </div>
+        {statsLoading ? (
+          <div className="p-6 text-gray-500 dark:text-gray-400">Yükleniyor...</div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+                    <th className="p-4 font-semibold text-white">Link</th>
+                    <th className="p-4 font-semibold text-white">Tıklanma</th>
+                    <th className="p-4 font-semibold text-white">Son tıklama</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clickStats.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="p-6 text-gray-500 dark:text-gray-400">
+                        Henüz tıklama kaydı yok.
+                      </td>
+                    </tr>
+                  ) : (
+                    clickStats.map((s) => (
+                      <tr key={s.link_type} className="border-b border-gray-100 dark:border-gray-800/50">
+                        <td className="p-4">
+                          <span className="font-medium text-white capitalize">{s.link_type.replace(/_/g, ' ')}</span>
+                          <br />
+                          <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px] inline-block" title={s.link_url}>{s.link_url}</span>
+                        </td>
+                        <td className="p-4 text-white font-mono">{s.count}</td>
+                        <td className="p-4 text-gray-600 dark:text-gray-300 text-sm">
+                          {s.last_clicked_at
+                            ? new Date(s.last_clicked_at).toLocaleString('tr-TR')
+                            : '—'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {recentClicks.length > 0 && (
+              <div className="p-6 border-t border-gray-200 dark:border-gray-800">
+                <h3 className="font-semibold text-white mb-3">Son tıklamalar (en son 50)</h3>
+                <ul className="space-y-2 max-h-64 overflow-y-auto">
+                  {recentClicks.map((c, i) => (
+                    <li key={c.id || i} className="text-sm flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="text-gray-400 dark:text-gray-500 font-mono w-8">{i + 1}.</span>
+                      <span className="font-medium text-white capitalize">{c.link_type.replace(/_/g, ' ')}</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {c.clicked_at ? new Date(c.clicked_at).toLocaleString('tr-TR') : '—'}
+                      </span>
+                      {c.referrer && (
+                        <span className="text-xs text-gray-500 truncate max-w-[120px]" title={c.referrer}>referrer</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }
